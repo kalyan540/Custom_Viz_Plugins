@@ -21,9 +21,7 @@ import buildQuery from './buildQuery';
 import controlPanel from './controlPanel';
 import transformProps from './transformProps';
 import thumbnail from '../images/thumbnail.png';
-import example1 from '../images/Time_Series_Bar_Chart.jpg';
-import example2 from '../images/Time_Series_Bar_Chart2.jpg';
-import example3 from '../images/Time_Series_Bar_Chart3.jpg';
+
 
 
 
@@ -46,7 +44,7 @@ export default class PluginChartBar extends ChartPlugin {
       credits: ['http://nvd3.org'],
       description: 'This Plugin is created by Altimetrian, which enable customization of Bar Chart as per the client requirement.',
       name: t('Bar Chart - Custom'),
-      exampleGallery: [{ url: example1 }, { url: example2 }, { url: example3 }],
+      //exampleGallery: [{ url: example1 }, { url: example2 }, { url: example3 }],
       tags: [
         t('Bar'),
         t('Time'),
