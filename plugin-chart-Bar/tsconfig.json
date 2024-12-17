@@ -38,7 +38,9 @@
   },
   "exclude": [
     "lib",
-    "test"
+    "test",
+    "node_modules/@types/lodash",
+    "node_modules/@types/node"
   ],
   "extends": "../../tsconfig.json",
   "include": [
