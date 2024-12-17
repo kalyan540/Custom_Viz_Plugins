@@ -39,8 +39,8 @@
   "exclude": [
     "lib",
     "test",
-    //"../../node_modules/@types/lodash",
-    //"../../packages/superset-ui-core/node_modules/@types/node"
+    "../../node_modules/@types/lodash",
+    "../../packages/superset-ui-core/node_modules/@types/node"
   ],
   "extends": "../../tsconfig.json",
   "include": [
