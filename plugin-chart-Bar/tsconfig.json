@@ -14,7 +14,7 @@
     ],
     "module": "esnext",
     "moduleResolution": "node",
-    "noEmitOnError": true,
+    "noEmitOnError": false,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "outDir": "lib",
