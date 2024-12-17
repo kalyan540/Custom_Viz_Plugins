@@ -40,7 +40,7 @@
     "lib",
     "test"
   ],
-  "extends": "../tsconfig.json",
+  "extends": "../../tsconfig.json",
   "include": [
     "src/**/*",
     "types/**/*",
@@ -48,10 +48,10 @@
   ],
   "references": [
     {
-      "path": "../packages/superset-ui-chart-controls"
+      "path": "../../packages/superset-ui-chart-controls"
     },
     {
-      "path": "../packages/superset-ui-core"
+      "path": "../../packages/superset-ui-core"
     }
   ]
 }
