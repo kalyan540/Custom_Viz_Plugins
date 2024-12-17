@@ -21,6 +21,13 @@ import buildQuery from './buildQuery';
 import controlPanel from './controlPanel';
 import transformProps from './transformProps';
 import thumbnail from '../images/thumbnail.png';
+import example1 from '../images/Time_Series_Bar_Chart.jpg';
+import example2 from '../images/Time_Series_Bar_Chart2.jpg';
+import example3 from '../images/Time_Series_Bar_Chart3.jpg';
+
+
+
+
 
 export default class PluginChartBar extends ChartPlugin {
   /**
@@ -35,15 +42,30 @@ export default class PluginChartBar extends ChartPlugin {
    */
   constructor() {
     const metadata = new ChartMetadata({
+      category: t('Evolution'),
+      credits: ['http://nvd3.org'],
       description: 'This Plugin is created by Altimetrian, which enable customization of Bar Chart as per the client requirement.',
       name: t('Bar Chart - Custom'),
+      exampleGallery: [{ url: example1 }, { url: example2 }, { url: example3 }],
+      tags: [
+        t('Bar'),
+        t('Time'),
+        t('Trend'),
+        t('Stacked'),
+        t('Percentages'),
+        t('Proportional'),
+        t('Advanced-Analytics'),
+        t('nvd3'),
+        t('Legacy'),
+      ],
       thumbnail,
+      useLegacyApi: true,
     });
 
     super({
       buildQuery,
       controlPanel,
-      loadChart: () => import('../PluginChartBar'),
+      loadChart: () => import('../ReactNVD3'),
       metadata,
       transformProps,
     });
