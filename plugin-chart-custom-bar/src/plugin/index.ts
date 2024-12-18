@@ -21,9 +21,9 @@ import buildQuery from './buildQuery';
 import controlPanel from './controlPanel';
 import transformProps from './transformProps';
 import thumbnail from '../images/thumbnail.png';
-import example1 from './images/Bar1.png';
-import example2 from './images/Bar2.png';
-import example3 from './images/Bar3.png';
+import example1 from '../images/Bar1.png';
+import example2 from '../images/Bar2.png';
+import example3 from '..images/Bar3.png';
 import {
   EchartsTimeseriesChartProps,
   EchartsTimeseriesFormData,
