@@ -16,12 +16,258 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { t, validateNonEmpty } from '@superset-ui/core';
+import { t } from '@superset-ui/core';
 import {
   ControlPanelConfig,
+  ControlPanelsContainerProps,
+  ControlSetRow,
+  ControlStateMapping,
+  ControlSubSectionHeader,
+  D3_TIME_FORMAT_DOCS,
+  formatSelectOptions,
+  getStandardizedControls,
   sections,
   sharedControls,
 } from '@superset-ui/chart-controls';
+import {
+  legendSection,
+  minorTicks,
+  richTooltipSection,
+  seriesOrderSection,
+  showValueSection,
+  truncateXAxis,
+  xAxisBounds,
+  xAxisLabelRotation,
+} from '../controls';
+
+
+const {
+  logAxis,
+  minorSplitLine,
+  truncateYAxis,
+  yAxisBounds,
+  zoomable,
+  orientation,
+} = DEFAULT_FORM_DATA;
+
+function createAxisTitleControl(axis: 'x' | 'y'): ControlSetRow[] {
+  const isXAxis = axis === 'x';
+  const isVertical = (controls: ControlStateMapping) =>
+    Boolean(controls?.orientation.value === OrientationType.Vertical);
+  const isHorizontal = (controls: ControlStateMapping) =>
+    Boolean(controls?.orientation.value === OrientationType.Horizontal);
+  return [
+    [
+      {
+        name: 'x_axis_title',
+        config: {
+          type: 'TextControl',
+          label: t('Axis Title'),
+          renderTrigger: true,
+          default: '',
+          description: t('Changing this control takes effect instantly'),
+          visibility: ({ controls }: ControlPanelsContainerProps) =>
+            isXAxis ? isVertical(controls) : isHorizontal(controls),
+          disableStash: true,
+          resetOnHide: false,
+        },
+      },
+    ],
+    [
+      {
+        name: 'x_axis_title_margin',
+        config: {
+          type: 'SelectControl',
+          freeForm: true,
+          clearable: true,
+          label: t('AXIS TITLE MARGIN'),
+          renderTrigger: true,
+          default: sections.TITLE_MARGIN_OPTIONS[0],
+          choices: formatSelectOptions(sections.TITLE_MARGIN_OPTIONS),
+          description: t('Changing this control takes effect instantly'),
+          visibility: ({ controls }: ControlPanelsContainerProps) =>
+            isXAxis ? isVertical(controls) : isHorizontal(controls),
+          disableStash: true,
+          resetOnHide: false,
+        },
+      },
+    ],
+    [
+      {
+        name: 'y_axis_title',
+        config: {
+          type: 'TextControl',
+          label: t('Axis Title'),
+          renderTrigger: true,
+          default: '',
+          description: t('Changing this control takes effect instantly'),
+          visibility: ({ controls }: ControlPanelsContainerProps) =>
+            isXAxis ? isHorizontal(controls) : isVertical(controls),
+          disableStash: true,
+          resetOnHide: false,
+        },
+      },
+    ],
+    [
+      {
+        name: 'y_axis_title_margin',
+        config: {
+          type: 'SelectControl',
+          freeForm: true,
+          clearable: true,
+          label: t('AXIS TITLE MARGIN'),
+          renderTrigger: true,
+          default: sections.TITLE_MARGIN_OPTIONS[0],
+          choices: formatSelectOptions(sections.TITLE_MARGIN_OPTIONS),
+          description: t('Changing this control takes effect instantly'),
+          visibility: ({ controls }: ControlPanelsContainerProps) =>
+            isXAxis ? isHorizontal(controls) : isVertical(controls),
+          disableStash: true,
+          resetOnHide: false,
+        },
+      },
+    ],
+    [
+      {
+        name: 'y_axis_title_position',
+        config: {
+          type: 'SelectControl',
+          freeForm: true,
+          clearable: false,
+          label: t('AXIS TITLE POSITION'),
+          renderTrigger: true,
+          default: sections.TITLE_POSITION_OPTIONS[0][0],
+          choices: sections.TITLE_POSITION_OPTIONS,
+          description: t('Changing this control takes effect instantly'),
+          visibility: ({ controls }: ControlPanelsContainerProps) =>
+            isXAxis ? isHorizontal(controls) : isVertical(controls),
+          disableStash: true,
+          resetOnHide: false,
+        },
+      },
+    ],
+  ];
+}
+
+function createAxisControl(axis: 'x' | 'y'): ControlSetRow[] {
+  const isXAxis = axis === 'x';
+  const isVertical = (controls: ControlStateMapping) =>
+    Boolean(controls?.orientation.value === OrientationType.Vertical);
+  const isHorizontal = (controls: ControlStateMapping) =>
+    Boolean(controls?.orientation.value === OrientationType.Horizontal);
+  return [
+    [
+      {
+        name: 'x_axis_time_format',
+        config: {
+          ...sharedControls.x_axis_time_format,
+          default: 'smart_date',
+          description: `${D3_TIME_FORMAT_DOCS}. ${TIME_SERIES_DESCRIPTION_TEXT}`,
+          visibility: ({ controls }: ControlPanelsContainerProps) =>
+            isXAxis ? isVertical(controls) : isHorizontal(controls),
+          disableStash: true,
+          resetOnHide: false,
+        },
+      },
+    ],
+    [
+      {
+        name: xAxisLabelRotation.name,
+        config: {
+          ...xAxisLabelRotation.config,
+          visibility: ({ controls }: ControlPanelsContainerProps) =>
+            isXAxis ? isVertical(controls) : isHorizontal(controls),
+          disableStash: true,
+          resetOnHide: false,
+        },
+      },
+    ],
+    [
+      {
+        name: 'y_axis_format',
+        config: {
+          ...sharedControls.y_axis_format,
+          label: t('Axis Format'),
+          visibility: ({ controls }: ControlPanelsContainerProps) =>
+            isXAxis ? isHorizontal(controls) : isVertical(controls),
+          disableStash: true,
+          resetOnHide: false,
+        },
+      },
+    ],
+    ['currency_format'],
+    [
+      {
+        name: 'logAxis',
+        config: {
+          type: 'CheckboxControl',
+          label: t('Logarithmic axis'),
+          renderTrigger: true,
+          default: logAxis,
+          description: t('Logarithmic axis'),
+          visibility: ({ controls }: ControlPanelsContainerProps) =>
+            isXAxis ? isHorizontal(controls) : isVertical(controls),
+          disableStash: true,
+          resetOnHide: false,
+        },
+      },
+    ],
+    [
+      {
+        name: 'minorSplitLine',
+        config: {
+          type: 'CheckboxControl',
+          label: t('Minor Split Line'),
+          renderTrigger: true,
+          default: minorSplitLine,
+          description: t('Draw split lines for minor axis ticks'),
+          visibility: ({ controls }: ControlPanelsContainerProps) =>
+            isXAxis ? isHorizontal(controls) : isVertical(controls),
+          disableStash: true,
+          resetOnHide: false,
+        },
+      },
+    ],
+    [
+      {
+        name: 'truncateYAxis',
+        config: {
+          type: 'CheckboxControl',
+          label: t('Truncate Axis'),
+          default: truncateYAxis,
+          renderTrigger: true,
+          description: t('It’s not recommended to truncate axis in Bar chart.'),
+          visibility: ({ controls }: ControlPanelsContainerProps) =>
+            isXAxis ? isHorizontal(controls) : isVertical(controls),
+          disableStash: true,
+          resetOnHide: false,
+        },
+      },
+    ],
+    [
+      {
+        name: 'y_axis_bounds',
+        config: {
+          type: 'BoundsControl',
+          label: t('Axis Bounds'),
+          renderTrigger: true,
+          default: yAxisBounds,
+          description: t(
+            'Bounds for the axis. When left empty, the bounds are ' +
+              'dynamically defined based on the min/max of the data. Note that ' +
+              "this feature will only expand the axis range. It won't " +
+              "narrow the data's extent.",
+          ),
+          visibility: ({ controls }: ControlPanelsContainerProps) =>
+            Boolean(controls?.truncateYAxis?.value) &&
+            (isXAxis ? isHorizontal(controls) : isVertical(controls)),
+          disableStash: true,
+          resetOnHide: false,
+        },
+      },
+    ],
+  ];
+}
 
 const config: ControlPanelConfig = {
   /**
@@ -100,95 +346,114 @@ const config: ControlPanelConfig = {
 
   // For control input types, see: superset-frontend/src/explore/components/controls/index.js
   controlPanelSections: [
-    sections.legacyTimeseriesTime,
+    sections.echartsTimeSeriesQueryWithXAxisSort,
+    sections.advancedAnalyticsControls,
+    sections.annotationsAndLayersControls,
+    sections.forecastIntervalControls,
     {
-      label: t('Query'),
+      label: t('Chart Orientation'),
       expanded: true,
       controlSetRows: [
         [
           {
-            name: 'cols',
+            name: 'orientation',
             config: {
-              ...sharedControls.groupby,
-              label: t('Columns'),
-              description: t('Columns to group by'),
+              type: 'RadioButtonControl',
+              renderTrigger: true,
+              label: t('Bar orientation'),
+              default: orientation,
+              options: [
+                [OrientationType.Vertical, t('Vertical')],
+                [OrientationType.Horizontal, t('Horizontal')],
+              ],
+              description: t('Orientation of bar chart'),
             },
-          },
-        ],
-        [
-          {
-            name: 'metrics',
-            config: {
-              ...sharedControls.metrics,
-              // it's possible to add validators to controls if
-              // certain selections/types need to be enforced
-              validators: [validateNonEmpty],
-            },
-          },
-        ],
-        ['adhoc_filters'],
-        [
-          {
-            name: 'row_limit',
-            config: sharedControls.row_limit,
           },
         ],
       ],
     },
     {
-      label: t('Hello Controls!'),
+      label: t('Chart Title'),
+      tabOverride: 'customize',
+      expanded: true,
+      controlSetRows: [
+        [<ControlSubSectionHeader>{t('X Axis')}</ControlSubSectionHeader>],
+        ...createAxisTitleControl('x'),
+        [<ControlSubSectionHeader>{t('Y Axis')}</ControlSubSectionHeader>],
+        ...createAxisTitleControl('y'),
+      ],
+    },
+    {
+      label: t('Chart Options'),
+      expanded: true,
+      controlSetRows: [
+        ...seriesOrderSection,
+        ['color_scheme'],
+        ['time_shift_color'],
+        ...showValueSection,
+        [minorTicks],
+        [
+          {
+            name: 'zoomable',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Data Zoom'),
+              default: zoomable,
+              renderTrigger: true,
+              description: t('Enable data zooming controls'),
+            },
+          },
+        ],
+        ...legendSection,
+        [<ControlSubSectionHeader>{t('X Axis')}</ControlSubSectionHeader>],
+        ...createAxisControl('x'),
+        [truncateXAxis],
+        [xAxisBounds],
+        ...richTooltipSection,
+        [<ControlSubSectionHeader>{t('Y Axis')}</ControlSubSectionHeader>],
+        ...createAxisControl('y'),
+      ],
+    },
+    {
+      label: t('Chart ToolTip View'),
       expanded: true,
       controlSetRows: [
         [
           {
-            name: 'header_text',
-            config: {
-              type: 'TextControl',
-              default: 'Hello, World!',
-              renderTrigger: true,
-              // ^ this makes it apply instantaneously, without triggering a "run query" button
-              label: t('Header Text'),
-              description: t('The text you want to see in the header'),
-            },
-          },
-        ],
-        [
-          {
-            name: 'bold_text',
+            name: 'custom_tooltip',
             config: {
               type: 'CheckboxControl',
-              label: t('Bold Text'),
+              label: t('Enable Custom Tooltip'),
               renderTrigger: true,
-              default: true,
-              description: t('A checkbox to make the '),
+              default: logAxis,
+              description: t('Enables the custom Tooltip'),
+              disableStash: true,
+              resetOnHide: false,
             },
           },
         ],
         [
           {
-            name: 'header_font_size',
+            name: 'custom_tooltip_text',
             config: {
-              type: 'SelectControl',
-              label: t('Font Size'),
-              default: 'xl',
-              choices: [
-                // [value, label]
-                ['xxs', 'xx-small'],
-                ['xs', 'x-small'],
-                ['s', 'small'],
-                ['m', 'medium'],
-                ['l', 'large'],
-                ['xl', 'x-large'],
-                ['xxl', 'xx-large'],
-              ],
+              type: 'TextControl',
+              label: t('Text'),
               renderTrigger: true,
-              description: t('The size of your header font'),
+              default: '',
+              description: t('Description of Metric'),
+              disableStash: true,
+              resetOnHide: false,
             },
           },
         ],
       ],
     },
   ],
+  formDataOverrides: formData => ({
+    ...formData,
+    metrics: getStandardizedControls().popAllMetrics(),
+    groupby: getStandardizedControls().popAllColumns(),
+  }),
 };
 
 export default config;
