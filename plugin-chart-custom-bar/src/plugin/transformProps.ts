@@ -626,13 +626,14 @@ export default function transformProps(
         console.log(formData);
         console.log(customTooltip);
         console.log(customTooltipText);
-        const formattedRow = rows.map(item => ({
-          name: item[0].replace(/<[^>]+>/g, '').trim(),  // Remove HTML tags
-          value: parseInt(item[1], 10),  // Convert to integer
-          percentage: item[2]  // Keep percentage as string
-        }));
-        console.log(formattedRow);
+        
         if (customTooltip) {
+          const formattedRow = rows.map(item => ({
+            name: item[0].replace(/<[^>]+>/g, '').trim(),  // Remove HTML tags
+            value: parseInt(item[1], 10),  // Convert to integer
+            percentage: item[2]  // Keep percentage as string
+          }));
+          console.log(formattedRow);
           let tooltipText = customTooltipText;
 
           // Replace <xValue> with the dynamic month value
@@ -652,8 +653,13 @@ export default function transformProps(
           // Final output
           console.log(tooltipText);
           // Example output: "During Jan'23, out of 8 Total members, 3 (37.50%) Joined in Altimetrik & Unbilled."
+          return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow, tooltipText);
         }
-        return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow);
+        else{
+          return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow);
+        }
+
+        
       },
     },
     legend: {
