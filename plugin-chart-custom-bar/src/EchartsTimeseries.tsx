@@ -142,7 +142,7 @@ export default function EchartsTimeseries({
 
   const eventHandlers: EventHandlers = {
     click: props => {
-      console.log(props);
+      
       if (!hasDimensions) {
         return;
       }
@@ -159,6 +159,7 @@ export default function EchartsTimeseries({
       onFocusedSeries(null);
     },
     mouseover: params => {
+      console.log(params);
       onFocusedSeries(params.seriesName);
     },
     legendselectchanged: payload => {

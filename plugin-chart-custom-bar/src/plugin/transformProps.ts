@@ -191,6 +191,8 @@ export default function transformProps(
     yAxisTitleMargin,
     yAxisTitlePosition,
     zoomable,
+    CustomTooltip,
+    CustomTooltipText,
   }: EchartsTimeseriesFormData = { ...DEFAULT_FORM_DATA, ...formData };
   const refs: Refs = {};
   const groupBy = ensureIsArray(groupby);
@@ -617,6 +619,13 @@ export default function transformProps(
           }
           rows.push(totalRow);
         }
+        console.log(rows);
+        console.log(focusedRow);
+        console.log(xValue);
+        console.log(legendData);
+        console.log(formData);
+        console.log(CustomTooltip);
+        console.log(CustomTooltipText);
         return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow);
       },
     },
