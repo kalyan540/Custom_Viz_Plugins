@@ -113,7 +113,7 @@ export const DEFAULT_TITLE_FORM_DATA: TitleFormData = {
   yAxisTitlePosition: 'Top',
 };
 
-export { DEFAULT_FORM_DATA } from './Timeseries/constants';
+export { DEFAULT_FORM_DATA } from '../constants';
 
 // How far away from the mouse should the tooltip be
 export const TOOLTIP_POINTER_MARGIN = 10;
