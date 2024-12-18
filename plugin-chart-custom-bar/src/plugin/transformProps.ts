@@ -626,7 +626,7 @@ export default function transformProps(
         console.log(formData);
         console.log(customTooltip);
         console.log(customTooltipText);
-        const formattedRow = row.map(item => ({
+        const formattedRow = rows.map(item => ({
           name: item[0].replace(/<[^>]+>/g, '').trim(),  // Remove HTML tags
           value: parseInt(item[1], 10),  // Convert to integer
           percentage: item[2]  // Keep percentage as string
