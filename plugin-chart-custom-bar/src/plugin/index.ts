@@ -16,13 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { t, ChartMetadata, ChartPlugin } from '@superset-ui/core';
+import { t, ChartMetadata, Behavior, AnnotationType } from '@superset-ui/core';
 import buildQuery from './buildQuery';
 import controlPanel from './controlPanel';
 import transformProps from './transformProps';
 import thumbnail from '../images/thumbnail.png';
+import example1 from './images/Bar1.png';
+import example2 from './images/Bar2.png';
+import example3 from './images/Bar3.png';
+import {
+  EchartsTimeseriesChartProps,
+  EchartsTimeseriesFormData,
+  EchartsTimeseriesSeriesType,
+} from '../Timeseries/types';
+import { EchartsChartPlugin } from '../Timeseries/types';
 
-export default class PluginChartCustomBar extends ChartPlugin {
+const barTransformProps = (chartProps: EchartsTimeseriesChartProps) =>
+  transformProps({
+    ...chartProps,
+    formData: {
+      ...chartProps.formData,
+      seriesType: EchartsTimeseriesSeriesType.Bar,
+    },
+  });
+
+export default class PluginChartCustomBar extends EchartsChartPlugin <
+EchartsTimeseriesFormData,
+EchartsTimeseriesChartProps
+>{
   /**
    * The constructor is used to pass relevant metadata and callbacks that get
    * registered in respective registries that are used throughout the library
@@ -38,6 +59,33 @@ export default class PluginChartCustomBar extends ChartPlugin {
       description: 'This Plugin Created by Altimetrian.',
       name: t('CustomBarChart'),
       thumbnail,
+      behaviors: [
+        Behavior.InteractiveChart,
+        Behavior.DrillToDetail,
+        Behavior.DrillBy,
+      ],
+      category: t('Evolution'),
+      exampleGallery: [
+        { url: example1 },
+        { url: example2 },
+        { url: example3 },
+      ],
+      supportedAnnotationTypes: [
+        AnnotationType.Event,
+        AnnotationType.Formula,
+        AnnotationType.Interval,
+        AnnotationType.Timeseries,
+      ],
+      tags: [
+        t('ECharts'),
+        t('Predictive'),
+        t('Advanced-Analytics'),
+        t('Time'),
+        t('Transformable'),
+        t('Stacked'),
+        t('Bar'),
+        t('Featured'),
+      ],
     });
 
     super({
@@ -45,7 +93,7 @@ export default class PluginChartCustomBar extends ChartPlugin {
       controlPanel,
       loadChart: () => import('../PluginChartCustomBar'),
       metadata,
-      transformProps,
+      transformProps: barTransformProps,
     });
   }
 }
