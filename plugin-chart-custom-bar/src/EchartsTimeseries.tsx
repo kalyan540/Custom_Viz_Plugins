@@ -142,6 +142,7 @@ export default function EchartsTimeseries({
 
   const eventHandlers: EventHandlers = {
     click: props => {
+      console.log(props);
       if (!hasDimensions) {
         return;
       }
