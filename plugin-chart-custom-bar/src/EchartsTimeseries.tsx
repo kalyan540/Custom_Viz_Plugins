@@ -30,11 +30,11 @@ import {
 import type { ViewRootGroup } from 'echarts/types/src/util/types';
 import type GlobalModel from 'echarts/types/src/model/Global';
 import type ComponentModel from 'echarts/types/src/model/Component';
-import { EchartsHandler, EventHandlers } from '../types';
-import Echart from '../components/Echart';
-import { TimeseriesChartTransformedProps } from './types';
-import { formatSeriesName } from '../utils/series';
-import { ExtraControls } from '../components/ExtraControls';
+import { EchartsHandler, EventHandlers } from './Timeseries/types';
+import Echart from './components/Echart';
+import { TimeseriesChartTransformedProps } from './Timeseries/types';
+import { formatSeriesName } from './utils/series';
+import { ExtraControls } from './components/ExtraControls';
 
 const TIMER_DURATION = 300;
 
