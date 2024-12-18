@@ -323,10 +323,10 @@ export default function transformProps(
         formatter: forcePercentFormatter
           ? percentFormatter
           : (getCustomFormatter(
-              customFormatters,
-              metrics,
-              labelMap?.[seriesName]?.[0],
-            ) ?? defaultFormatter),
+            customFormatters,
+            metrics,
+            labelMap?.[seriesName]?.[0],
+          ) ?? defaultFormatter),
         showValue,
         onlyTotal,
         totalStackedValues: sortedTotalValues,
@@ -454,8 +454,8 @@ export default function transformProps(
       : String;
 
   const {
-    setDataMask = () => {},
-    setControlValue = () => {},
+    setDataMask = () => { },
+    setControlValue = () => { },
     onContextMenu,
     onLegendStateChanged,
   } = hooks;
@@ -498,8 +498,8 @@ export default function transformProps(
     minInterval:
       xAxisType === AxisType.Time && timeGrainSqla
         ? TIMEGRAIN_TO_TIMESTAMP[
-            timeGrainSqla as keyof typeof TIMEGRAIN_TO_TIMESTAMP
-          ]
+        timeGrainSqla as keyof typeof TIMEGRAIN_TO_TIMESTAMP
+        ]
         : 0,
     ...getMinAndMaxFromBounds(
       xAxisType,
@@ -626,6 +626,33 @@ export default function transformProps(
         console.log(formData);
         console.log(customTooltip);
         console.log(customTooltipText);
+        const formattedRow = row.map(item => ({
+          name: item[0].replace(/<[^>]+>/g, '').trim(),  // Remove HTML tags
+          value: parseInt(item[1], 10),  // Convert to integer
+          percentage: item[2]  // Keep percentage as string
+        }));
+        console.log(formattedRow);
+        if (customTooltip) {
+          let tooltipText = customTooltipText;
+
+          // Replace <xValue> with the dynamic month value
+          tooltipText = tooltipText.replace("<xValue>", xValue);
+
+          // Replace <total.value> and <total.name> using the formattedRow's last item (Total)
+          const total = formattedRow[formattedRow.length - 1];
+          tooltipText = tooltipText.replace("<total.value>", total.value)
+            .replace("<total.name>", total.name);
+
+          // Replace <row1.value>, <row1.percentage>, <row1.name> dynamically with row data
+          const row1 = formattedRow[0];  // Assuming you want to replace with the first row (Joined in Altimetrik & Unbilled)
+          tooltipText = tooltipText.replace("<row1.value>", row1.value)
+            .replace("<row1.percentage>", row1.percentage)
+            .replace("<row1.name>", row1.name);
+
+          // Final output
+          console.log(tooltipText);
+          // Example output: "During Jan'23, out of 8 Total members, 3 (37.50%) Joined in Altimetrik & Unbilled."
+        }
         return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow);
       },
     },
@@ -657,26 +684,26 @@ export default function transformProps(
     },
     dataZoom: zoomable
       ? [
-          {
-            type: 'slider',
-            start: TIMESERIES_CONSTANTS.dataZoomStart,
-            end: TIMESERIES_CONSTANTS.dataZoomEnd,
-            bottom: TIMESERIES_CONSTANTS.zoomBottom,
-            yAxisIndex: isHorizontal ? 0 : undefined,
-          },
-          {
-            type: 'inside',
-            yAxisIndex: 0,
-            zoomOnMouseWheel: false,
-            moveOnMouseWheel: true,
-          },
-          {
-            type: 'inside',
-            xAxisIndex: 0,
-            zoomOnMouseWheel: false,
-            moveOnMouseWheel: true,
-          },
-        ]
+        {
+          type: 'slider',
+          start: TIMESERIES_CONSTANTS.dataZoomStart,
+          end: TIMESERIES_CONSTANTS.dataZoomEnd,
+          bottom: TIMESERIES_CONSTANTS.zoomBottom,
+          yAxisIndex: isHorizontal ? 0 : undefined,
+        },
+        {
+          type: 'inside',
+          yAxisIndex: 0,
+          zoomOnMouseWheel: false,
+          moveOnMouseWheel: true,
+        },
+        {
+          type: 'inside',
+          xAxisIndex: 0,
+          zoomOnMouseWheel: false,
+          moveOnMouseWheel: true,
+        },
+      ]
       : [],
   };
 
