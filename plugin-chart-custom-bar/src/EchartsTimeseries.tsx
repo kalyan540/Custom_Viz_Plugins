@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DTTM_ALIAS,
