@@ -55,9 +55,9 @@ import {
   EchartsTimeseriesFormData,
   OrientationType,
   TimeseriesChartTransformedProps,
-} from './types';
-import { DEFAULT_FORM_DATA } from './constants';
-import { ForecastSeriesEnum, ForecastValue, Refs } from '../types';
+} from '../Timeseries/types';
+import { DEFAULT_FORM_DATA } from '../constants';
+import { ForecastSeriesEnum, ForecastValue, Refs } from '../Timeseries/types';
 import { parseAxisBound } from '../utils/controls';
 import {
   calculateLowerLogTick,
@@ -92,7 +92,7 @@ import {
   transformIntervalAnnotation,
   transformSeries,
   transformTimeseriesAnnotation,
-} from './transformers';
+} from '../transformers';
 import {
   OpacityEnum,
   StackControlsValue,

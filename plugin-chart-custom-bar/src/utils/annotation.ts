@@ -33,7 +33,7 @@ import {
   isTableAnnotationLayer,
   isTimeseriesAnnotationResult,
 } from '@superset-ui/core';
-import { EchartsTimeseriesChartProps } from '../types';
+import { EchartsTimeseriesChartProps } from '../Timeseries/types';
 import { EchartsMixedTimeseriesProps } from '../MixedTimeseries/types';
 
 export function evalFormula(

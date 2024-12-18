@@ -24,7 +24,7 @@ import {
   ForecastSeriesContext,
   ForecastSeriesEnum,
   ForecastValue,
-} from '../types';
+} from '../Timeseries/types';
 import { sanitizeHtml } from './series';
 
 const seriesTypeRegex = new RegExp(
