@@ -55,8 +55,8 @@ const {
   yAxisBounds,
   zoomable,
   orientation,
-  CustomTooltip,
-  CustomTooltipText,
+  customTooltip,
+  customTooltipText,
 } = DEFAULT_FORM_DATA;
 
 function createAxisTitleControl(axis: 'x' | 'y'): ControlSetRow[] {
@@ -434,7 +434,7 @@ const config: ControlPanelConfig = {
               type: 'CheckboxControl',
               label: t('Enable Custom Tooltip'),
               renderTrigger: true,
-              default: CustomTooltip,
+              default: customTooltip,
               description: t('Enables the custom Tooltip'),
               disableStash: true,
               resetOnHide: false,
@@ -448,7 +448,7 @@ const config: ControlPanelConfig = {
               type: 'TextControl',
               label: t('Text'),
               renderTrigger: true,
-              default: CustomTooltipText,
+              default: customTooltipText,
               description: t('Description of Metric'),
               disableStash: true,
               resetOnHide: false,
