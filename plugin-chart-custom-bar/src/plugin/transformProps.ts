@@ -624,7 +624,7 @@ export default function transformProps(
         console.log(xValue);
         console.log(legendData);
         console.log(formData);
-        console.log(CustomTooltip);
+        console.log(formData.CustomTooltip);
         console.log(CustomTooltipText);
         return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow);
       },
