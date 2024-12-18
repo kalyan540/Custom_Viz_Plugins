@@ -16,77 +16,108 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  DEFAULT_SORT_SERIES_DATA,
-  sections,
-} from '@superset-ui/chart-controls';
-import { t } from '@superset-ui/core';
-import { LegendOrientation, LegendType } from './Timeseries/types';
-import {
-  OrientationType,
-  EchartsTimeseriesSeriesType,
-  EchartsTimeseriesFormData,
-} from './Timeseries/type';
-// import {
-//   DEFAULT_LEGEND_FORM_DATA,
-//   DEFAULT_TITLE_FORM_DATA,
-// } from '../constants';
-import { defaultXAxis } from './Timeseries/defaults';
 
-// @ts-ignore
-export const DEFAULT_FORM_DATA: EchartsTimeseriesFormData = {
-  // ...DEFAULT_LEGEND_FORM_DATA, // TODO: figure out why these break things for stories (e.g. Bubble Chart)
-  // Here are the contents of DEFAULT_LEGEND_FORM_DATA:
+import { JsonValue, t, TimeGranularity } from '@superset-ui/core';
+import { ReactNode } from 'react';
+import {
+  LabelPositionEnum,
+  LegendFormData,
+  LegendOrientation,
+  LegendType,
+  TitleFormData,
+} from './Timeseries/types';
+
+// eslint-disable-next-line import/prefer-default-export
+export const NULL_STRING = '<NULL>';
+
+export const TIMESERIES_CONSTANTS = {
+  gridOffsetRight: 20,
+  gridOffsetLeft: 20,
+  gridOffsetTop: 20,
+  gridOffsetBottom: 20,
+  gridOffsetBottomZoomable: 80,
+  legendRightTopOffset: 30,
+  legendTopRightOffset: 55,
+  zoomBottom: 30,
+  toolboxTop: 0,
+  toolboxRight: 5,
+  dataZoomStart: 0,
+  dataZoomEnd: 100,
+  yAxisLabelTopOffset: 20,
+  extraControlsOffset: 22,
+};
+
+export const LABEL_POSITION: [LabelPositionEnum, string][] = [
+  [LabelPositionEnum.Top, 'Top'],
+  [LabelPositionEnum.Left, 'Left'],
+  [LabelPositionEnum.Right, 'Right'],
+  [LabelPositionEnum.Bottom, 'Bottom'],
+  [LabelPositionEnum.Inside, 'Inside'],
+  [LabelPositionEnum.InsideLeft, 'Inside left'],
+  [LabelPositionEnum.InsideRight, 'Inside right'],
+  [LabelPositionEnum.InsideTop, 'Inside top'],
+  [LabelPositionEnum.InsideBottom, 'Inside bottom'],
+  [LabelPositionEnum.InsideTopLeft, 'Inside top left'],
+  [LabelPositionEnum.InsideBottomLeft, 'Inside bottom left'],
+  [LabelPositionEnum.InsideTopRight, 'Inside top right'],
+  [LabelPositionEnum.InsideBottomRight, 'Inside bottom right'],
+];
+
+export enum OpacityEnum {
+  Transparent = 0,
+  SemiTransparent = 0.3,
+  DerivedSeries = 0.7,
+  NonTransparent = 1,
+}
+
+export enum StackControlsValue {
+  Stack = 'Stack',
+  Stream = 'Stream',
+  Expand = 'Expand',
+}
+
+export const StackControlOptions: [
+  JsonValue,
+  Exclude<ReactNode, null | undefined | boolean>,
+][] = [
+  [null, t('None')],
+  [StackControlsValue.Stack, t('Stack')],
+  [StackControlsValue.Stream, t('Stream')],
+];
+
+export const AreaChartStackControlOptions: [
+  JsonValue,
+  Exclude<ReactNode, null | undefined | boolean>,
+][] = [...StackControlOptions, [StackControlsValue.Expand, t('Expand')]];
+
+export const TIMEGRAIN_TO_TIMESTAMP = {
+  [TimeGranularity.HOUR]: 3600 * 1000,
+  [TimeGranularity.DAY]: 3600 * 1000 * 24,
+  [TimeGranularity.MONTH]: 3600 * 1000 * 24 * 31,
+  [TimeGranularity.QUARTER]: 3600 * 1000 * 24 * 31 * 3,
+  [TimeGranularity.YEAR]: 3600 * 1000 * 24 * 31 * 12,
+};
+
+export const DEFAULT_LEGEND_FORM_DATA: LegendFormData = {
   legendMargin: null,
   legendOrientation: LegendOrientation.Top,
   legendType: LegendType.Scroll,
   showLegend: true,
-  // ...DEFAULT_TITLE_FORM_DATA, // TODO: figure out why these break things for stories (e.g. Bubble Chart)
-  // here are the contents of DEFAULT_TITLE_FORM_DATA:
+};
+
+export const DEFAULT_TITLE_FORM_DATA: TitleFormData = {
   xAxisTitle: '',
   xAxisTitleMargin: 0,
   yAxisTitle: '',
   yAxisTitleMargin: 0,
   yAxisTitlePosition: 'Top',
-  // Now that the weird bug workaround is over, here's the rest...
-  ...DEFAULT_SORT_SERIES_DATA,
-  annotationLayers: sections.annotationLayers,
-  area: false,
-  forecastEnabled: sections.FORECAST_DEFAULT_DATA.forecastEnabled,
-  forecastInterval: sections.FORECAST_DEFAULT_DATA.forecastInterval,
-  forecastPeriods: sections.FORECAST_DEFAULT_DATA.forecastPeriods,
-  forecastSeasonalityDaily:
-    sections.FORECAST_DEFAULT_DATA.forecastSeasonalityDaily,
-  forecastSeasonalityWeekly:
-    sections.FORECAST_DEFAULT_DATA.forecastSeasonalityWeekly,
-  forecastSeasonalityYearly:
-    sections.FORECAST_DEFAULT_DATA.forecastSeasonalityYearly,
-  logAxis: false,
-  markerEnabled: false,
-  markerSize: 6,
-  minorSplitLine: false,
-  opacity: 0.2,
-  orderDesc: true,
-  rowLimit: 10000,
-  seriesType: EchartsTimeseriesSeriesType.Line,
-  stack: false,
-  tooltipTimeFormat: 'smart_date',
-  truncateXAxis: true,
-  truncateYAxis: false,
-  yAxisBounds: [null, null],
-  zoomable: false,
-  richTooltip: true,
-  xAxisForceCategorical: false,
-  xAxisLabelRotation: defaultXAxis.xAxisLabelRotation,
-  groupby: [],
-  showValue: false,
-  onlyTotal: false,
-  percentageThreshold: 0,
-  orientation: OrientationType.Vertical,
-  sort_series_type: 'sum',
-  sort_series_ascending: false,
 };
 
-export const TIME_SERIES_DESCRIPTION_TEXT: string = t(
-  'When using other than adaptive formatting, labels may overlap',
-);
+export { DEFAULT_FORM_DATA } from './Timeseries/constants';
+
+// How far away from the mouse should the tooltip be
+export const TOOLTIP_POINTER_MARGIN = 10;
+
+// If no satisfactory position can be found, how far away
+// from the edge of the window should the tooltip be kept
+export const TOOLTIP_OVERFLOW_MARGIN = 5;

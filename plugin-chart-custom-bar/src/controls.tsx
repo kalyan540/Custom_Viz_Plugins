@@ -26,8 +26,8 @@ import {
   SORT_SERIES_CHOICES,
   sharedControls,
 } from '@superset-ui/chart-controls';
-import { DEFAULT_LEGEND_FORM_DATA, StackControlOptions } from './Timeseries/constants';
-import { DEFAULT_FORM_DATA } from './constants';
+import { DEFAULT_LEGEND_FORM_DATA, StackControlOptions } from './constants';
+import { DEFAULT_FORM_DATA } from './Timeseries/constants';
 import { defaultXAxis } from './Timeseries/defaults';
 
 const { legendMargin, legendOrientation, legendType, showLegend } =

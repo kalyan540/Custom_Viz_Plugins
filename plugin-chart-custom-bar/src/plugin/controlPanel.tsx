@@ -40,6 +40,12 @@ import {
   xAxisLabelRotation,
 } from '../controls';
 
+import { OrientationType } from '../Timeseries/types';
+import {
+  DEFAULT_FORM_DATA,
+  TIME_SERIES_DESCRIPTION_TEXT,
+} from '../Timeseries/constants';
+
 
 const {
   logAxis,

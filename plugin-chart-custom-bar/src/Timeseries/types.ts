@@ -34,7 +34,7 @@ import {
 } from '@superset-ui/core';
 import type { EChartsCoreOption, EChartsType } from 'echarts/core';
 import type { TooltipMarker } from 'echarts/types/src/util/format';
-import { StackControlsValue } from './constants';
+import { StackControlsValue } from '../constants';
 
 export type EchartsStylesProps = {
   height: number;
