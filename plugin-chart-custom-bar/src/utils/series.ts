@@ -48,7 +48,7 @@ import {
   LegendOrientation,
   LegendType,
   StackType,
-} from '../types';
+} from '../Timeseries/types';
 import { defaultLegendPadding } from '../defaults';
 
 function isDefined<T>(value: T | undefined | null): boolean {

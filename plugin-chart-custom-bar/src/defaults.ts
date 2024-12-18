@@ -16,7 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export const convertInteger = (value: string | number) => {
-  if (typeof value !== 'number') return parseInt(value, 10) || 0;
-  return value;
+import { LegendOrientation } from './Timeseries/types';
+
+export const defaultGrid = {
+  containLabel: true,
+};
+
+export const defaultYAxis = {
+  scale: true,
+  yAxisLabelRotation: 0,
+};
+
+export const defaultXAxis = {
+  xAxisLabelRotation: 0,
+};
+
+export const defaultLegendPadding = {
+  [LegendOrientation.Top]: 20,
+  [LegendOrientation.Bottom]: 20,
+  [LegendOrientation.Left]: 170,
+  [LegendOrientation.Right]: 170,
 };
