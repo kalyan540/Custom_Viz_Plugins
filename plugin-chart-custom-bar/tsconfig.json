@@ -33,13 +33,15 @@
       "./node_modules/@types"
     ]
   },
+  "extends": "../../tsconfig.json",
   "exclude": [
     "lib",
     "test"
   ],
   "include": [
     "src/**/*",
-    "types/**/*"
+    "types/**/*",
+    "../../types/**/*"
   ],
   "references": [
   {
