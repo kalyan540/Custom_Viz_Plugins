@@ -657,7 +657,7 @@ export default function transformProps(
           if(defaultTooltip){
             return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow, tooltipText);
           }else {
-            return tooltipHtml(tooltipText);
+            return tooltipHtml(undefined, undefined, undefined, tooltipText);
           }
           
         }
