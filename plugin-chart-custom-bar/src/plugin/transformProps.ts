@@ -627,8 +627,8 @@ export default function transformProps(
         console.log(formData);
         console.log(customTooltip);
         console.log(customTooltipText);
-        
-        if (customTooltip) {
+
+        /*if (customTooltip) {
           const formattedRow = rows.map(item => ({
             name: item[0].replace(/<[^>]+>/g, '').trim(),  // Remove HTML tags
             value: parseInt(item[1], 10),  // Convert to integer
@@ -660,12 +660,61 @@ export default function transformProps(
             return tooltipHtml(undefined, undefined, undefined, tooltipText);
           }
           
+        }*/
+        if (customTooltip) {
+          // Initialize the formattedRow based on legendData
+          const formattedRow = legendData.map(rowName => {
+            // Find the corresponding row from the data or fallback to default values
+            const matchedRow = rows.find(item => item.name.replace(/<[^>]+>/g, '').trim() === rowName);
+
+            // If matchedRow is found, use its values, else fallback to defaults
+            return {
+              [rowName]: {
+                name: matchedRow ? matchedRow.name.replace(/<[^>]+>/g, '').trim() : '',  // Remove HTML tags
+                value: matchedRow ? matchedRow.value : 0,  // Use matched value or fallback to 0
+                percentage: matchedRow ? matchedRow.percentage : '0%'  // Use matched percentage or fallback to '0%'
+              }
+            };
+          });
+
+          console.log(formattedRow);
+
+          let tooltipText = customTooltipText;
+
+          // Replace <xValue> with the dynamic month value
+          tooltipText = tooltipText.replace("<xValue>", xValue);
+
+          // Replace <total.value> and <total.name> using the last row (Total)
+          const total = formattedRow[formattedRow.length - 1][legendData[formattedRow.length - 1]];
+          tooltipText = tooltipText.replace("<total.value>", total.value)
+            .replace("<total.name>", total.name);
+
+          // Loop through legendData to replace <rowX.value>, <rowX.percentage>, <rowX.name>
+          legendData.forEach((rowName, index) => {
+            const row = formattedRow[index][rowName] || { name: '', value: 0, percentage: '0%' };  // Ensure fallback for missing rows
+            tooltipText = tooltipText.replace(`<${rowName}.value>`, row.value)
+              .replace(`<${rowName}.percentage>`, row.percentage)
+              .replace(`<${rowName}.name>`, row.name);
+          });
+
+          // Final output
+          console.log(tooltipText);
+
+          // Example output: "During Feb'23, we have Total 6 resource, Data Engineer is 1."
+          if (defaultTooltip) {
+            return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow, tooltipText);
+          } else {
+            return tooltipHtml(undefined, undefined, undefined, tooltipText);
+          }
         }
-        if(defaultTooltip && !customTooltip){
+
+
+        if (defaultTooltip && !customTooltip) {
           return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow);
         }
 
-        
+
+
       },
     },
     legend: {
