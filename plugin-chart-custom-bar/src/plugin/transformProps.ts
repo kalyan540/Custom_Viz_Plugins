@@ -191,6 +191,7 @@ export default function transformProps(
     yAxisTitleMargin,
     yAxisTitlePosition,
     zoomable,
+    defaultTooltip,
     customTooltip,
     customTooltipText,
   }: EchartsTimeseriesFormData = { ...DEFAULT_FORM_DATA, ...formData };
@@ -653,9 +654,14 @@ export default function transformProps(
           // Final output
           console.log(tooltipText);
           // Example output: "During Jan'23, out of 8 Total members, 3 (37.50%) Joined in Altimetrik & Unbilled."
-          return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow, tooltipText);
+          if(defaultTooltip){
+            return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow, tooltipText);
+          }else {
+            return tooltipHtml(tooltipText);
+          }
+          
         }
-        else{
+        if(defaultTooltip && !customTooltip){
           return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow);
         }
 

@@ -55,6 +55,7 @@ const {
   yAxisBounds,
   zoomable,
   orientation,
+  defaultTooltip,
   customTooltip,
   customTooltipText,
 } = DEFAULT_FORM_DATA;
@@ -427,6 +428,20 @@ const config: ControlPanelConfig = {
       label: t('Chart ToolTip View'),
       expanded: true,
       controlSetRows: [
+        [
+          {
+            name: 'default_tooltip',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Enable Default Tooltip'),
+              renderTrigger: true,
+              default: defaultTooltip,
+              description: t('Enables the default Tooltip'),
+              disableStash: true,
+              resetOnHide: false,
+            },
+          },
+        ],
         [
           {
             name: 'custom_tooltip',
