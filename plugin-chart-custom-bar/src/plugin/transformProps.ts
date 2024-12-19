@@ -662,17 +662,17 @@ export default function transformProps(
           
         }*/
         if (customTooltip) {
-          // Initialize the formattedRow based on legendData
+          // Initialize formattedRow based on legendData
           const formattedRow = legendData.map(rowName => {
             // Find the corresponding row from the data or fallback to default values
-            const matchedRow = rows.find(item => item.name.replace(/<[^>]+>/g, '').trim() === rowName);
+            const matchedRow = rows.find(item => item[0].replace(/<[^>]+>/g, '').trim() === rowName);
 
             // If matchedRow is found, use its values, else fallback to defaults
             return {
               [rowName]: {
-                name: matchedRow ? matchedRow.name.replace(/<[^>]+>/g, '').trim() : '',  // Remove HTML tags
-                value: matchedRow ? matchedRow.value : 0,  // Use matched value or fallback to 0
-                percentage: matchedRow ? matchedRow.percentage : '0%'  // Use matched percentage or fallback to '0%'
+                name: matchedRow ? matchedRow[0].replace(/<[^>]+>/g, '').trim() : '',  // Remove HTML tags
+                value: matchedRow ? parseInt(matchedRow[1], 10) : 0,  // Convert to integer or fallback to 0
+                percentage: matchedRow ? matchedRow[2] : '0%'  // Use matched percentage or fallback to '0%'
               }
             };
           });
@@ -707,6 +707,7 @@ export default function transformProps(
             return tooltipHtml(undefined, undefined, undefined, tooltipText);
           }
         }
+
 
 
         if (defaultTooltip && !customTooltip) {
