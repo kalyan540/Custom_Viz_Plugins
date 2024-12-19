@@ -663,18 +663,30 @@ export default function transformProps(
         }*/
         if (customTooltip) {
           // Initialize formattedRow based on legendData
-          const formattedRow = legendData.map(rowName => {
+          const formattedRow = legendData.map((rowName, index) => {
             // Find the corresponding row from the data or fallback to default values
             const matchedRow = rows.find(item => item[0].replace(/<[^>]+>/g, '').trim() === rowName);
 
+            const rowKey = `row${index + 1}`;  // This will generate row1, row2, ...
+
             // If matchedRow is found, use its values, else fallback to defaults
             return {
-              [rowName]: {
-                name: matchedRow ? matchedRow[0].replace(/<[^>]+>/g, '').trim() : '',  // Remove HTML tags
+              [rowKey]: {
+                name: matchedRow ? matchedRow[0].replace(/<[^>]+>/g, '').trim() : rowName,  // Remove HTML tags
                 value: matchedRow ? parseInt(matchedRow[1], 10) : 0,  // Convert to integer or fallback to 0
                 percentage: matchedRow ? matchedRow[2] : '0%'  // Use matched percentage or fallback to '0%'
               }
             };
+          });
+
+          // Add "Total" row in the formattedRow
+          const total = rows.find(item => item[0] === "Total");
+          formattedRow.push({
+            total: {
+              name: total[0],
+              value: parseInt(total[1], 10),
+              percentage: total[2]
+            }
           });
 
           console.log(formattedRow);
@@ -685,16 +697,16 @@ export default function transformProps(
           tooltipText = tooltipText.replace("<xValue>", xValue);
 
           // Replace <total.value> and <total.name> using the last row (Total)
-          const total = formattedRow[formattedRow.length - 1][legendData[formattedRow.length - 1]];
-          tooltipText = tooltipText.replace("<total.value>", total.value)
-            .replace("<total.name>", total.name);
+          const totalRow = formattedRow.find(row => row.total);
+          tooltipText = tooltipText.replace("<total.value>", totalRow.total.value)
+            .replace("<total.name>", totalRow.total.name);
 
           // Loop through legendData to replace <rowX.value>, <rowX.percentage>, <rowX.name>
           legendData.forEach((rowName, index) => {
-            const row = formattedRow[index][rowName] || { name: '', value: 0, percentage: '0%' };  // Ensure fallback for missing rows
-            tooltipText = tooltipText.replace(`<${rowName}.value>`, row.value)
-              .replace(`<${rowName}.percentage>`, row.percentage)
-              .replace(`<${rowName}.name>`, row.name);
+            const row = formattedRow[index][`row${index + 1}`] || { name: '', value: 0, percentage: '0%' };  // Ensure fallback for missing rows
+            tooltipText = tooltipText.replace(`<row${index + 1}.value>`, row.value)
+              .replace(`<row${index + 1}.percentage>`, row.percentage)
+              .replace(`<row${index + 1}.name>`, row.name);
           });
 
           // Final output
