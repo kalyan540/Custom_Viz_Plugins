@@ -55,7 +55,7 @@ const {
   yAxisBounds,
   zoomable,
   orientation,
-  defaultTooltip,
+  defaultTooltip = true,
   customTooltip,
   customTooltipText,
 } = DEFAULT_FORM_DATA;
