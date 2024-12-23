@@ -132,8 +132,11 @@ export default function transformProps(
     currencyFormats = {},
   } = datasource;
   const [queryData] = queriesData;
+  console.log(queriesData);
   const { data = [], label_map = {} } =
     queryData as TimeseriesChartDataResponseResult;
+    
+  console.log(data, labelMap);
 
   const dataTypes = getColtypesMapping(queryData);
   const annotationData = getAnnotationData(chartProps);
