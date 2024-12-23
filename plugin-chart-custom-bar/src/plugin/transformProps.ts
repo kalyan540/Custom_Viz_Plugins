@@ -210,6 +210,7 @@ export default function transformProps(
     }
     return { ...acc, [entry[0]]: entry[1] };
   }, {});
+  console.log(data);
   const monthOrder: { [key: string]: number } = {
     Jan: 0,
     Feb: 1,
