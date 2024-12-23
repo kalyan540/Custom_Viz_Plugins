@@ -124,18 +124,6 @@ export default function transformProps(
     emitCrossFilters,
   } = chartProps;
 
-  console.log('width:', width);
-  console.log('height:', height);
-  console.log('filterState:', filterState);
-  console.log('legendState:', legendState);
-  console.log('formData:', formData);
-  console.log('hooks:', hooks);
-  console.log('queriesData:', queriesData);
-  console.log('datasource:', datasource);
-  console.log('theme:', theme);
-  console.log('inContextMenu:', inContextMenu);
-  console.log('emitCrossFilters:', emitCrossFilters);
-
 
   let focusedSeries: string | null = null;
 
@@ -145,48 +133,8 @@ export default function transformProps(
     currencyFormats = {},
   } = datasource;
   const [queryData] = queriesData;
-  console.log('queries:',queriesData);
   const { data = [], label_map = {} } =
     queryData as TimeseriesChartDataResponseResult;
-
-  console.log('data:',data);
-
-  const monthOrder: { [key: string]: number } = {
-    Jan: 0,
-    Feb: 1,
-    Mar: 2,
-    Apr: 3,
-    May: 4,
-    Jun: 5,
-    Jul: 6,
-    Aug: 7,
-    Sep: 8,
-    Oct: 9,
-    Nov: 10,
-    Dec: 11,
-  };
-
-  // Custom sort function
-  data.sort((a, b) => {
-    // Check if "Selection Month" exists in both objects
-    if (!a["Selection Month"] || !b["Selection Month"]) {
-      return 0; // Leave the order unchanged if either is missing
-    }
-
-    // Split the "Selection Month" into month and year
-    const [monthA, yearA] = a["Selection Month"].split("'");
-    const [monthB, yearB] = b["Selection Month"].split("'");
-
-    // Compare by year first
-    const yearComparison = parseInt(yearA) - parseInt(yearB);
-    if (yearComparison !== 0) {
-      return yearComparison;
-    }
-
-    // If years are the same, compare by month order
-    return (monthOrder[monthA] || 0) - (monthOrder[monthB] || 0);
-  });
-  console.log(data);
 
   const dataTypes = getColtypesMapping(queryData);
   const annotationData = getAnnotationData(chartProps);
@@ -262,6 +210,44 @@ export default function transformProps(
     }
     return { ...acc, [entry[0]]: entry[1] };
   }, {});
+  const monthOrder: { [key: string]: number } = {
+    Jan: 0,
+    Feb: 1,
+    Mar: 2,
+    Apr: 3,
+    May: 4,
+    Jun: 5,
+    Jul: 6,
+    Aug: 7,
+    Sep: 8,
+    Oct: 9,
+    Nov: 10,
+    Dec: 11,
+  };
+
+  if (xAxisTimeFormat === "%b'%y") {
+    // Custom sort function
+    data.sort((a, b) => {
+      // Check if "Selection Month" exists in both objects
+      if (!a[xAxisOrig] || !b[xAxisOrig]) {
+        return 0; // Leave the order unchanged if either is missing
+      }
+  
+      // Split the "Selection Month" into month and year
+      const [monthA, yearA] = a[xAxisOrig].split("'");
+      const [monthB, yearB] = b[xAxisOrig].split("'");
+  
+      // Compare by year first
+      const yearComparison = parseInt(yearA) - parseInt(yearB);
+      if (yearComparison !== 0) {
+        return yearComparison;
+      }
+  
+      // If years are the same, compare by month order
+      return (monthOrder[monthA] || 0) - (monthOrder[monthB] || 0);
+    });
+  }
+  console.log(data, xAxisOrig);
   const colorScale = CategoricalColorNamespace.getScale(colorScheme as string);
   const rebasedData = rebaseForecastDatum(data, verboseMap);
   let xAxisLabel = getXAxisLabel(chartProps.rawFormData) as string;
