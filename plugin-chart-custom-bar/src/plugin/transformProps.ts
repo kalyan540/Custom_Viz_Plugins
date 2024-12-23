@@ -167,6 +167,7 @@ export default function transformProps(
     // If years are the same, compare by month order
     return monthOrder[monthA] - monthOrder[monthB];
   })
+  console.log(data);
 
   const dataTypes = getColtypesMapping(queryData);
   const annotationData = getAnnotationData(chartProps);
