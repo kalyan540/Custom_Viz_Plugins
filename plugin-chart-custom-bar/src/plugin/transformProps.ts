@@ -136,7 +136,7 @@ export default function transformProps(
   const { data = [], label_map = {} } =
     queryData as TimeseriesChartDataResponseResult;
     
-  console.log(data, labelMap);
+  console.log(queriesData);
 
   const dataTypes = getColtypesMapping(queryData);
   const annotationData = getAnnotationData(chartProps);
