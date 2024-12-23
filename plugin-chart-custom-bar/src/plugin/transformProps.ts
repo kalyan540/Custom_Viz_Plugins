@@ -124,6 +124,19 @@ export default function transformProps(
     emitCrossFilters,
   } = chartProps;
 
+  console.log('width:', width);
+  console.log('height:', height);
+  console.log('filterState:', filterState);
+  console.log('legendState:', legendState);
+  console.log('formData:', formData);
+  console.log('hooks:', hooks);
+  console.log('queriesData:', queriesData);
+  console.log('datasource:', datasource);
+  console.log('theme:', theme);
+  console.log('inContextMenu:', inContextMenu);
+  console.log('emitCrossFilters:', emitCrossFilters);
+
+
   let focusedSeries: string | null = null;
 
   const {
@@ -132,11 +145,11 @@ export default function transformProps(
     currencyFormats = {},
   } = datasource;
   const [queryData] = queriesData;
-  console.log(queriesData);
+  console.log('queries:',queriesData);
   const { data = [], label_map = {} } =
     queryData as TimeseriesChartDataResponseResult;
 
-  console.log(data);
+  console.log('data:',data);
 
   const monthOrder: { [key: string]: number } = {
     Jan: 0,
@@ -271,7 +284,7 @@ export default function transformProps(
   const extraMetricLabels = extractExtraMetrics(chartProps.rawFormData).map(
     getMetricLabel,
   );
-
+  console.log('xAxisTimeFormat',xAxisTimeFormat);
   const isMultiSeries = groupBy.length || metrics?.length > 1;
 
   const [rawSeries, sortedTotalValues, minPositiveValue] = extractSeries(
@@ -550,7 +563,7 @@ export default function transformProps(
       seriesType,
     ),
   };
-  console.log(xAxis);
+  //console.log(xAxis);
 
   let yAxis: any = {
     ...defaultYAxis,
@@ -573,8 +586,8 @@ export default function transformProps(
     nameGap: convertInteger(yAxisTitleMargin),
     nameLocation: yAxisTitlePosition === 'Left' ? 'middle' : 'end',
   };
-  console.log(xAxis);
-  console.log(yAxis);
+  console.log('xAxis:', xAxis);
+  console.log('yAxis:', yAxis);
 
   if (isHorizontal) {
     [xAxis, yAxis] = [yAxis, xAxis];
