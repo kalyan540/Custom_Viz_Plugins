@@ -138,37 +138,6 @@ export default function transformProps(
 
   console.log(data);
 
-  const monthOrder: { [key: string]: number } = {
-    Jan: 0,
-    Feb: 1,
-    Mar: 2,
-    Apr: 3,
-    May: 4,
-    Jun: 5,
-    Jul: 6,
-    Aug: 7,
-    Sep: 8,
-    Oct: 9,
-    Nov: 10,
-    Dec: 11,
-  };
-
-  // Custom sort function
-  data.sort((a, b) => {
-    const [monthA, yearA] = a["Selection Month"].split("'");
-    const [monthB, yearB] = b["Selection Month"].split("'");
-
-    // Compare by year first
-    const yearComparison = parseInt(yearA) - parseInt(yearB);
-    if (yearComparison !== 0) {
-      return yearComparison;
-    }
-
-    // If years are the same, compare by month order
-    return monthOrder[monthA] - monthOrder[monthB];
-  })
-  console.log(data);
-
   const dataTypes = getColtypesMapping(queryData);
   const annotationData = getAnnotationData(chartProps);
 
