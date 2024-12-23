@@ -155,6 +155,12 @@ export default function transformProps(
 
   // Custom sort function
   data.sort((a, b) => {
+    // Check if "Selection Month" exists in both objects
+    if (!a["Selection Month"] || !b["Selection Month"]) {
+      return 0; // Leave the order unchanged if either is missing
+    }
+
+    // Split the "Selection Month" into month and year
     const [monthA, yearA] = a["Selection Month"].split("'");
     const [monthB, yearB] = b["Selection Month"].split("'");
 
@@ -165,8 +171,8 @@ export default function transformProps(
     }
 
     // If years are the same, compare by month order
-    return monthOrder[monthA] - monthOrder[monthB];
-  })
+    return (monthOrder[monthA] || 0) - (monthOrder[monthB] || 0);
+  });
   console.log(data);
 
   const dataTypes = getColtypesMapping(queryData);
@@ -487,7 +493,7 @@ export default function transformProps(
     xAxisDataType === GenericDataType.Temporal
       ? getXAxisFormatter(xAxisTimeFormat)
       : String;
-
+  console.log(xAxisFormatter);
   const {
     setDataMask = () => { },
     setControlValue = () => { },
@@ -544,6 +550,7 @@ export default function transformProps(
       seriesType,
     ),
   };
+  console.log(xAxis);
 
   let yAxis: any = {
     ...defaultYAxis,
@@ -566,6 +573,8 @@ export default function transformProps(
     nameGap: convertInteger(yAxisTitleMargin),
     nameLocation: yAxisTitlePosition === 'Left' ? 'middle' : 'end',
   };
+  console.log(xAxis);
+  console.log(yAxis);
 
   if (isHorizontal) {
     [xAxis, yAxis] = [yAxis, xAxis];
