@@ -127,7 +127,7 @@ function Echart(
   useEffect(() => {
     if (!divRef.current) return;
     if (!chartRef.current) {
-      chartRef.current = init(divRef.current, 'dark');
+      chartRef.current = init(divRef.current);
     }
 
     Object.entries(eventHandlers || {}).forEach(([name, handler]) => {

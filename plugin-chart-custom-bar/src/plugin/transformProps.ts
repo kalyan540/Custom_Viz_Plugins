@@ -866,7 +866,7 @@ export default function transformProps(
       ),
       data: legendData as string[],
     },
-    series: dedupSeries(series),
+    series: processSeries(series, data, xAxisTimeFormat || '', xAxisOrig),
     toolbox: {
       show: zoomable,
       top: TIMESERIES_CONSTANTS.toolboxTop,
