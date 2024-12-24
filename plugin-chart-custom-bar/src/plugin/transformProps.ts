@@ -276,6 +276,18 @@ export default function transformProps(
   console.log('xAxisTimeFormat',xAxisTimeFormat);
   const isMultiSeries = groupBy.length || metrics?.length > 1;
 
+  console.log('rebasedData:', rebasedData);
+console.log('fillNeighborValue:', stack && !forecastEnabled ? 0 : undefined);
+console.log('xAxisLabel:', xAxisLabel);
+console.log('extraMetricLabels:', extraMetricLabels);
+console.log('stack:', stack);
+console.log('totalStackedValues:', totalStackedValues);
+console.log('isHorizontal:', isHorizontal);
+console.log('sortSeriesType:', sortSeriesType);
+console.log('sortSeriesAscending:', sortSeriesAscending);
+console.log('xAxisSortSeries:', isMultiSeries ? xAxisSortSeries : undefined);
+console.log('xAxisSortSeriesAscending:', isMultiSeries ? xAxisSortSeriesAscending : undefined);
+
   const [rawSeries, sortedTotalValues, minPositiveValue] = extractSeries(
     rebasedData,
     {
@@ -294,6 +306,7 @@ export default function transformProps(
     },
   );
   console.log('rawSeries:',rawSeries);
+
   const showValueIndexes = extractShowValueIndexes(rawSeries, {
     stack,
     onlyTotal,
