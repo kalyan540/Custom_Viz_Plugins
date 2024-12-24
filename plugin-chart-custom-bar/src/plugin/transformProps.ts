@@ -293,6 +293,7 @@ export default function transformProps(
         : undefined,
     },
   );
+  console.log('rawSeries:',rawSeries);
   const showValueIndexes = extractShowValueIndexes(rawSeries, {
     stack,
     onlyTotal,
