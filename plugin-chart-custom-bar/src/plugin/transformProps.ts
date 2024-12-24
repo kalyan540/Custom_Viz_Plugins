@@ -277,16 +277,16 @@ export default function transformProps(
   const isMultiSeries = groupBy.length || metrics?.length > 1;
 
   console.log('rebasedData:', rebasedData);
-console.log('fillNeighborValue:', stack && !forecastEnabled ? 0 : undefined);
-console.log('xAxisLabel:', xAxisLabel);
-console.log('extraMetricLabels:', extraMetricLabels);
-console.log('stack:', stack);
-console.log('totalStackedValues:', totalStackedValues);
-console.log('isHorizontal:', isHorizontal);
-console.log('sortSeriesType:', sortSeriesType);
-console.log('sortSeriesAscending:', sortSeriesAscending);
-console.log('xAxisSortSeries:', isMultiSeries ? xAxisSortSeries : undefined);
-console.log('xAxisSortSeriesAscending:', isMultiSeries ? xAxisSortSeriesAscending : undefined);
+  console.log('fillNeighborValue:', stack && !forecastEnabled ? 0 : undefined);
+  console.log('xAxisLabel:', xAxisLabel);
+  console.log('extraMetricLabels:', extraMetricLabels);
+  console.log('stack:', stack);
+  console.log('totalStackedValues:', totalStackedValues);
+  console.log('isHorizontal:', isHorizontal);
+  console.log('sortSeriesType:', sortSeriesType);
+  console.log('sortSeriesAscending:', sortSeriesAscending);
+  console.log('xAxisSortSeries:', isMultiSeries ? xAxisSortSeries : undefined);
+  console.log('xAxisSortSeriesAscending:', isMultiSeries ? xAxisSortSeriesAscending : undefined);
 
   const [rawSeries, sortedTotalValues, minPositiveValue] = extractSeries(
     rebasedData,
@@ -602,6 +602,66 @@ console.log('xAxisSortSeriesAscending:', isMultiSeries ? xAxisSortSeriesAscendin
     [xAxis, yAxis] = [yAxis, xAxis];
     [padding.bottom, padding.left] = [padding.left, padding.bottom];
   }
+
+  function processSeries(
+    series: any[],
+    data: any[],
+    xAxisTimeFormat: string,
+    xAxisOrig: string,
+  ): any[] {
+    if (
+      xAxisTimeFormat === "%b'%y" &&
+      data.length > 0 &&
+      /^[A-Z][a-z]{2}'\d{2}$/.test(data[0][xAxisOrig]) // Matches format like Jan'24
+    ) {
+      // Define the order of months
+      const monthOrder: { [key: string]: number } = {
+        Jan: 0,
+        Feb: 1,
+        Mar: 2,
+        Apr: 3,
+        May: 4,
+        Jun: 5,
+        Jul: 6,
+        Aug: 7,
+        Sep: 8,
+        Oct: 9,
+        Nov: 10,
+        Dec: 11,
+      };
+  
+      // Sort each series' data array
+      return series.map((serie) => {
+        const sortedData = serie.data.sort((a: [string, number], b: [string, number]) => {
+          const [monthA, yearA] = a[0].split("'"); // Extract month and year from the date string
+          const [monthB, yearB] = b[0].split("'");
+  
+          // Compare by year first
+          const yearComparison = parseInt(yearA) - parseInt(yearB);
+          if (yearComparison !== 0) {
+            return yearComparison;
+          }
+  
+          // If years are the same, compare by month order
+          return (monthOrder[monthA] || 0) - (monthOrder[monthB] || 0);
+        });
+  
+        // Return the updated series with sorted data
+        return {
+          ...serie,
+          data: sortedData,
+        };
+      });
+    } else {
+      // If conditions are not met, call dedupSeries
+      return dedupSeries(series);
+    }
+  }
+  if (xAxisOrig) {
+    console.log('Process Series:', processSeries(series, data, xAxisTimeFormat || '', xAxisOrig));
+  }
+  
+
 
   const echartOptions: EChartsCoreOption = {
     useUTC: true,
