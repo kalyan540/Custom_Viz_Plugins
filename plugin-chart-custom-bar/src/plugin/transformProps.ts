@@ -211,6 +211,7 @@ export default function transformProps(
     return { ...acc, [entry[0]]: entry[1] };
   }, {});
   console.log(data);
+  
   const monthOrder: { [key: string]: number } = {
     Jan: 0,
     Feb: 1,
@@ -301,6 +302,7 @@ export default function transformProps(
   const seriesContexts = extractForecastSeriesContexts(
     rawSeries.map(series => series.name as string),
   );
+  console.log(seriesContexts);
   const isAreaExpand = stack === StackControlsValue.Expand;
   const xAxisDataType = dataTypes?.[xAxisLabel] ?? dataTypes?.[xAxisOrig];
 
@@ -347,7 +349,7 @@ export default function transformProps(
     const entryName = String(entry.name || '');
     const seriesName = inverted[entryName] || entryName;
     const colorScaleKey = getOriginalSeries(seriesName, array);
-
+    console.log(entry);
     const transformedSeries = transformSeries(
       entry,
       colorScale,
@@ -383,6 +385,7 @@ export default function transformProps(
         timeShiftColor,
       },
     );
+    console.log('transformedSeries:',transformedSeries);
     if (transformedSeries) {
       if (stack === StackControlsValue.Stream) {
         // bug in Echarts - `stackStrategy: 'all'` doesn't work with nulls, so we cast them to 0
