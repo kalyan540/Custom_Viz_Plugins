@@ -306,6 +306,7 @@ export default function transformProps(
 
   const xAxisType = getAxisType(stack, xAxisForceCategorical, xAxisDataType);
   const series: SeriesOption[] = [];
+  console.log('series:',series);
 
   const forcePercentFormatter = Boolean(contributionMode || isAreaExpand);
   const percentFormatter = forcePercentFormatter
@@ -396,6 +397,7 @@ export default function transformProps(
       }
     }
   });
+  console.log('series:',series);
 
   if (stack === StackControlsValue.Stream) {
     const baselineSeries = getBaselineSeriesForStream(
@@ -405,6 +407,7 @@ export default function transformProps(
 
     series.unshift(baselineSeries);
   }
+  console.log('series:',series);
   const selectedValues = (filterState.selectedValues || []).reduce(
     (acc: Record<string, number>, selectedValue: string) => {
       const index = series.findIndex(({ name }) => name === selectedValue);
@@ -415,6 +418,7 @@ export default function transformProps(
     },
     {},
   );
+  console.log('series:',series);
 
   annotationLayers
     .filter((layer: AnnotationLayer) => layer.show)
@@ -469,7 +473,7 @@ export default function transformProps(
         );
       }
     });
-
+  console.log('series:',series);
   // axis bounds need to be parsed to replace incompatible values with undefined
   const [xAxisMin, xAxisMax] = (xAxisBounds || []).map(parseAxisBound);
   let [yAxisMin, yAxisMax] = (yAxisBounds || []).map(parseAxisBound);
@@ -824,6 +828,7 @@ export default function transformProps(
       ]
       : [],
   };
+  console.log('dedupSeries series:',dedupSeries(series));
 
   const onFocusedSeries = (seriesName: string | null) => {
     focusedSeries = seriesName;
