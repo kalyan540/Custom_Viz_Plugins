@@ -251,6 +251,7 @@ export default function transformProps(
   console.log(data, xAxisOrig);
   const colorScale = CategoricalColorNamespace.getScale(colorScheme as string);
   const rebasedData = rebaseForecastDatum(data, verboseMap);
+  console.log('rebasedData: ',rebasedData);
   let xAxisLabel = getXAxisLabel(chartProps.rawFormData) as string;
   if (
     isPhysicalColumn(chartProps.rawFormData?.x_axis) &&
