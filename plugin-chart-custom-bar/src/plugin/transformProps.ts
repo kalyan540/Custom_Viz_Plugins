@@ -211,7 +211,7 @@ export default function transformProps(
     return { ...acc, [entry[0]]: entry[1] };
   }, {});
   console.log(data);
-  
+
   const monthOrder: { [key: string]: number } = {
     Jan: 0,
     Feb: 1,
@@ -234,17 +234,17 @@ export default function transformProps(
       if (!a[xAxisOrig] || !b[xAxisOrig]) {
         return 0; // Leave the order unchanged if either is missing
       }
-  
+
       // Split the "Selection Month" into month and year
       const [monthA, yearA] = a[xAxisOrig].split("'");
       const [monthB, yearB] = b[xAxisOrig].split("'");
-  
+
       // Compare by year first
       const yearComparison = parseInt(yearA) - parseInt(yearB);
       if (yearComparison !== 0) {
         return yearComparison;
       }
-  
+
       // If years are the same, compare by month order
       return (monthOrder[monthA] || 0) - (monthOrder[monthB] || 0);
     });
@@ -252,7 +252,7 @@ export default function transformProps(
   console.log(data, xAxisOrig);
   const colorScale = CategoricalColorNamespace.getScale(colorScheme as string);
   const rebasedData = rebaseForecastDatum(data, verboseMap);
-  console.log('rebasedData: ',rebasedData);
+  console.log('rebasedData: ', rebasedData);
   let xAxisLabel = getXAxisLabel(chartProps.rawFormData) as string;
   if (
     isPhysicalColumn(chartProps.rawFormData?.x_axis) &&
@@ -273,7 +273,7 @@ export default function transformProps(
   const extraMetricLabels = extractExtraMetrics(chartProps.rawFormData).map(
     getMetricLabel,
   );
-  console.log('xAxisTimeFormat',xAxisTimeFormat);
+  console.log('xAxisTimeFormat', xAxisTimeFormat);
   const isMultiSeries = groupBy.length || metrics?.length > 1;
 
   console.log('rebasedData:', rebasedData);
@@ -305,7 +305,7 @@ export default function transformProps(
         : undefined,
     },
   );
-  console.log('rawSeries:',rawSeries);
+  console.log('rawSeries:', rawSeries);
 
   const showValueIndexes = extractShowValueIndexes(rawSeries, {
     stack,
@@ -322,7 +322,7 @@ export default function transformProps(
 
   const xAxisType = getAxisType(stack, xAxisForceCategorical, xAxisDataType);
   const series: SeriesOption[] = [];
-  console.log('series:',series);
+  console.log('series:', series);
 
   const forcePercentFormatter = Boolean(contributionMode || isAreaExpand);
   const percentFormatter = forcePercentFormatter
@@ -399,7 +399,7 @@ export default function transformProps(
         timeShiftColor,
       },
     );
-    console.log('transformedSeries:',transformedSeries);
+    console.log('transformedSeries:', transformedSeries);
     if (transformedSeries) {
       if (stack === StackControlsValue.Stream) {
         // bug in Echarts - `stackStrategy: 'all'` doesn't work with nulls, so we cast them to 0
@@ -414,7 +414,7 @@ export default function transformProps(
       }
     }
   });
-  console.log('series:',series);
+  console.log('series:', series);
 
   if (stack === StackControlsValue.Stream) {
     const baselineSeries = getBaselineSeriesForStream(
@@ -424,7 +424,7 @@ export default function transformProps(
 
     series.unshift(baselineSeries);
   }
-  console.log('series:',series);
+  console.log('series:', series);
   const selectedValues = (filterState.selectedValues || []).reduce(
     (acc: Record<string, number>, selectedValue: string) => {
       const index = series.findIndex(({ name }) => name === selectedValue);
@@ -435,7 +435,7 @@ export default function transformProps(
     },
     {},
   );
-  console.log('series:',series);
+  console.log('series:', series);
 
   annotationLayers
     .filter((layer: AnnotationLayer) => layer.show)
@@ -490,7 +490,7 @@ export default function transformProps(
         );
       }
     });
-  console.log('series:',series);
+  console.log('series:', series);
   // axis bounds need to be parsed to replace incompatible values with undefined
   const [xAxisMin, xAxisMax] = (xAxisBounds || []).map(parseAxisBound);
   let [yAxisMin, yAxisMax] = (yAxisBounds || []).map(parseAxisBound);
@@ -629,23 +629,23 @@ export default function transformProps(
         Nov: 10,
         Dec: 11,
       };
-  
+
       // Sort each series' data array
       return series.map((serie) => {
         const sortedData = serie.data.sort((a: [string, number], b: [string, number]) => {
           const [monthA, yearA] = a[0].split("'"); // Extract month and year from the date string
           const [monthB, yearB] = b[0].split("'");
-  
+
           // Compare by year first
           const yearComparison = parseInt(yearA) - parseInt(yearB);
           if (yearComparison !== 0) {
             return yearComparison;
           }
-  
+
           // If years are the same, compare by month order
           return (monthOrder[monthA] || 0) - (monthOrder[monthB] || 0);
         });
-  
+
         // Return the updated series with sorted data
         return {
           ...serie,
@@ -660,7 +660,7 @@ export default function transformProps(
   if (xAxisOrig) {
     console.log('Process Series:', processSeries(series, data, xAxisTimeFormat || '', xAxisOrig));
   }
-  
+
 
 
   const echartOptions: EChartsCoreOption = {
@@ -814,8 +814,6 @@ export default function transformProps(
             }
           });
 
-          console.log(formattedRow);
-
           let tooltipText = customTooltipText;
 
           // Replace <xValue> with the dynamic month value
@@ -829,27 +827,77 @@ export default function transformProps(
           // Loop through legendData to replace <rowX.value>, <rowX.percentage>, <rowX.name>
           legendData.forEach((rowName, index) => {
             const row = formattedRow[index][`row${index + 1}`] || { name: '', value: 0, percentage: '0%' };  // Ensure fallback for missing rows
-        
-            // Skip replacement if both value and percentage are 0
-            if (row.value === 0 && row.percentage === '0%') {
-                return; // Skip this iteration and continue with the next
-            }
-        
-            tooltipText = tooltipText.replace(`<row${index + 1}.value>`, row.value)
-                                      .replace(`<row${index + 1}.percentage>`, row.percentage)
-                                      .replace(`<row${index + 1}.name>`, row.name);
-        });
+
+            // Dynamically handle multiple conditions in template like {<row2.percentage>=0 is <row2.value>>10}
+            tooltipText = tooltipText.replace(/{<row(\d+)\.(\w+)([<>=!]+)(\d+)\s+is\s+<row\1\.(\w+)([<>=!]+)(\d+)>}/g, (match, rowIndex, prop1, operator1, value1, prop2, operator2, value2) => {
+              const currentRow = formattedRow[parseInt(rowIndex) - 1][`row${rowIndex}`];
+
+              // Determine if the first condition is true based on the operator and value
+              let condition1Met = false;
+              const property1 = currentRow[prop1];
+              const numericValue1 = prop1 === 'percentage' ? parseInt(property1) : property1; // Convert percentage to numeric value
+
+              switch (operator1) {
+                case '=':
+                  condition1Met = numericValue1 === parseInt(value1);
+                  break;
+                case '>':
+                  condition1Met = numericValue1 > parseInt(value1);
+                  break;
+                case '<':
+                  condition1Met = numericValue1 < parseInt(value1);
+                  break;
+                case '>=':
+                  condition1Met = numericValue1 >= parseInt(value1);
+                  break;
+                case '<=':
+                  condition1Met = numericValue1 <= parseInt(value1);
+                  break;
+                default:
+                  condition1Met = false;
+              }
+
+              // Determine if the second condition is true based on the operator and value
+              let condition2Met = false;
+              const property2 = currentRow[prop2];
+
+              switch (operator2) {
+                case '=':
+                  condition2Met = property2 === parseInt(value2);
+                  break;
+                case '>':
+                  condition2Met = property2 > parseInt(value2);
+                  break;
+                case '<':
+                  condition2Met = property2 < parseInt(value2);
+                  break;
+                case '>=':
+                  condition2Met = property2 >= parseInt(value2);
+                  break;
+                case '<=':
+                  condition2Met = property2 <= parseInt(value2);
+                  break;
+                default:
+                  condition2Met = false;
+              }
+
+              // If both conditions are met, return the replacement text; otherwise, return an empty string
+              if (condition1Met && condition2Met && currentRow.value !== 0 && currentRow.percentage !== '0%') {
+                return `${currentRow[prop2]} is ${currentRow.value}`; // Include the text if condition is met
+              }
+              return ''; // Return an empty string if the condition is not met
+            });
+          });
 
           // Final output
-          console.log(tooltipText);
-
-          // Example output: "During Feb'23, we have Total 6 resource, Data Engineer is 1."
           if (defaultTooltip) {
             return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow, tooltipText);
           } else {
             return tooltipHtml(undefined, undefined, undefined, tooltipText);
           }
         }
+
+
 
 
 
@@ -911,7 +959,7 @@ export default function transformProps(
       ]
       : [],
   };
-  console.log('dedupSeries series:',dedupSeries(series));
+  console.log('dedupSeries series:', dedupSeries(series));
 
   const onFocusedSeries = (seriesName: string | null) => {
     focusedSeries = seriesName;
