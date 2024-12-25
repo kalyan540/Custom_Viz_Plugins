@@ -829,10 +829,16 @@ export default function transformProps(
           // Loop through legendData to replace <rowX.value>, <rowX.percentage>, <rowX.name>
           legendData.forEach((rowName, index) => {
             const row = formattedRow[index][`row${index + 1}`] || { name: '', value: 0, percentage: '0%' };  // Ensure fallback for missing rows
+        
+            // Skip replacement if both value and percentage are 0
+            if (row.value === 0 && row.percentage === '0%') {
+                return; // Skip this iteration and continue with the next
+            }
+        
             tooltipText = tooltipText.replace(`<row${index + 1}.value>`, row.value)
-              .replace(`<row${index + 1}.percentage>`, row.percentage)
-              .replace(`<row${index + 1}.name>`, row.name);
-          });
+                                      .replace(`<row${index + 1}.percentage>`, row.percentage)
+                                      .replace(`<row${index + 1}.name>`, row.name);
+        });
 
           // Final output
           console.log(tooltipText);
