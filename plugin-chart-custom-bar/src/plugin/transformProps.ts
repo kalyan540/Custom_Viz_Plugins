@@ -834,7 +834,7 @@ export default function transformProps(
               .replace(`<row${index + 1}.name>`, row.name);
 
             // Dynamically handle single conditional template like {<rowX.name> is <rowX.value>=0}
-            tooltipText = tooltipText.replace(/{,<row(\d+)\.name> is <row\1\.value>([<>=!]+)(\d+)}/g, (match, rowIndex, operator, value) => {
+            tooltipText = tooltipText.replace(/{,?<row(\d+)\.name> is <row\1\.value>([<>=!]+)(\d+)}/g, (match, rowIndex, operator, value) => {
               const currentRow = formattedRow[parseInt(rowIndex) - 1][`row${rowIndex}`];
 
               // Determine if the condition is true based on the operator and value
