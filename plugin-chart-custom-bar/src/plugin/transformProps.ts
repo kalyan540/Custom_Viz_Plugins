@@ -835,35 +835,43 @@ export default function transformProps(
 
             // Dynamically handle single conditional template like {<rowX.name> is <rowX.value>=0}
             tooltipText = tooltipText.replace(/{,?<row(\d+)\.name> is <row\1\.value>([<>=!]+)(\d+)}/g, (match, rowIndex, operator, value) => {
-              const currentRow = formattedRow[parseInt(rowIndex) - 1][`row${rowIndex}`];
-
-              // Determine if the condition is true based on the operator and value
-              let conditionMet = false;
-              const currentValue = currentRow.value;
-
-              switch (operator) {
-                case '=':
-                  conditionMet = currentValue === parseInt(value);
-                  break;
-                case '>':
-                  conditionMet = currentValue > parseInt(value);
-                  break;
-                case '<':
-                  conditionMet = currentValue < parseInt(value);
-                  break;
-                case '>=':
-                  conditionMet = currentValue >= parseInt(value);
-                  break;
-                case '<=':
-                  conditionMet = currentValue <= parseInt(value);
-                  break;
-                default:
-                  conditionMet = false;
+              const currentRow = formattedRow[parseInt(rowIndex, 10) - 1][`row${rowIndex}`];
+            
+              // Check if the currentRow exists and evaluate the condition
+              if (currentRow) {
+                const currentValue = currentRow.value;
+            
+                // Determine if the condition is met based on the operator
+                let conditionMet = false;
+                switch (operator) {
+                  case '=':
+                    conditionMet = currentValue === parseInt(value, 10);
+                    break;
+                  case '>':
+                    conditionMet = currentValue > parseInt(value, 10);
+                    break;
+                  case '<':
+                    conditionMet = currentValue < parseInt(value, 10);
+                    break;
+                  case '>=':
+                    conditionMet = currentValue >= parseInt(value, 10);
+                    break;
+                  case '<=':
+                    conditionMet = currentValue <= parseInt(value, 10);
+                    break;
+                  default:
+                    conditionMet = false;
+                }
+            
+                // If condition is met, return replacement text; otherwise, remove it
+                return conditionMet ? `${currentRow.name} is ${currentRow.value}` : '';
               }
-
-              // If the condition is met, return the replacement text; otherwise, return an empty string
-              return conditionMet ? `${currentRow.name} is ${currentRow.value}` : '';
+            
+              // If the currentRow does not exist, return an empty string
+              return '';
             });
+            
+            //});
           });
 
           // Final output
