@@ -828,64 +828,41 @@ export default function transformProps(
           legendData.forEach((rowName, index) => {
             const row = formattedRow[index][`row${index + 1}`] || { name: '', value: 0, percentage: '0%' };  // Ensure fallback for missing rows
 
-            // Dynamically handle multiple conditions in template like {<row2.percentage>=0 is <row2.value>>10}
-            tooltipText = tooltipText.replace(/{<row(\d+)\.(\w+)([<>=!]+)(\d+)\s+is\s+<row\1\.(\w+)([<>=!]+)(\d+)>}/g, (match, rowIndex, prop1, operator1, value1, prop2, operator2, value2) => {
+            // Replace <rowX.value>, <rowX.percentage>, <rowX.name>
+            tooltipText = tooltipText.replace(`<row${index + 1}.value>`, row.value)
+              .replace(`<row${index + 1}.percentage>`, row.percentage)
+              .replace(`<row${index + 1}.name>`, row.name);
+
+            // Dynamically handle single conditional template like {<rowX.name> is <rowX.value>=0}
+            tooltipText = tooltipText.replace(/{,<row(\d+)\.name> is <row\1\.value>([<>=!]+)(\d+)}/g, (match, rowIndex, operator, value) => {
               const currentRow = formattedRow[parseInt(rowIndex) - 1][`row${rowIndex}`];
 
-              // Determine if the first condition is true based on the operator and value
-              let condition1Met = false;
-              const property1 = currentRow[prop1];
-              const numericValue1 = prop1 === 'percentage' ? parseInt(property1) : property1; // Convert percentage to numeric value
+              // Determine if the condition is true based on the operator and value
+              let conditionMet = false;
+              const currentValue = currentRow.value;
 
-              switch (operator1) {
+              switch (operator) {
                 case '=':
-                  condition1Met = numericValue1 === parseInt(value1);
+                  conditionMet = currentValue === parseInt(value);
                   break;
                 case '>':
-                  condition1Met = numericValue1 > parseInt(value1);
+                  conditionMet = currentValue > parseInt(value);
                   break;
                 case '<':
-                  condition1Met = numericValue1 < parseInt(value1);
+                  conditionMet = currentValue < parseInt(value);
                   break;
                 case '>=':
-                  condition1Met = numericValue1 >= parseInt(value1);
+                  conditionMet = currentValue >= parseInt(value);
                   break;
                 case '<=':
-                  condition1Met = numericValue1 <= parseInt(value1);
+                  conditionMet = currentValue <= parseInt(value);
                   break;
                 default:
-                  condition1Met = false;
+                  conditionMet = false;
               }
 
-              // Determine if the second condition is true based on the operator and value
-              let condition2Met = false;
-              const property2 = currentRow[prop2];
-
-              switch (operator2) {
-                case '=':
-                  condition2Met = property2 === parseInt(value2);
-                  break;
-                case '>':
-                  condition2Met = property2 > parseInt(value2);
-                  break;
-                case '<':
-                  condition2Met = property2 < parseInt(value2);
-                  break;
-                case '>=':
-                  condition2Met = property2 >= parseInt(value2);
-                  break;
-                case '<=':
-                  condition2Met = property2 <= parseInt(value2);
-                  break;
-                default:
-                  condition2Met = false;
-              }
-
-              // If both conditions are met, return the replacement text; otherwise, return an empty string
-              if (condition1Met && condition2Met && currentRow.value !== 0 && currentRow.percentage !== '0%') {
-                return `${currentRow[prop2]} is ${currentRow.value}`; // Include the text if condition is met
-              }
-              return ''; // Return an empty string if the condition is not met
+              // If the condition is met, return the replacement text; otherwise, return an empty string
+              return conditionMet ? `${currentRow.name} is ${currentRow.value}` : '';
             });
           });
 
@@ -896,7 +873,6 @@ export default function transformProps(
             return tooltipHtml(undefined, undefined, undefined, tooltipText);
           }
         }
-
 
 
 
