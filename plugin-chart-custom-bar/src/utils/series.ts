@@ -343,7 +343,8 @@ export function extractSeries(
   }));
   return [
     finalSeries,
-    sortedRows.map(({ totalStackedValue }) => totalStackedValue),
+    //sortedRows.map(({ totalStackedValue }) => totalStackedValue),
+    totalStackedValues,
     minPositiveValue,
   ];
 }

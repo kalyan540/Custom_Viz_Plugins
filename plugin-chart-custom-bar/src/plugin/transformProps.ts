@@ -306,6 +306,8 @@ export default function transformProps(
     },
   );
   console.log('rawSeries:',rawSeries);
+  console.log('totalStackedValues:', totalStackedValues);
+  console.log('sortedTotalValues:',sortedTotalValues);
 
   const showValueIndexes = extractShowValueIndexes(rawSeries, {
     stack,
