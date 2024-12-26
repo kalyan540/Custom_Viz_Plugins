@@ -837,19 +837,20 @@ export default function transformProps(
           
                   // Check if the value is not zero
                   if (row.value !== 0) {
-                    // Replace placeholders with actual values
+                    // Replace placeholders with actual values and add to dynamic parts
                     const replacedPart = part
                       .replace(`<row${rowIndex + 1}.value>`, row.value)
                       .replace(`<row${rowIndex + 1}.name>`, row.name);
                     dynamicParts.push(replacedPart);
                   }
-              } else {
-                // Static part, just add it
+              }
+              // If it's a static part, just add it
+              else {
                 dynamicParts.push(part);
               }
             });
           
-            // Join the static and dynamic parts to form the final tooltip text
+            // Join the static parts and dynamic parts to form the final tooltip text
             const finalTooltipText = dynamicParts.join('').replace(/,\s*$/, ''); // Remove trailing comma if any
           
             console.log(finalTooltipText);
