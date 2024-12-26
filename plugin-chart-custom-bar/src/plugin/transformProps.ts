@@ -795,24 +795,37 @@ export default function transformProps(
             const rowKey = `row${index + 1}`;  // This will generate row1, row2, ...
 
             // If matchedRow is found, use its values, else fallback to defaults
-            return {
-              [rowKey]: {
-                name: matchedRow ? matchedRow[0].replace(/<[^>]+>/g, '').trim() : rowName,  // Remove HTML tags
-                value: matchedRow ? parseInt(matchedRow[1], 10) : 0,  // Convert to integer or fallback to 0
-                percentage: matchedRow ? matchedRow[2] : '0%'  // Use matched percentage or fallback to '0%'
-              }
-            };
-          });
+            const value = matchedRow ? parseInt(matchedRow[1], 10) : 0;  // Convert to integer or fallback to 0
+
+            // Only return the row if the value is not 0
+            if (value !== 0) {
+              return {
+                [rowKey]: {
+                  name: matchedRow ? matchedRow[0].replace(/<[^>]+>/g, '').trim() : rowName,  // Remove HTML tags
+                  value: value,
+                  percentage: matchedRow ? matchedRow[2] : '0%'  // Use matched percentage or fallback to '0%'
+                }
+              };
+            }
+            return null; // Return null for rows with value 0
+          }).filter(row => row !== null); // Filter out null values
 
           // Add "Total" row in the formattedRow
           const total = rows.find(item => item[0] === "Total");
-          formattedRow.push({
-            total: {
-              name: total[0],
-              value: parseInt(total[1], 10),
-              percentage: total[2]
-            }
-          });
+          const totalValue = parseInt(total[1], 10);
+
+          // Only add the total row if its value is not 0
+          if (totalValue !== 0) {
+            formattedRow.push({
+              total: {
+                name: total[0],
+                value: totalValue,
+                percentage: total[2]
+              }
+            });
+          }
+
+          console.log(formattedRow);
 
           let tooltipText = customTooltipText;
 
@@ -821,69 +834,29 @@ export default function transformProps(
 
           // Replace <total.value> and <total.name> using the last row (Total)
           const totalRow = formattedRow.find(row => row.total);
-          tooltipText = tooltipText.replace("<total.value>", totalRow.total.value)
-            .replace("<total.name>", totalRow.total.name);
+          if (totalRow) {
+            tooltipText = tooltipText.replace("<total.value>", totalRow.total.value)
+              .replace("<total.name>", totalRow.total.name);
+          }
 
           // Loop through legendData to replace <rowX.value>, <rowX.percentage>, <rowX.name>
           legendData.forEach((rowName, index) => {
-            const row = formattedRow[index][`row${index + 1}`] || { name: '', value: 0, percentage: '0%' };  // Ensure fallback for missing rows
-
-            // Replace <rowX.value>, <rowX.percentage>, <rowX.name>
+            const row = formattedRow[index] ? formattedRow[index][`row${index + 1}`] : { name: '', value: 0, percentage: '0%' };  // Ensure fallback for missing rows
             tooltipText = tooltipText.replace(`<row${index + 1}.value>`, row.value)
               .replace(`<row${index + 1}.percentage>`, row.percentage)
               .replace(`<row${index + 1}.name>`, row.name);
-
-            // Dynamically handle single conditional template like {<rowX.name> is <rowX.value>=0}
-            tooltipText = tooltipText.replace(/{,?<row(\d+)\.name> is <row\1\.value>([<>=!]+)(\d+)}/g, (match, rowIndex, operator, value) => {
-              const currentRow = formattedRow[parseInt(rowIndex, 10) - 1][`row${rowIndex}`];
-            
-              // Check if the currentRow exists and evaluate the condition
-              if (currentRow) {
-                const currentValue = currentRow.value;
-            
-                // Determine if the condition is met based on the operator
-                let conditionMet = false;
-                switch (operator) {
-                  case '=':
-                    conditionMet = currentValue === parseInt(value, 10);
-                    break;
-                  case '>':
-                    conditionMet = currentValue > parseInt(value, 10);
-                    break;
-                  case '<':
-                    conditionMet = currentValue < parseInt(value, 10);
-                    break;
-                  case '>=':
-                    conditionMet = currentValue >= parseInt(value, 10);
-                    break;
-                  case '<=':
-                    conditionMet = currentValue <= parseInt(value, 10);
-                    break;
-                  default:
-                    conditionMet = false;
-                }
-            
-                // If condition is met, return replacement text; otherwise, remove it
-                return conditionMet ? `${currentRow.name} is ${currentRow.value}` : '';
-              }
-            
-              // If the currentRow does not exist, return an empty string
-              return '';
-            });
-            
-            //});
           });
 
           // Final output
+          console.log(tooltipText);
+
+          // Example output: "During Feb'23, we have Total 6 resource, Data Engineer is 1."
           if (defaultTooltip) {
             return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow, tooltipText);
           } else {
             return tooltipHtml(undefined, undefined, undefined, tooltipText);
           }
         }
-
-
-
 
         if (defaultTooltip && !customTooltip) {
           return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow);
