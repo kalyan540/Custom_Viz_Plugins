@@ -841,7 +841,7 @@ export default function transformProps(
                     const replacedPart = part
                       .replace(`<row${rowIndex + 1}.value>`, row.value)
                       .replace(`<row${rowIndex + 1}.name>`, row.name);
-                    dynamicParts.push(replacedPart.replace(/^\{|\}$/g, '')); // Remove curly brackets
+                    dynamicParts.push(replacedPart); // Keep the curly brackets
                   }
               } else {
                 // Static part, just add it
@@ -852,13 +852,16 @@ export default function transformProps(
             // Join the static parts and dynamic parts to form the final tooltip text
             const finalTooltipText = dynamicParts.join('').replace(/,\s*$/, ''); // Remove trailing comma if any
           
-            console.log(finalTooltipText);
+            // Remove any remaining curly brackets from the final output
+            const cleanedFinalText = finalTooltipText.replace(/\{|\}/g, ''); // Remove curly brackets
+          
+            console.log(cleanedFinalText);
           
             // Final output
             if (defaultTooltip) {
-              return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow, finalTooltipText);
+              return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow, cleanedFinalText);
             } else {
-              return tooltipHtml(undefined, undefined, undefined, finalTooltipText);
+              return tooltipHtml(undefined, undefined, undefined, cleanedFinalText);
             }
           }
 
