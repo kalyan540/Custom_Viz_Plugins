@@ -211,7 +211,7 @@ export default function transformProps(
     return { ...acc, [entry[0]]: entry[1] };
   }, {});
   console.log(data);
-
+  
   const monthOrder: { [key: string]: number } = {
     Jan: 0,
     Feb: 1,
@@ -234,17 +234,17 @@ export default function transformProps(
       if (!a[xAxisOrig] || !b[xAxisOrig]) {
         return 0; // Leave the order unchanged if either is missing
       }
-
+  
       // Split the "Selection Month" into month and year
       const [monthA, yearA] = a[xAxisOrig].split("'");
       const [monthB, yearB] = b[xAxisOrig].split("'");
-
+  
       // Compare by year first
       const yearComparison = parseInt(yearA) - parseInt(yearB);
       if (yearComparison !== 0) {
         return yearComparison;
       }
-
+  
       // If years are the same, compare by month order
       return (monthOrder[monthA] || 0) - (monthOrder[monthB] || 0);
     });
@@ -252,7 +252,7 @@ export default function transformProps(
   console.log(data, xAxisOrig);
   const colorScale = CategoricalColorNamespace.getScale(colorScheme as string);
   const rebasedData = rebaseForecastDatum(data, verboseMap);
-  console.log('rebasedData: ', rebasedData);
+  console.log('rebasedData: ',rebasedData);
   let xAxisLabel = getXAxisLabel(chartProps.rawFormData) as string;
   if (
     isPhysicalColumn(chartProps.rawFormData?.x_axis) &&
@@ -273,7 +273,7 @@ export default function transformProps(
   const extraMetricLabels = extractExtraMetrics(chartProps.rawFormData).map(
     getMetricLabel,
   );
-  console.log('xAxisTimeFormat', xAxisTimeFormat);
+  console.log('xAxisTimeFormat',xAxisTimeFormat);
   const isMultiSeries = groupBy.length || metrics?.length > 1;
 
   console.log('rebasedData:', rebasedData);
@@ -305,7 +305,7 @@ export default function transformProps(
         : undefined,
     },
   );
-  console.log('rawSeries:', rawSeries);
+  console.log('rawSeries:',rawSeries);
 
   const showValueIndexes = extractShowValueIndexes(rawSeries, {
     stack,
@@ -322,7 +322,7 @@ export default function transformProps(
 
   const xAxisType = getAxisType(stack, xAxisForceCategorical, xAxisDataType);
   const series: SeriesOption[] = [];
-  console.log('series:', series);
+  console.log('series:',series);
 
   const forcePercentFormatter = Boolean(contributionMode || isAreaExpand);
   const percentFormatter = forcePercentFormatter
@@ -399,7 +399,7 @@ export default function transformProps(
         timeShiftColor,
       },
     );
-    console.log('transformedSeries:', transformedSeries);
+    console.log('transformedSeries:',transformedSeries);
     if (transformedSeries) {
       if (stack === StackControlsValue.Stream) {
         // bug in Echarts - `stackStrategy: 'all'` doesn't work with nulls, so we cast them to 0
@@ -414,7 +414,7 @@ export default function transformProps(
       }
     }
   });
-  console.log('series:', series);
+  console.log('series:',series);
 
   if (stack === StackControlsValue.Stream) {
     const baselineSeries = getBaselineSeriesForStream(
@@ -424,7 +424,7 @@ export default function transformProps(
 
     series.unshift(baselineSeries);
   }
-  console.log('series:', series);
+  console.log('series:',series);
   const selectedValues = (filterState.selectedValues || []).reduce(
     (acc: Record<string, number>, selectedValue: string) => {
       const index = series.findIndex(({ name }) => name === selectedValue);
@@ -435,7 +435,7 @@ export default function transformProps(
     },
     {},
   );
-  console.log('series:', series);
+  console.log('series:',series);
 
   annotationLayers
     .filter((layer: AnnotationLayer) => layer.show)
@@ -490,7 +490,7 @@ export default function transformProps(
         );
       }
     });
-  console.log('series:', series);
+  console.log('series:',series);
   // axis bounds need to be parsed to replace incompatible values with undefined
   const [xAxisMin, xAxisMax] = (xAxisBounds || []).map(parseAxisBound);
   let [yAxisMin, yAxisMax] = (yAxisBounds || []).map(parseAxisBound);
@@ -629,23 +629,23 @@ export default function transformProps(
         Nov: 10,
         Dec: 11,
       };
-
+  
       // Sort each series' data array
       return series.map((serie) => {
         const sortedData = serie.data.sort((a: [string, number], b: [string, number]) => {
           const [monthA, yearA] = a[0].split("'"); // Extract month and year from the date string
           const [monthB, yearB] = b[0].split("'");
-
+  
           // Compare by year first
           const yearComparison = parseInt(yearA) - parseInt(yearB);
           if (yearComparison !== 0) {
             return yearComparison;
           }
-
+  
           // If years are the same, compare by month order
           return (monthOrder[monthA] || 0) - (monthOrder[monthB] || 0);
         });
-
+  
         // Return the updated series with sorted data
         return {
           ...serie,
@@ -660,7 +660,7 @@ export default function transformProps(
   if (xAxisOrig) {
     console.log('Process Series:', processSeries(series, data, xAxisTimeFormat || '', xAxisOrig));
   }
-
+  
 
 
   const echartOptions: EChartsCoreOption = {
@@ -786,82 +786,66 @@ export default function transformProps(
           }
           
         }*/
-          if (customTooltip) {
-            // Initialize formattedRow based on legendData
-            const formattedRow = legendData.map((rowName, index) => {
-              // Find the corresponding row from the data or fallback to default values
-              const matchedRow = rows.find(item => item[0].replace(/<[^>]+>/g, '').trim() === rowName);
-          
-              const rowKey = `row${index + 1}`;  // This will generate row1, row2, ...
-          
-              // If matchedRow is found, use its values, else fallback to defaults
-              const value = matchedRow ? parseInt(matchedRow[1], 10) : 0;  // Convert to integer or fallback to 0
-          
-              // Only return the row if the value is not 0
-              if (value !== 0) {
-                return {
-                  [rowKey]: {
-                    name: matchedRow ? matchedRow[0].replace(/<[^>]+>/g, '').trim() : rowName,  // Remove HTML tags
-                    value: value,
-                    percentage: matchedRow ? matchedRow[2] : '0%'  // Use matched percentage or fallback to '0%'
-                  }
-                };
+        if (customTooltip) {
+          // Initialize formattedRow based on legendData
+          const formattedRow = legendData.map((rowName, index) => {
+            // Find the corresponding row from the data or fallback to default values
+            const matchedRow = rows.find(item => item[0].replace(/<[^>]+>/g, '').trim() === rowName);
+
+            const rowKey = `row${index + 1}`;  // This will generate row1, row2, ...
+
+            // If matchedRow is found, use its values, else fallback to defaults
+            return {
+              [rowKey]: {
+                name: matchedRow ? matchedRow[0].replace(/<[^>]+>/g, '').trim() : rowName,  // Remove HTML tags
+                value: matchedRow ? parseInt(matchedRow[1], 10) : 0,  // Convert to integer or fallback to 0
+                percentage: matchedRow ? matchedRow[2] : '0%'  // Use matched percentage or fallback to '0%'
               }
-              return null; // Return null for rows with value 0
-            }).filter(row => row !== null); // Filter out null values
-          
-            // Add "Total" row in the formattedRow
-            const total = rows.find(item => item[0] === "Total");
-            const totalValue = parseInt(total[1], 10);
-            
-            // Only add the total row if its value is not 0
-            if (totalValue !== 0) {
-              formattedRow.push({
-                total: {
-                  name: total[0],
-                  value: totalValue,
-                  percentage: total[2]
-                }
-              });
+            };
+          });
+
+          // Add "Total" row in the formattedRow
+          const total = rows.find(item => item[0] === "Total");
+          formattedRow.push({
+            total: {
+              name: total[0],
+              value: parseInt(total[1], 10),
+              percentage: total[2]
             }
-          
-            console.log(formattedRow);
-          
-            let tooltipText = customTooltipText;
-          
-            // Replace <xValue> with the dynamic month value
-            tooltipText = tooltipText.replace("<xValue>", xValue);
-          
-            // Replace <total.value> and <total.name> using the last row (Total)
-            const totalRow = formattedRow.find(row => row.total);
-            if (totalRow) {
-              tooltipText = tooltipText.replace("<total.value>", totalRow.total.value)
-                .replace("<total.name>", totalRow.total.name);
-            }
-          
-            // Loop through legendData to replace <rowX.value>, <rowX.percentage>, <rowX.name>
-            let validIndex = 0; // Index for valid rows
-            legendData.forEach((rowName, index) => {
-              // Check if the valid row exists
-              if (validIndex < formattedRow.length) {
-                const row = formattedRow[validIndex][`row${validIndex + 1}`]; // Access the valid row
-                tooltipText = tooltipText.replace(`<row${validIndex + 1}.value>`, row.value)
-                  .replace(`<row${validIndex + 1}.percentage>`, row.percentage)
-                  .replace(`<row${validIndex + 1}.name>`, row.name);
-                validIndex++; // Increment valid index only if a valid row was processed
-              }
-            });
-          
-            // Final output
-            console.log(tooltipText);
-          
-            // Example output: "During Feb'23, we have Total 6 resource, Data Engineer is 1."
-            if (defaultTooltip) {
-              return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow, tooltipText);
-            } else {
-              return tooltipHtml(undefined, undefined, undefined, tooltipText);
-            }
+          });
+
+          console.log(formattedRow);
+
+          let tooltipText = customTooltipText;
+
+          // Replace <xValue> with the dynamic month value
+          tooltipText = tooltipText.replace("<xValue>", xValue);
+
+          // Replace <total.value> and <total.name> using the last row (Total)
+          const totalRow = formattedRow.find(row => row.total);
+          tooltipText = tooltipText.replace("<total.value>", totalRow.total.value)
+            .replace("<total.name>", totalRow.total.name);
+
+          // Loop through legendData to replace <rowX.value>, <rowX.percentage>, <rowX.name>
+          legendData.forEach((rowName, index) => {
+            const row = formattedRow[index][`row${index + 1}`] || { name: '', value: 0, percentage: '0%' };  // Ensure fallback for missing rows
+            tooltipText = tooltipText.replace(`<row${index + 1}.value>`, row.value)
+              .replace(`<row${index + 1}.percentage>`, row.percentage)
+              .replace(`<row${index + 1}.name>`, row.name);
+          });
+
+          // Final output
+          console.log(tooltipText);
+
+          // Example output: "During Feb'23, we have Total 6 resource, Data Engineer is 1."
+          if (defaultTooltip) {
+            return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow, tooltipText);
+          } else {
+            return tooltipHtml(undefined, undefined, undefined, tooltipText);
           }
+        }
+
+
 
         if (defaultTooltip && !customTooltip) {
           return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow);
@@ -921,7 +905,7 @@ export default function transformProps(
       ]
       : [],
   };
-  console.log('dedupSeries series:', dedupSeries(series));
+  console.log('dedupSeries series:',dedupSeries(series));
 
   const onFocusedSeries = (seriesName: string | null) => {
     focusedSeries = seriesName;
