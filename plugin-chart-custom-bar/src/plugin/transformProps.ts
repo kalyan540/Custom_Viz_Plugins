@@ -841,11 +841,10 @@ export default function transformProps(
                     const replacedPart = part
                       .replace(`<row${rowIndex + 1}.value>`, row.value)
                       .replace(`<row${rowIndex + 1}.name>`, row.name);
-                    dynamicParts.push(replacedPart);
+                    dynamicParts.push(replacedPart.replace(/^\{|\}$/g, '')); // Remove curly brackets
                   }
-              }
-              // If it's a static part, just add it
-              else {
+              } else {
+                // Static part, just add it
                 dynamicParts.push(part);
               }
             });
