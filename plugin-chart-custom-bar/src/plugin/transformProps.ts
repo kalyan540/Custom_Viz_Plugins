@@ -786,77 +786,82 @@ export default function transformProps(
           }
           
         }*/
-        if (customTooltip) {
-          // Initialize formattedRow based on legendData
-          const formattedRow = legendData.map((rowName, index) => {
-            // Find the corresponding row from the data or fallback to default values
-            const matchedRow = rows.find(item => item[0].replace(/<[^>]+>/g, '').trim() === rowName);
-
-            const rowKey = `row${index + 1}`;  // This will generate row1, row2, ...
-
-            // If matchedRow is found, use its values, else fallback to defaults
-            const value = matchedRow ? parseInt(matchedRow[1], 10) : 0;  // Convert to integer or fallback to 0
-
-            // Only return the row if the value is not 0
-            if (value !== 0) {
-              return {
-                [rowKey]: {
-                  name: matchedRow ? matchedRow[0].replace(/<[^>]+>/g, '').trim() : rowName,  // Remove HTML tags
-                  value: value,
-                  percentage: matchedRow ? matchedRow[2] : '0%'  // Use matched percentage or fallback to '0%'
+          if (customTooltip) {
+            // Initialize formattedRow based on legendData
+            const formattedRow = legendData.map((rowName, index) => {
+              // Find the corresponding row from the data or fallback to default values
+              const matchedRow = rows.find(item => item[0].replace(/<[^>]+>/g, '').trim() === rowName);
+          
+              const rowKey = `row${index + 1}`;  // This will generate row1, row2, ...
+          
+              // If matchedRow is found, use its values, else fallback to defaults
+              const value = matchedRow ? parseInt(matchedRow[1], 10) : 0;  // Convert to integer or fallback to 0
+          
+              // Only return the row if the value is not 0
+              if (value !== 0) {
+                return {
+                  [rowKey]: {
+                    name: matchedRow ? matchedRow[0].replace(/<[^>]+>/g, '').trim() : rowName,  // Remove HTML tags
+                    value: value,
+                    percentage: matchedRow ? matchedRow[2] : '0%'  // Use matched percentage or fallback to '0%'
+                  }
+                };
+              }
+              return null; // Return null for rows with value 0
+            }).filter(row => row !== null); // Filter out null values
+          
+            // Add "Total" row in the formattedRow
+            const total = rows.find(item => item[0] === "Total");
+            const totalValue = parseInt(total[1], 10);
+            
+            // Only add the total row if its value is not 0
+            if (totalValue !== 0) {
+              formattedRow.push({
+                total: {
+                  name: total[0],
+                  value: totalValue,
+                  percentage: total[2]
                 }
-              };
+              });
             }
-            return null; // Return null for rows with value 0
-          }).filter(row => row !== null); // Filter out null values
-
-          // Add "Total" row in the formattedRow
-          const total = rows.find(item => item[0] === "Total");
-          const totalValue = parseInt(total[1], 10);
-
-          // Only add the total row if its value is not 0
-          if (totalValue !== 0) {
-            formattedRow.push({
-              total: {
-                name: total[0],
-                value: totalValue,
-                percentage: total[2]
+          
+            console.log(formattedRow);
+          
+            let tooltipText = customTooltipText;
+          
+            // Replace <xValue> with the dynamic month value
+            tooltipText = tooltipText.replace("<xValue>", xValue);
+          
+            // Replace <total.value> and <total.name> using the last row (Total)
+            const totalRow = formattedRow.find(row => row.total);
+            if (totalRow) {
+              tooltipText = tooltipText.replace("<total.value>", totalRow.total.value)
+                .replace("<total.name>", totalRow.total.name);
+            }
+          
+            // Loop through legendData to replace <rowX.value>, <rowX.percentage>, <rowX.name>
+            let validIndex = 0; // Index for valid rows
+            legendData.forEach((rowName, index) => {
+              // Check if the valid row exists
+              if (validIndex < formattedRow.length) {
+                const row = formattedRow[validIndex][`row${validIndex + 1}`]; // Access the valid row
+                tooltipText = tooltipText.replace(`<row${validIndex + 1}.value>`, row.value)
+                  .replace(`<row${validIndex + 1}.percentage>`, row.percentage)
+                  .replace(`<row${validIndex + 1}.name>`, row.name);
+                validIndex++; // Increment valid index only if a valid row was processed
               }
             });
+          
+            // Final output
+            console.log(tooltipText);
+          
+            // Example output: "During Feb'23, we have Total 6 resource, Data Engineer is 1."
+            if (defaultTooltip) {
+              return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow, tooltipText);
+            } else {
+              return tooltipHtml(undefined, undefined, undefined, tooltipText);
+            }
           }
-
-          console.log(formattedRow);
-
-          let tooltipText = customTooltipText;
-
-          // Replace <xValue> with the dynamic month value
-          tooltipText = tooltipText.replace("<xValue>", xValue);
-
-          // Replace <total.value> and <total.name> using the last row (Total)
-          const totalRow = formattedRow.find(row => row.total);
-          if (totalRow) {
-            tooltipText = tooltipText.replace("<total.value>", totalRow.total.value)
-              .replace("<total.name>", totalRow.total.name);
-          }
-
-          // Loop through legendData to replace <rowX.value>, <rowX.percentage>, <rowX.name>
-          legendData.forEach((rowName, index) => {
-            const row = formattedRow[index] ? formattedRow[index][`row${index + 1}`] : { name: '', value: 0, percentage: '0%' };  // Ensure fallback for missing rows
-            tooltipText = tooltipText.replace(`<row${index + 1}.value>`, row.value)
-              .replace(`<row${index + 1}.percentage>`, row.percentage)
-              .replace(`<row${index + 1}.name>`, row.name);
-          });
-
-          // Final output
-          console.log(tooltipText);
-
-          // Example output: "During Feb'23, we have Total 6 resource, Data Engineer is 1."
-          if (defaultTooltip) {
-            return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow, tooltipText);
-          } else {
-            return tooltipHtml(undefined, undefined, undefined, tooltipText);
-          }
-        }
 
         if (defaultTooltip && !customTooltip) {
           return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow);
