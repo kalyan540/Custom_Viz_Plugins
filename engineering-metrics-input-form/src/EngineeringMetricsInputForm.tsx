@@ -16,11 +16,9 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
     font-weight: ${({ theme, boldText }) => theme.typography.weights[boldText ? 'bold' : 'normal']};
   }
 
-  pre {
-    height: ${({ theme, headerFontSize, height }) => height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
-  }
-
-  .dropdown {
+  .dropdown-container {
+    display: flex;
+    gap: 10px; /* Space between dropdowns */
     margin-bottom: ${({ theme }) => theme.gridUnit * 2}px;
   }
 
@@ -35,27 +33,26 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
 export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
   const { data, height, width, headerText } = props;
   const rootElem = createRef<HTMLDivElement>();
-
-  const [selectedBusinessUnit, setSelectedBusinessUnit] = useState<string | null>(null);
-  const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
-
+  
   // Extract unique business units
   const businessUnits = Array.from(new Set(data.map(item => item['Business Unit'])));
-
-  // Filter accounts based on selected business unit
-  const filteredAccounts = selectedBusinessUnit ?
-    Array.from(new Set(data.filter(item => item['Business Unit'] === selectedBusinessUnit).map(item => item['Account'])))
-    : [];
-
-  // Filter projects based on selected account
-  const filteredProjects = selectedAccount ?
-    data.filter(item => item['Account'] === selectedAccount)
-    : [];
+  
+  // State to hold selected accounts for each business unit dropdown
+  const [selectedAccounts, setSelectedAccounts] = useState<{ [key: string]: string | null }>({});
+  
+  // State to hold selected projects for each account
+  const [selectedProjects, setSelectedProjects] = useState<{ [key: string]: string | null }>({});
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);
   }, [rootElem]);
+
+  // Function to handle account selection
+  const handleAccountChange = (businessUnit: string, account: string | null) => {
+    setSelectedAccounts(prev => ({ ...prev, [businessUnit]: account }));
+    setSelectedProjects(prev => ({ ...prev, [businessUnit]: null })); // Reset projects when account changes
+  };
 
   return (
     <Styles
@@ -66,54 +63,37 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       width={width}
     >
       <h3>{headerText}</h3>
+      
+      {/* Dropdowns for Business Units */}
+      <div className="dropdown-container">
+        {businessUnits.map(unit => (
+          <div key={unit}>
+            <label htmlFor={`account-${unit}`}>{unit}:</label>
+            <select
+              id={`account-${unit}`}
+              onChange={(e) => handleAccountChange(unit, e.target.value)}
+              value={selectedAccounts[unit] || ''}
+            >
+              <option value="">-- Select Account --</option>
+              {Array.from(new Set(data.filter(item => item['Business Unit'] === unit).map(item => item['Account']))).map(account => (
+                <option key={account} value={account}>{account}</option>
+              ))}
+            </select>
 
-      {/* Dropdown for Business Units */}
-      <div className="dropdown">
-        <label htmlFor="business-unit">Select Business Unit:</label>
-        <select id="business-unit" onChange={(e) => setSelectedBusinessUnit(e.target.value)} value={selectedBusinessUnit || ''}>
-          <option value="">-- Select Business Unit --</option>
-          {businessUnits.map(unit => (
-            <option key={unit} value={unit}>{unit}</option>
-          ))}
-        </select>
+            {/* Display Projects Card */}
+            {selectedAccounts[unit] && (
+              <div className="card">
+                <h4>Projects for {selectedAccounts[unit]}:</h4>
+                <ul>
+                  {data.filter(item => item['Account'] === selectedAccounts[unit]).map(project => (
+                    <li key={project.Project}>{project.Project}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
-
-      {/* Dropdown for Accounts */}
-      {selectedBusinessUnit && (
-        <div className="dropdown">
-          <label htmlFor="account">Select Account:</label>
-          <select id="account" onChange={(e) => setSelectedAccount(e.target.value)} value={selectedAccount || ''}>
-            <option value="">-- Select Account --</option>
-            {filteredAccounts.map(account => (
-              <option key={account} value={account}>{account}</option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {/* Display Accounts Card */}
-      {selectedBusinessUnit && filteredAccounts.length > 0 && (
-        <div className="card">
-          <h4>Accounts for {selectedBusinessUnit}:</h4>
-          <ul>
-            {filteredAccounts.map(account => (
-              <li key={account}>{account}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Display Projects Card */}
-      {selectedAccount && filteredProjects.length > 0 && (
-        <div className="card">
-          <h4>Projects for {selectedAccount}:</h4>
-          <ul>
-            {filteredProjects.map(project => (
-              <li key={project.Project}>{project.Project}</li>
-            ))}
-          </ul>
-        </div>
-      )}
 
       {/* Display JSON Data for Debugging */}
       <pre>${JSON.stringify(data, null, 2)}</pre>
