@@ -62,11 +62,12 @@ const EngineeringMetricsInputForm: React.FC<EngineeringMetricsInputFormProps> = 
 
   const [businessUnits, setBusinessUnits] = useState<string[]>([]);
   const [accounts, setAccounts] = useState<{ [key: string]: string[] }>({});
-  const [selectedBusinessUnit, setSelectedBusinessUnit] = useState<string>('');
+  const [selectedBusinessUnits, setSelectedBusinessUnits] = useState<string[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<string>('');
+  const [projects, setProjects] = useState<string[]>([]);
   const [showAccountModal, setShowAccountModal] = useState<boolean>(false);
   const [showProjectModal, setShowProjectModal] = useState<boolean>(false);
-  const [projects, setProjects] = useState<string[]>([]);
+  const [currentProject, setCurrentProject] = useState<string>('');
 
   useEffect(() => {
     // Extract unique business units from the data
@@ -86,10 +87,10 @@ const EngineeringMetricsInputForm: React.FC<EngineeringMetricsInputFormProps> = 
     setAccounts(accountMap);
   }, [data]);
 
-  const handleBusinessUnitChange = (unit: string) => {
-    setSelectedBusinessUnit(unit);
-    setShowAccountModal(true);
-    setSelectedAccount('');
+  const handleBusinessUnitChange = (index: number, unit: string) => {
+    const newSelectedBusinessUnits = [...selectedBusinessUnits];
+    newSelectedBusinessUnits[index] = unit;
+    setSelectedBusinessUnits(newSelectedBusinessUnits);
   };
 
   const handleAccountClick = (account: string) => {
@@ -101,42 +102,60 @@ const EngineeringMetricsInputForm: React.FC<EngineeringMetricsInputFormProps> = 
     setShowProjectModal(true);
   };
 
+  const handleProjectClick = (project: string) => {
+    setCurrentProject(project);
+    setShowAccountModal(true);
+  };
+
   const handleModalClose = () => {
     setShowAccountModal(false);
     setShowProjectModal(false);
     setSelectedAccount('');
+    setCurrentProject('');
   };
 
   return (
     <Styles height={height} width={width}>
       <h3>{props.headerText}</h3>
       <div className="dropdown-container">
-        <select onChange={(e) => handleBusinessUnitChange(e.target.value)} defaultValue="">
-          <option value="" disabled>Select Business Unit</option>
-          {businessUnits.map((unit) => (
-            <option key={unit} value={unit}>{unit}</option>
-          ))}
-        </select>
+        {businessUnits.map((unit, index) => (
+          <select key={index} onChange={(e) => handleBusinessUnitChange(index, e.target.value)} defaultValue="">
+            <option value="" disabled>Select Business Unit</option>
+            {businessUnits.map((bu) => (
+              <option key={bu} value={bu}>{bu}</option>
+            ))}
+          </select>
+        ))}
       </div>
-      {showAccountModal && (
+      {selectedBusinessUnits.map((unit, index) => (
+        unit && (
+          <div key={index}>
+            <h4>Accounts for {unit}</h4>
+            <div className="card-container">
+              {accounts[unit]?.map((account) => (
+                <div key={account} className="card" onClick={() => handleAccountClick(account)}>
+                  {account}
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      ))}
+      {showProjectModal && (
         <div className="modal">
-          <h4>Accounts for {selectedBusinessUnit}</h4>
-          {accounts[selectedBusinessUnit]?.map((account) => (
-            <div key={account} className="card" onClick={() => handleAccountClick(account)}>
-              {account}
+          <h4>Projects for {selectedAccount}</h4>
+          {projects.map((project) => (
+            <div key={project} className="card" onClick={() => handleProjectClick(project)}>
+              {project}
             </div>
           ))}
           <button onClick={handleModalClose}>Close</button>
         </div>
       )}
-      {showProjectModal && (
+      {showAccountModal && (
         <div className="modal">
-          <h4>Projects for {selectedAccount}</h4>
-          {projects.map((project) => (
-            <div key={project} className="card">
-              {project}
-            </div>
-          ))}
+          <h4>Input for {currentProject}</h4>
+          <input type="text" placeholder="Enter details..." />
           <button onClick={handleModalClose}>Close</button>
         </div>
       )}
