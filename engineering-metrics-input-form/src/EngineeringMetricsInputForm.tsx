@@ -14,6 +14,7 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
     display: flex;
     gap: 15px; /* Space between dropdowns */
     margin-bottom: ${({ theme }) => theme.gridUnit * 2}px;
+    position: relative; /* Position relative for nested dropdowns */
   }
 
   label {
@@ -21,28 +22,28 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
     margin-right: 5px; /* Space between label and dropdown */
   }
 
-  select {
-    padding: 8px 12px; /* Add padding for a modern look */
-    border: 1px solid #ccc; /* Light border */
-    border-radius: 4px; /* Rounded corners */
-    font-size: 14px; /* Font size */
-    transition: border-color 0.3s; /* Smooth transition for border color */
-    
-    &:focus {
-      border-color: ${({ theme }) => theme.colors.primary.base}; /* Change border color on focus */
-      outline: none; /* Remove default outline */
-    }
-  }
-
-  .project-popover {
+  .dropdown-menu {
+    display: none; /* Hide dropdowns by default */
     position: absolute;
     background-color: white;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     z-index: 1000; /* Ensure it appears above other elements */
-    margin-top: 5px; /* Space between account dropdown and project popover */
-    padding: 10px;
+  }
+
+  .dropdown:hover .dropdown-menu {
+    display: block; /* Show dropdown on hover */
+  }
+
+  .dropdown-submenu {
+    position: relative;
+  }
+
+  .dropdown-submenu .dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -1px;
   }
 
   .project-list {
@@ -60,20 +61,32 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   .project-list li:hover {
     background-color: #f0f0f0; /* Highlight on hover */
   }
+
+  .selected-info {
+    margin-top: 20px;
+    font-weight: bold;
+  }
 `;
 
 export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
   const { data, height, width } = props;
   const rootElem = createRef<HTMLDivElement>();
-  
+
   // Extract unique business units
   const businessUnits = Array.from(new Set(data.map(item => item['Business Unit'])));
-  
+
   // State to hold selected accounts for each business unit dropdown
   const [selectedAccounts, setSelectedAccounts] = useState<{ [key: string]: string | null }>({});
-  
-  // State to hold the currently hovered account for showing projects
-  const [hoveredAccount, setHoveredAccount] = useState<string | null>(null);
+
+  // State to hold selected projects for each account
+  const [selectedProjects, setSelectedProjects] = useState<{ [key: string]: string | null }>({});
+
+  // State to hold selected business unit, account, and project for display
+  const [selectedInfo, setSelectedInfo] = useState<{ businessUnit: string | null, account: string | null, project: string | null }>({
+    businessUnit: null,
+    account: null,
+    project: null,
+  });
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -83,12 +96,13 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   // Function to handle account selection
   const handleAccountChange = (businessUnit: string, account: string | null) => {
     setSelectedAccounts(prev => ({ ...prev, [businessUnit]: account }));
+    setSelectedProjects(prev => ({ ...prev, [businessUnit]: null })); // Reset projects when account changes
   };
 
   // Function to handle project selection
-  const handleProjectSelect = (project: string | null) => {
-    console.log('Selected Project:', project);
-    // You can add further logic here for what happens when a project is selected
+  const handleProjectSelect = (businessUnit: string, account: string | null, project: string | null) => {
+    setSelectedProjects(prev => ({ ...prev, [businessUnit]: project }));
+    setSelectedInfo({ businessUnit, account, project }); // Update selected info
   };
 
   return (
@@ -102,14 +116,12 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       {/* Dropdowns for Business Units */}
       <div className="dropdown-container">
         {businessUnits.map(unit => (
-          <div key={unit} style={{ position: 'relative' }}>
-            <label htmlFor={`account-${unit }`}>{unit}:</label>
+          <div key={unit} className="dropdown" style={{ position: 'relative' }}>
+            <label htmlFor={`account-${unit}`}>{unit}:</label>
             <select
               id={`account-${unit}`}
               onChange={(e) => handleAccountChange(unit, e.target.value)}
               value={selectedAccounts[unit] || ''}
-              onMouseEnter={() => setHoveredAccount(selectedAccounts[unit])}
-              onMouseLeave={() => setHoveredAccount(null)}
             >
               <option value="">-- Select Account --</option>
               {Array.from(new Set(data.filter(item => item['Business Unit'] === unit).map(item => item['Account']))).map(account => (
@@ -117,12 +129,13 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
               ))}
             </select>
 
-            {/* Popover for Projects */}
-            {hoveredAccount === selectedAccounts[unit] && selectedAccounts[unit] && (
-              <div className="project-popover">
-                <ul className="project-list">
+            {/* Nested Dropdown for Projects */}
+            {selectedAccounts[unit] && (
+              <div className="dropdown-submenu">
+                <a className="test" href="#">{selectedAccounts[unit]} <span className="caret"></span></a>
+                <ul className="dropdown-menu">
                   {Array.from(new Set(data.filter(item => item['Account'] === selectedAccounts[unit]).map(item => item['Project']))).map(project => (
-                    <li key={project} onClick={() => handleProjectSelect(project)}>
+                    <li key={project} onClick={() => handleProjectSelect(unit, selectedAccounts[unit], project)}>
                       {project}
                     </li>
                   ))}
@@ -131,6 +144,17 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
             )}
           </div>
         ))}
+      </div>
+
+      {/* Display Selected Information */}
+      <div className="selected-info">
+        {selectedInfo.businessUnit && selectedInfo.account && selectedInfo.project ? (
+          <p>
+            Selected: Business Unit - {selectedInfo.businessUnit}, Account - {selectedInfo.account}, Project - {selectedInfo.project}
+          </p>
+        ) : (
+          <p>No selection made yet.</p>
+        )}
       </div>
     </Styles>
   );
