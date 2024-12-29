@@ -1,8 +1,33 @@
-import React, { useEffect, useState } from 'react';
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+import React, { useEffect, createRef } from 'react';
 import { styled } from '@superset-ui/core';
-import { EngineeringMetricsInputFormProps } from './types';
+import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
 
-const Styles = styled.div<{ height: number; width: number }>`
+// The following Styles component is a <div> element, which has been styled using Emotion
+// For docs, visit https://emotion.sh/docs/styled
+
+// Theming variables are provided for your use via a ThemeProvider
+// imported from @superset-ui/core. For variables available, please visit
+// https://github.com/apache-superset/superset-ui/blob/master/packages/superset-ui-core/src/style/index.ts
+
+const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   background-color: ${({ theme }) => theme.colors.secondary.light2};
   padding: ${({ theme }) => theme.gridUnit * 4}px;
   border-radius: ${({ theme }) => theme.gridUnit * 2}px;
@@ -10,157 +35,55 @@ const Styles = styled.div<{ height: number; width: number }>`
   width: ${({ width }) => width}px;
 
   h3 {
+    /* You can use your props to control CSS! */
     margin-top: 0;
     margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
-    font-size: ${({ theme }) => theme.typography.sizes.xl}px;
-    font-weight: bold;
+    font-size: ${({ theme, headerFontSize }) =>
+      theme.typography.sizes[headerFontSize]}px;
+    font-weight: ${({ theme, boldText }) =>
+      theme.typography.weights[boldText ? 'bold' : 'normal']};
   }
 
-  .dropdown-container {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-
-  .modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    border: 1px solid #ccc;
-    padding: 20px;
-    z-index: 1000;
-    max-height: 80%;
-    overflow-y: auto;
-  }
-
-  .card {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 10px;
-    margin: 10px 0;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-
-  .card:hover {
-    background-color: #f0f0f0;
-  }
-
-  select {
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-    width: 100%;
+  pre {
+    height: ${({ theme, headerFontSize, height }) =>
+      height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
   }
 `;
 
-const EngineeringMetricsInputForm: React.FC<EngineeringMetricsInputFormProps> = (props) => {
+/**
+ * ******************* WHAT YOU CAN BUILD HERE *******************
+ *  In essence, a chart is given a few key ingredients to work with:
+ *  * Data: provided via `props.data`
+ *  * A DOM element
+ *  * FormData (your controls!) provided as props by transformProps.ts
+ */
+
+export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
+  // height and width are the height and width of the DOM element as it exists in the dashboard.
+  // There is also a `data` prop, which is, of course, your DATA 🎉
   const { data, height, width } = props;
 
-  const [businessUnits, setBusinessUnits] = useState<string[]>([]);
-  const [accounts, setAccounts] = useState<{ [key: string]: string[] }>({});
-  const [selectedBusinessUnits, setSelectedBusinessUnits] = useState<string[]>([]);
-  const [selectedAccount, setSelectedAccount] = useState<string>('');
-  const [projects, setProjects] = useState<string[]>([]);
-  const [showAccountModal, setShowAccountModal] = useState<boolean>(false);
-  const [showProjectModal, setShowProjectModal] = useState<boolean>(false);
-  const [currentProject, setCurrentProject] = useState<string>('');
+  const rootElem = createRef<HTMLDivElement>();
 
+  // Often, you just want to access the DOM and do whatever you want.
+  // Here, you can do that with createRef, and the useEffect hook.
   useEffect(() => {
-    // Extract unique business units from the data
-    const uniqueBusinessUnits = Array.from(new Set(data.map(item => item['Business Unit'])));
-    setBusinessUnits(uniqueBusinessUnits);
+    const root = rootElem.current as HTMLElement;
+    console.log('Plugin element', root);
+  });
 
-    // Populate accounts based on business units
-    const accountMap: { [key: string]: string[] } = {};
-    data.forEach(item => {
-      if (!accountMap[item['Business Unit']]) {
-        accountMap[item['Business Unit']] = [];
-      }
-      if (!accountMap[item['Business Unit']].includes(item['Account'])) {
-        accountMap[item['Business Unit']].push(item['Account']);
-      }
-    });
-    setAccounts(accountMap);
-  }, [data]);
-
-  const handleBusinessUnitChange = (index: number, unit: string) => {
-    const newSelectedBusinessUnits = [...selectedBusinessUnits];
-    newSelectedBusinessUnits[index] = unit;
-    setSelectedBusinessUnits(newSelectedBusinessUnits);
-  };
-
-  const handleAccountClick = (account: string) => {
-    setSelectedAccount(account);
-    const projectList = data
-      .filter(item => item['Account'] === account)
-      .map(item => item['Project']);
-    setProjects(['New Project', ...new Set(projectList)]);
-    setShowProjectModal(true);
-  };
-
-  const handleProjectClick = (project: string) => {
-    setCurrentProject(project);
-    setShowAccountModal(true);
-  };
-
-  const handleModalClose = () => {
-    setShowAccountModal(false);
-    setShowProjectModal(false);
-    setSelectedAccount('');
-    setCurrentProject('');
-  };
+  console.log('Plugin props', props);
 
   return (
-    <Styles height={height} width={width}>
+    <Styles
+      ref={rootElem}
+      boldText={props.boldText}
+      headerFontSize={props.headerFontSize}
+      height={height}
+      width={width}
+    >
       <h3>{props.headerText}</h3>
-      <div className="dropdown-container">
-        {businessUnits.map((unit, index) => (
-          <select key={index} onChange={(e) => handleBusinessUnitChange(index, e.target.value)} defaultValue="">
-            <option value="" disabled>Select Business Unit</option>
-            {businessUnits.map((bu) => (
-              <option key={bu} value={bu}>{bu}</option>
-            ))}
-          </select>
-        ))}
-      </div>
-      {selectedBusinessUnits.map((unit, index) => (
-        unit && (
-          <div key={index}>
-            <h4>Accounts for {unit}</h4>
-            <div className="card-container">
-              {accounts[unit]?.map((account) => (
-                <div key={account} className="card" onClick={() => handleAccountClick(account)}>
-                  {account}
-                </div>
-              ))}
-            </div>
-          </div>
-        )
-      ))}
-      {showProjectModal && (
-        <div className="modal">
-          <h4>Projects for {selectedAccount}</h4>
-          {projects.map((project) => (
-            <div key={project} className="card" onClick={() => handleProjectClick(project)}>
-              {project}
-            </div>
-          ))}
-          <button onClick={handleModalClose}>Close</button>
-        </div>
-      )}
-      {showAccountModal && (
-        <div className="modal">
-          <h4>Input for {currentProject}</h4>
-          <input type="text" placeholder="Enter details..." />
-          <button onClick={handleModalClose}>Close</button>
-        </div>
-      )}
+      <pre>${JSON.stringify(data, null, 2)}</pre>
     </Styles>
   );
-};
-
-export default EngineeringMetricsInputForm;
+}
