@@ -1,101 +1,128 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { styled } from '@superset-ui/core';
+import { EngineeringMetricsInputFormProps } from './types';
 
 const Styles = styled.div`
+  background-color: ${({ theme }) => theme.colors.secondary.light2};
+  padding: ${({ theme }) => theme.gridUnit * 4}px;
+  border-radius: ${({ theme }) => theme.gridUnit * 2}px;
+  height: ${({ height }) => height}px;
+  width: ${({ width }) => width}px;
+
   display: flex;
-  justify-content: space-around;
-  gap: 20px;
-  padding: 20px;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.gridUnit * 3}px;
 
-  .business-unit {
-    position: relative;
-    display: inline-block;
+  .dropdown-container {
+    display: flex;
+    flex-direction: column;
+    gap: ${({ theme }) => theme.gridUnit * 2}px;
+  }
 
-    .dropdown {
-      margin-top: 10px;
-      cursor: pointer;
-    }
+  select {
+    padding: ${({ theme }) => theme.gridUnit * 2}px;
+    border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
+    border-radius: ${({ theme }) => theme.gridUnit}px;
+    font-size: ${({ theme }) => theme.typography.sizes.m}px;
+  }
 
-    ul {
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-      position: absolute;
-      background-color: #fff;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      border-radius: 5px;
-      z-index: 10;
-      display: none;
-
-      li {
-        padding: 10px;
-        cursor: pointer;
-
-        &:hover {
-          background-color: #f0f0f0;
-        }
-
-        .nested-dropdown {
-          position: relative;
-
-          ul {
-            position: absolute;
-            left: 100%;
-            top: 0;
-            display: none;
-          }
-
-          &:hover > ul {
-            display: block;
-          }
-        }
-      }
-    }
-
-    &:hover > ul {
-      display: block;
-    }
+  .result-text {
+    font-size: ${({ theme }) => theme.typography.sizes.m}px;
+    padding: ${({ theme }) => theme.gridUnit * 2}px;
+    background-color: ${({ theme }) => theme.colors.grayscale.light4};
+    border-radius: ${({ theme }) => theme.gridUnit}px;
   }
 `;
 
-export default function MultiLevelDropdown({ data }) {
+export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
+  const { data, height, width } = props;
+
+  const [selectedBusinessUnit, setSelectedBusinessUnit] = useState('');
+  const [selectedAccount, setSelectedAccount] = useState('');
+  const [selectedProject, setSelectedProject] = useState('');
+
   const businessUnits = [...new Set(data.map(item => item['Business Unit']))];
+  
+  // Get accounts and projects for selected business unit
+  const getAccountsAndProjects = (businessUnit: string) => {
+    const accounts = [...new Set(data.filter(item => item['Business Unit'] === businessUnit).map(item => item.Account))];
+    const projects = selectedAccount
+      ? [...new Set(
+          data.filter(item => item['Business Unit'] === businessUnit && item.Account === selectedAccount)
+            .map(item => item.Project),
+        )]
+      : [];
+    return { accounts, projects };
+  };
 
-  const getAccountsForBusinessUnit = businessUnit =>
-    [...new Set(data.filter(item => item['Business Unit'] === businessUnit).map(item => item.Account))];
+  const handleBusinessUnitChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedBusinessUnit(event.target.value);
+    setSelectedAccount('');
+    setSelectedProject('');
+  };
 
-  const getProjectsForAccount = (businessUnit, account) =>
-    [...new Set(data.filter(item => item['Business Unit'] === businessUnit && item.Account === account).map(item => item.Project))];
+  const handleAccountChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedAccount(event.target.value);
+    setSelectedProject('');
+  };
+
+  const handleProjectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedProject(event.target.value);
+  };
 
   return (
-    <Styles>
-      {businessUnits.map(businessUnit => {
-        const accounts = getAccountsForBusinessUnit(businessUnit);
+    <Styles height={height} width={width}>
+      <div className="dropdown-container">
+        {businessUnits.map((unit) => {
+          const { accounts, projects } = getAccountsAndProjects(unit);
 
-        return (
-          <div key={businessUnit} className="business-unit">
-            <button className="dropdown">{businessUnit}</button>
-            <ul>
-              {accounts.map(account => {
-                const projects = getProjectsForAccount(businessUnit, account);
+          return (
+            <div key={unit}>
+              <h4>{unit} Business Unit</h4>
 
-                return (
-                  <li key={account} className="nested-dropdown">
-                    {account}
-                    {projects.length > 0 && (
-                      <ul>
-                        {projects.map(project => (
-                          <li key={project}>{project}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        );
-      })}
+              {/* Business Unit Dropdown */}
+              <select onChange={handleBusinessUnitChange} value={selectedBusinessUnit}>
+                <option value="">Select Business Unit</option>
+                {businessUnits.map(unit => (
+                  <option key={unit} value={unit}>
+                    {unit}
+                  </option>
+                ))}
+              </select>
+
+              {/* Account Dropdown */}
+              {selectedBusinessUnit && (
+                <select onChange={handleAccountChange} value={selectedAccount}>
+                  <option value="">Select Account</option>
+                  {accounts.map(account => (
+                    <option key={account} value={account}>
+                      {account}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              {/* Project Dropdown */}
+              {selectedAccount && (
+                <select onChange={handleProjectChange} value={selectedProject}>
+                  <option value="">Select Project</option>
+                  {projects.map(project => (
+                    <option key={project} value={project}>
+                      {project}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {selectedBusinessUnit && selectedAccount && selectedProject && (
+        <div className="result-text">
+          Selected: {selectedBusinessUnit}, {selectedAccount}, {selectedProject}
+        </div>
+      )}
     </Styles>
   );
 }
