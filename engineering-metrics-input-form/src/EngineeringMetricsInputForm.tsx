@@ -3,23 +3,35 @@ import { styled } from '@superset-ui/core';
 import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
-  background-color: ${({ theme }) => theme.colors.secondary.light2};
+  background-color: white; /* Set background to white */
   padding: ${({ theme }) => theme.gridUnit * 4}px;
   border-radius: ${({ theme }) => theme.gridUnit * 2}px;
   height: ${({ height }) => height}px;
   width: ${({ width }) => width}px;
-
-  h3 {
-    margin-top: 0;
-    margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
-    font-size: ${({ theme, headerFontSize }) => theme.typography.sizes[headerFontSize]}px;
-    font-weight: ${({ theme, boldText }) => theme.typography.weights[boldText ? 'bold' : 'normal']};
-  }
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add subtle shadow for depth */
 
   .dropdown-container {
     display: flex;
-    gap: 10px; /* Space between dropdowns */
+    gap: 15px; /* Space between dropdowns */
     margin-bottom: ${({ theme }) => theme.gridUnit * 2}px;
+  }
+
+  label {
+    font-weight: bold; /* Make labels bold */
+    margin-right: 5px; /* Space between label and dropdown */
+  }
+
+  select {
+    padding: 8px 12px; /* Add padding for a modern look */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 4px; /* Rounded corners */
+    font-size: 14px; /* Font size */
+    transition: border-color 0.3s; /* Smooth transition for border color */
+    
+    &:focus {
+      border-color: ${({ theme }) => theme.colors.primary.base}; /* Change border color on focus */
+      outline: none; /* Remove default outline */
+    }
   }
 
   .card {
@@ -27,11 +39,26 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
     border-radius: 4px;
     padding: 10px;
     margin-top: 10px;
+    background-color: ${({ theme }) => theme.colors.secondary.light1}; /* Light background for cards */
+  }
+
+  h4 {
+    margin: 0; /* Remove default margin */
+    font-size: 16px; /* Font size for project title */
+    font-weight: bold; /* Make project title bold */
+  }
+
+  ul {
+    padding-left: 20px; /* Indent list items */
+  }
+
+  li {
+    margin: 5px 0; /* Space between list items */
   }
 `;
 
 export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
-  const { data, height, width, headerText } = props;
+  const { data, height, width } = props;
   const rootElem = createRef<HTMLDivElement>();
   
   // Extract unique business units
@@ -40,9 +67,6 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   // State to hold selected accounts for each business unit dropdown
   const [selectedAccounts, setSelectedAccounts] = useState<{ [key: string]: string | null }>({});
   
-  // State to hold selected projects for each account
-  const [selectedProjects, setSelectedProjects] = useState<{ [key: string]: string | null }>({});
-
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);
@@ -51,7 +75,6 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   // Function to handle account selection
   const handleAccountChange = (businessUnit: string, account: string | null) => {
     setSelectedAccounts(prev => ({ ...prev, [businessUnit]: account }));
-    setSelectedProjects(prev => ({ ...prev, [businessUnit]: null })); // Reset projects when account changes
   };
 
   return (
@@ -62,8 +85,6 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       height={height}
       width={width}
     >
-      <h3>{headerText}</h3>
-      
       {/* Dropdowns for Business Units */}
       <div className="dropdown-container">
         {businessUnits.map(unit => (
@@ -94,9 +115,6 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
           </div>
         ))}
       </div>
-
-      {/* Display JSON Data for Debugging */}
-      <pre>${JSON.stringify(data, null, 2)}</pre>
-    </Styles>
+      </Styles>
   );
 }
