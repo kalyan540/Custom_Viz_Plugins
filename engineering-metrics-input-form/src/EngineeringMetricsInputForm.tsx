@@ -45,6 +45,9 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   // State to hold selected accounts for each business unit dropdown
   const [selectedAccounts, setSelectedAccounts] = useState<{ [key: string]: string | null }>({});
   
+  // State to hold selected projects for each account
+  const [selectedProjects, setSelectedProjects] = useState<{ [key: string]: string | null }>({});
+
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);
@@ -53,6 +56,12 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   // Function to handle account selection
   const handleAccountChange = (businessUnit: string, account: string | null) => {
     setSelectedAccounts(prev => ({ ...prev, [businessUnit]: account }));
+    setSelectedProjects(prev => ({ ...prev, [businessUnit]: null })); // Reset projects when account changes
+  };
+
+  // Function to handle project selection
+  const handleProjectChange = (businessUnit: string, project: string | null) => {
+    setSelectedProjects(prev => ({ ...prev, [businessUnit]: project }));
   };
 
   return (
@@ -73,11 +82,26 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
               onChange={(e) => handleAccountChange(unit, e.target.value)}
               value={selectedAccounts[unit] || ''}
             >
-              <option value="">-- Select Account --</option>
+              <option value="-- Select Account --"></option>
               {Array.from(new Set(data.filter(item => item['Business Unit'] === unit).map(item => item['Account']))).map(account => (
                 <option key={account} value={account}>{account}</option>
               ))}
             </select>
+
+            {/* Dropdown for Projects */}
+            {selectedAccounts[unit] && (
+              <select
+                id={`project-${unit}`}
+                onChange={(e) => handleProjectChange(unit, e.target.value)}
+                value={selectedProjects[unit] || ''}
+                style={{ marginLeft: '10px' }} // Add some space between account and project dropdowns
+              >
+                < option value="">-- Select Project --</option>
+                {Array.from(new Set(data.filter(item => item['Account'] === selectedAccounts[unit]).map(item => item['Project']))).map(project => (
+                  <option key={project} value={project}>{project}</option>
+                ))}
+              </select>
+            )}
           </div>
         ))}
       </div>
