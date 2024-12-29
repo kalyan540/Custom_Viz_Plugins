@@ -1,109 +1,78 @@
-import React, { useEffect, createRef, useState } from 'react';
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+import React, { useEffect, createRef } from 'react';
 import { styled } from '@superset-ui/core';
 import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
 
+// The following Styles component is a <div> element, which has been styled using Emotion
+// For docs, visit https://emotion.sh/docs/styled
+
+// Theming variables are provided for your use via a ThemeProvider
+// imported from @superset-ui/core. For variables available, please visit
+// https://github.com/apache-superset/superset-ui/blob/master/packages/superset-ui-core/src/style/index.ts
+
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
-  background-color: #f7f7f7; /* Set background to light grey */
+  background-color: ${({ theme }) => theme.colors.secondary.light2};
   padding: ${({ theme }) => theme.gridUnit * 4}px;
   border-radius: ${({ theme }) => theme.gridUnit * 2}px;
   height: ${({ height }) => height}px;
   width: ${({ width }) => width}px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add subtle shadow for depth */
 
-  .dropdown-container {
-    display: flex;
-    gap: 15px; /* Space between dropdowns */
-    margin-bottom: ${({ theme }) => theme.gridUnit * 2}px;
-    position: relative; /* Position relative for nested dropdowns */
+  h3 {
+    /* You can use your props to control CSS! */
+    margin-top: 0;
+    margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
+    font-size: ${({ theme, headerFontSize }) =>
+      theme.typography.sizes[headerFontSize]}px;
+    font-weight: ${({ theme, boldText }) =>
+      theme.typography.weights[boldText ? 'bold' : 'normal']};
   }
 
-  label {
-    font-weight: bold; /* Make labels bold */
-    margin-right: 5px; /* Space between label and dropdown */
-  }
-
-  .dropdown-menu {
-    display: none; /* Hide dropdowns by default */
-    position: absolute;
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    z-index: 1000; /* Ensure it appears above other elements */
-  }
-
-  .dropdown:hover .dropdown-menu {
-    display: block; /* Show dropdown on hover */
-  }
-
-  .dropdown-submenu {
-    position: relative;
-  }
-
-  .dropdown-submenu .dropdown-menu {
-    top: 0;
-    left: 100%;
-    margin-top: -1px;
-  }
-
-  .project-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .project-list li {
-    padding: 5px 10px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-
-  .project-list li:hover {
-    background-color: #f0f0f0; /* Highlight on hover */
-  }
-
-  .selected-info {
-    margin-top: 20px;
-    font-weight: bold;
+  pre {
+    height: ${({ theme, headerFontSize, height }) =>
+      height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
   }
 `;
 
+/**
+ * ******************* WHAT YOU CAN BUILD HERE *******************
+ *  In essence, a chart is given a few key ingredients to work with:
+ *  * Data: provided via `props.data`
+ *  * A DOM element
+ *  * FormData (your controls!) provided as props by transformProps.ts
+ */
+
 export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
+  // height and width are the height and width of the DOM element as it exists in the dashboard.
+  // There is also a `data` prop, which is, of course, your DATA 🎉
   const { data, height, width } = props;
+
   const rootElem = createRef<HTMLDivElement>();
 
-  // Extract unique business units
-  const businessUnits = Array.from(new Set(data.map(item => item['Business Unit'])));
-
-  // State to hold selected accounts for each business unit dropdown
-  const [selectedAccounts, setSelectedAccounts] = useState<{ [key: string]: string | null }>({});
-
-  // State to hold selected projects for each account
-  const [selectedProjects, setSelectedProjects] = useState<{ [key: string]: string | null }>({});
-
-  // State to hold selected business unit, account, and project for display
-  const [selectedInfo, setSelectedInfo] = useState<{ businessUnit: string | null, account: string | null, project: string | null }>({
-    businessUnit: null,
-    account: null,
-    project: null,
-  });
-
+  // Often, you just want to access the DOM and do whatever you want.
+  // Here, you can do that with createRef, and the useEffect hook.
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);
-  }, [rootElem]);
+  });
 
-  // Function to handle account selection
-  const handleAccountChange = (businessUnit: string, account: string | null) => {
-    setSelectedAccounts(prev => ({ ...prev, [businessUnit]: account }));
-    setSelectedProjects(prev => ({ ...prev, [businessUnit]: null })); // Reset projects when account changes
-  };
-
-  // Function to handle project selection
-  const handleProjectSelect = (businessUnit: string, account: string | null, project: string | null) => {
-    setSelectedProjects(prev => ({ ...prev, [businessUnit]: project }));
-    setSelectedInfo({ businessUnit, account, project }); // Update selected info
-  };
+  console.log('Plugin props', props);
 
   return (
     <Styles
@@ -113,49 +82,8 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       height={height}
       width={width}
     >
-      {/* Dropdowns for Business Units */}
-      <div className="dropdown-container">
-        {businessUnits.map(unit => (
-          <div key={unit} className="dropdown" style={{ position: 'relative' }}>
-            <label htmlFor={`account-${unit}`}>{unit}:</label>
-            <select
-              id={`account-${unit}`}
-              onChange={(e) => handleAccountChange(unit, e.target.value)}
-              value={selectedAccounts[unit] || ''}
-            >
-              <option value="">-- Select Account --</option>
-              {Array.from(new Set(data.filter(item => item['Business Unit'] === unit).map(item => item['Account']))).map(account => (
-                <option key={account} value={account}>{account}</option>
-              ))}
-            </select>
-
-            {/* Nested Dropdown for Projects */}
-            {selectedAccounts[unit] && (
-              <div className="dropdown-submenu">
-                <a className="test" href="#">{selectedAccounts[unit]} <span className="caret"></span></a>
-                <ul className="dropdown-menu">
-                  {Array.from(new Set(data.filter(item => item['Account'] === selectedAccounts[unit]).map(item => item['Project']))).map(project => (
-                    <li key={project} onClick={() => handleProjectSelect(unit, selectedAccounts[unit], project)}>
-                      {project}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Display Selected Information */}
-      <div className="selected-info">
-        {selectedInfo.businessUnit && selectedInfo.account && selectedInfo.project ? (
-          <p>
-            Selected: Business Unit - {selectedInfo.businessUnit}, Account - {selectedInfo.account}, Project - {selectedInfo.project}
-          </p>
-        ) : (
-          <p>No selection made yet.</p>
-        )}
-      </div>
+      <h3>{props.headerText}</h3>
+      <pre>${JSON.stringify(data, null, 2)}</pre>
     </Styles>
   );
 }
