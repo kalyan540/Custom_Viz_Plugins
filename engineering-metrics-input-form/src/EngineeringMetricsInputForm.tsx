@@ -1,128 +1,89 @@
-import React, { useState } from 'react';
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+import React, { useEffect, createRef } from 'react';
 import { styled } from '@superset-ui/core';
-import { EngineeringMetricsInputFormProps } from './types';
+import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
 
-const Styles = styled.div`
+// The following Styles component is a <div> element, which has been styled using Emotion
+// For docs, visit https://emotion.sh/docs/styled
+
+// Theming variables are provided for your use via a ThemeProvider
+// imported from @superset-ui/core. For variables available, please visit
+// https://github.com/apache-superset/superset-ui/blob/master/packages/superset-ui-core/src/style/index.ts
+
+const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   background-color: ${({ theme }) => theme.colors.secondary.light2};
   padding: ${({ theme }) => theme.gridUnit * 4}px;
   border-radius: ${({ theme }) => theme.gridUnit * 2}px;
   height: ${({ height }) => height}px;
   width: ${({ width }) => width}px;
 
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.gridUnit * 3}px;
-
-  .dropdown-container {
-    display: flex;
-    flex-direction: column;
-    gap: ${({ theme }) => theme.gridUnit * 2}px;
+  h3 {
+    /* You can use your props to control CSS! */
+    margin-top: 0;
+    margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
+    font-size: ${({ theme, headerFontSize }) =>
+      theme.typography.sizes[headerFontSize]}px;
+    font-weight: ${({ theme, boldText }) =>
+      theme.typography.weights[boldText ? 'bold' : 'normal']};
   }
 
-  select {
-    padding: ${({ theme }) => theme.gridUnit * 2}px;
-    border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
-    border-radius: ${({ theme }) => theme.gridUnit}px;
-    font-size: ${({ theme }) => theme.typography.sizes.m}px;
-  }
-
-  .result-text {
-    font-size: ${({ theme }) => theme.typography.sizes.m}px;
-    padding: ${({ theme }) => theme.gridUnit * 2}px;
-    background-color: ${({ theme }) => theme.colors.grayscale.light4};
-    border-radius: ${({ theme }) => theme.gridUnit}px;
+  pre {
+    height: ${({ theme, headerFontSize, height }) =>
+      height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
   }
 `;
 
+/**
+ * ******************* WHAT YOU CAN BUILD HERE *******************
+ *  In essence, a chart is given a few key ingredients to work with:
+ *  * Data: provided via `props.data`
+ *  * A DOM element
+ *  * FormData (your controls!) provided as props by transformProps.ts
+ */
+
 export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
+  // height and width are the height and width of the DOM element as it exists in the dashboard.
+  // There is also a `data` prop, which is, of course, your DATA 🎉
   const { data, height, width } = props;
 
-  const [selectedBusinessUnit, setSelectedBusinessUnit] = useState('');
-  const [selectedAccount, setSelectedAccount] = useState('');
-  const [selectedProject, setSelectedProject] = useState('');
+  const rootElem = createRef<HTMLDivElement>();
 
-  const businessUnits = [...new Set(data.map(item => item['Business Unit']))];
-  
-  // Get accounts and projects for selected business unit
-  const getAccountsAndProjects = (businessUnit: string) => {
-    const accounts = [...new Set(data.filter(item => item['Business Unit'] === businessUnit).map(item => item.Account))];
-    const projects = selectedAccount
-      ? [...new Set(
-          data.filter(item => item['Business Unit'] === businessUnit && item.Account === selectedAccount)
-            .map(item => item.Project),
-        )]
-      : [];
-    return { accounts, projects };
-  };
+  // Often, you just want to access the DOM and do whatever you want.
+  // Here, you can do that with createRef, and the useEffect hook.
+  useEffect(() => {
+    const root = rootElem.current as HTMLElement;
+    console.log('Plugin element', root);
+  });
 
-  const handleBusinessUnitChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedBusinessUnit(event.target.value);
-    setSelectedAccount('');
-    setSelectedProject('');
-  };
-
-  const handleAccountChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedAccount(event.target.value);
-    setSelectedProject('');
-  };
-
-  const handleProjectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedProject(event.target.value);
-  };
+  console.log('Plugin props', props);
 
   return (
-    <Styles height={height} width={width}>
-      <div className="dropdown-container">
-        {businessUnits.map((unit) => {
-          const { accounts, projects } = getAccountsAndProjects(unit);
-
-          return (
-            <div key={unit}>
-              <h4>{unit} Business Unit</h4>
-
-              {/* Business Unit Dropdown */}
-              <select onChange={handleBusinessUnitChange} value={selectedBusinessUnit}>
-                <option value="">Select Business Unit</option>
-                {businessUnits.map(unit => (
-                  <option key={unit} value={unit}>
-                    {unit}
-                  </option>
-                ))}
-              </select>
-
-              {/* Account Dropdown */}
-              {selectedBusinessUnit && (
-                <select onChange={handleAccountChange} value={selectedAccount}>
-                  <option value="">Select Account</option>
-                  {accounts.map(account => (
-                    <option key={account} value={account}>
-                      {account}
-                    </option>
-                  ))}
-                </select>
-              )}
-
-              {/* Project Dropdown */}
-              {selectedAccount && (
-                <select onChange={handleProjectChange} value={selectedProject}>
-                  <option value="">Select Project</option>
-                  {projects.map(project => (
-                    <option key={project} value={project}>
-                      {project}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {selectedBusinessUnit && selectedAccount && selectedProject && (
-        <div className="result-text">
-          Selected: {selectedBusinessUnit}, {selectedAccount}, {selectedProject}
-        </div>
-      )}
+    <Styles
+      ref={rootElem}
+      boldText={props.boldText}
+      headerFontSize={props.headerFontSize}
+      height={height}
+      width={width}
+    >
+      <h3>{props.headerText}</h3>
+      <pre>${JSON.stringify(data, null, 2)}</pre>
     </Styles>
   );
 }
