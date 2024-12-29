@@ -3,7 +3,7 @@ import { styled } from '@superset-ui/core';
 import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
-  background-color: white; /* Set background to white */
+  background-color: #f7f7f7; /* Set background to light grey */
   padding: ${({ theme }) => theme.gridUnit * 4}px;
   border-radius: ${({ theme }) => theme.gridUnit * 2}px;
   height: ${({ height }) => height}px;
@@ -32,28 +32,6 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
       border-color: ${({ theme }) => theme.colors.primary.base}; /* Change border color on focus */
       outline: none; /* Remove default outline */
     }
-  }
-
-  .card {
-    border: 1px solid ${({ theme }) => theme.colors.secondary.dark2};
-    border-radius: 4px;
-    padding: 10px;
-    margin-top: 10px;
-    background-color: ${({ theme }) => theme.colors.secondary.light1}; /* Light background for cards */
-  }
-
-  h4 {
-    margin: 0; /* Remove default margin */
-    font-size: 16px; /* Font size for project title */
-    font-weight: bold; /* Make project title bold */
-  }
-
-  ul {
-    padding-left: 20px; /* Indent list items */
-  }
-
-  li {
-    margin: 5px 0; /* Space between list items */
   }
 `;
 
@@ -100,21 +78,9 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
                 <option key={account} value={account}>{account}</option>
               ))}
             </select>
-
-            {/* Display Projects Card */}
-            {selectedAccounts[unit] && (
-              <div className="card">
-                <h4>Projects for {selectedAccounts[unit]}:</h4>
-                <ul>
-                  {data.filter(item => item['Account'] === selectedAccounts[unit]).map(project => (
-                    <li key={project.Project}>{project.Project}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
         ))}
       </div>
-      </Styles>
+    </Styles>
   );
 }
