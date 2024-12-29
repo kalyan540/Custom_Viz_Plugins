@@ -1,49 +1,64 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { styled } from '@superset-ui/core';
 
 const Styles = styled.div`
-  background-color: ${({ theme }) => theme.colors.secondary.light2};
-  padding: ${({ theme }) => theme.gridUnit * 4}px;
-  border-radius: ${({ theme }) => theme.gridUnit * 2}px;
-  height: ${({ height }) => height}px;
-  width: ${({ width }) => width}px;
-
   display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.gridUnit * 4}px;
+  justify-content: space-around;
+  gap: 20px;
+  padding: 20px;
 
-  .business-unit-container {
-    display: flex;
-    flex-direction: column;
-    gap: ${({ theme }) => theme.gridUnit * 2}px;
-  }
+  .business-unit {
+    position: relative;
+    display: inline-block;
 
-  .dropdown {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: ${({ theme }) => theme.gridUnit * 3}px;
-  }
+    .dropdown {
+      margin-top: 10px;
+      cursor: pointer;
+    }
 
-  select {
-    padding: ${({ theme }) => theme.gridUnit * 2}px;
-    border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
-    border-radius: ${({ theme }) => theme.gridUnit}px;
-    font-size: ${({ theme }) => theme.typography.sizes.m}px;
-    min-width: 150px;
-  }
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      position: absolute;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+      z-index: 10;
+      display: none;
 
-  .result-text {
-    font-size: ${({ theme }) => theme.typography.sizes.m}px;
-    padding: ${({ theme }) => theme.gridUnit * 2}px;
-    background-color: ${({ theme }) => theme.colors.grayscale.light4};
-    border-radius: ${({ theme }) => theme.gridUnit}px;
+      li {
+        padding: 10px;
+        cursor: pointer;
+
+        &:hover {
+          background-color: #f0f0f0;
+        }
+
+        .nested-dropdown {
+          position: relative;
+
+          ul {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            display: none;
+          }
+
+          &:hover > ul {
+            display: block;
+          }
+        }
+      }
+    }
+
+    &:hover > ul {
+      display: block;
+    }
   }
 `;
 
-export default function NestedDropdownComponent({ data, height, width }) {
-  const [selectedValues, setSelectedValues] = useState({});
-
+export default function MultiLevelDropdown({ data }) {
   const businessUnits = [...new Set(data.map(item => item['Business Unit']))];
 
   const getAccountsForBusinessUnit = businessUnit =>
@@ -52,60 +67,32 @@ export default function NestedDropdownComponent({ data, height, width }) {
   const getProjectsForAccount = (businessUnit, account) =>
     [...new Set(data.filter(item => item['Business Unit'] === businessUnit && item.Account === account).map(item => item.Project))];
 
-  const handleSelectionChange = (businessUnit, key, value) => {
-    setSelectedValues(prevState => ({
-      ...prevState,
-      [businessUnit]: {
-        ...prevState[businessUnit],
-        [key]: value,
-        ...(key === 'account' ? { project: '' } : {}),
-      },
-    }));
-  };
-
   return (
-    <Styles height={height} width={width}>
+    <Styles>
       {businessUnits.map(businessUnit => {
         const accounts = getAccountsForBusinessUnit(businessUnit);
-        const selectedAccount = selectedValues[businessUnit]?.account;
-        const projects = selectedAccount ? getProjectsForAccount(businessUnit, selectedAccount) : [];
 
         return (
-          <div key={businessUnit} className="business-unit-container">
-            <div className="dropdown">
-              <label>{businessUnit}</label>
-              <select
-                onChange={e => handleSelectionChange(businessUnit, 'account', e.target.value)}
-                value={selectedValues[businessUnit]?.account || ''}
-              >
-                <option value="">Select Account</option>
-                {accounts.map(account => (
-                  <option key={account} value={account}>
+          <div key={businessUnit} className="business-unit">
+            <button className="dropdown">{businessUnit}</button>
+            <ul>
+              {accounts.map(account => {
+                const projects = getProjectsForAccount(businessUnit, account);
+
+                return (
+                  <li key={account} className="nested-dropdown">
                     {account}
-                  </option>
-                ))}
-              </select>
-
-              {selectedAccount && (
-                <select
-                  onChange={e => handleSelectionChange(businessUnit, 'project', e.target.value)}
-                  value={selectedValues[businessUnit]?.project || ''}
-                >
-                  <option value="">Select Project</option>
-                  {projects.map(project => (
-                    <option key={project} value={project}>
-                      {project}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-
-            {selectedValues[businessUnit]?.account && selectedValues[businessUnit]?.project && (
-              <div className="result-text">
-                {`Selected: ${businessUnit}, ${selectedValues[businessUnit].account}, ${selectedValues[businessUnit].project}`}
-              </div>
-            )}
+                    {projects.length > 0 && (
+                      <ul>
+                        {projects.map(project => (
+                          <li key={project}>{project}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         );
       })}
