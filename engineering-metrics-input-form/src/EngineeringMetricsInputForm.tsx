@@ -33,6 +33,33 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
       outline: none; /* Remove default outline */
     }
   }
+
+  .project-popover {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000; /* Ensure it appears above other elements */
+    margin-top: 5px; /* Space between account dropdown and project popover */
+    padding: 10px;
+  }
+
+  .project-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .project-list li {
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .project-list li:hover {
+    background-color: #f0f0f0; /* Highlight on hover */
+  }
 `;
 
 export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
@@ -45,8 +72,8 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   // State to hold selected accounts for each business unit dropdown
   const [selectedAccounts, setSelectedAccounts] = useState<{ [key: string]: string | null }>({});
   
-  // State to hold selected projects for each account
-  const [selectedProjects, setSelectedProjects] = useState<{ [key: string]: string | null }>({});
+  // State to hold the currently hovered account for showing projects
+  const [hoveredAccount, setHoveredAccount] = useState<string | null>(null);
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -56,12 +83,12 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   // Function to handle account selection
   const handleAccountChange = (businessUnit: string, account: string | null) => {
     setSelectedAccounts(prev => ({ ...prev, [businessUnit]: account }));
-    setSelectedProjects(prev => ({ ...prev, [businessUnit]: null })); // Reset projects when account changes
   };
 
   // Function to handle project selection
-  const handleProjectChange = (businessUnit: string, project: string | null) => {
-    setSelectedProjects(prev => ({ ...prev, [businessUnit]: project }));
+  const handleProjectSelect = (project: string | null) => {
+    console.log('Selected Project:', project);
+    // You can add further logic here for what happens when a project is selected
   };
 
   return (
@@ -75,32 +102,32 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       {/* Dropdowns for Business Units */}
       <div className="dropdown-container">
         {businessUnits.map(unit => (
-          <div key={unit}>
-            <label htmlFor={`account-${unit}`}>{unit}:</label>
+          <div key={unit} style={{ position: 'relative' }}>
+            <label htmlFor={`account-${unit }`}>{unit}:</label>
             <select
               id={`account-${unit}`}
               onChange={(e) => handleAccountChange(unit, e.target.value)}
               value={selectedAccounts[unit] || ''}
+              onMouseEnter={() => setHoveredAccount(selectedAccounts[unit])}
+              onMouseLeave={() => setHoveredAccount(null)}
             >
-              <option value="-- Select Account --"></option>
+              <option value="">-- Select Account --</option>
               {Array.from(new Set(data.filter(item => item['Business Unit'] === unit).map(item => item['Account']))).map(account => (
                 <option key={account} value={account}>{account}</option>
               ))}
             </select>
 
-            {/* Dropdown for Projects */}
-            {selectedAccounts[unit] && (
-              <select
-                id={`project-${unit}`}
-                onChange={(e) => handleProjectChange(unit, e.target.value)}
-                value={selectedProjects[unit] || ''}
-                style={{ marginLeft: '10px' }} // Add some space between account and project dropdowns
-              >
-                < option value="">-- Select Project --</option>
-                {Array.from(new Set(data.filter(item => item['Account'] === selectedAccounts[unit]).map(item => item['Project']))).map(project => (
-                  <option key={project} value={project}>{project}</option>
-                ))}
-              </select>
+            {/* Popover for Projects */}
+            {hoveredAccount === selectedAccounts[unit] && selectedAccounts[unit] && (
+              <div className="project-popover">
+                <ul className="project-list">
+                  {Array.from(new Set(data.filter(item => item['Account'] === selectedAccounts[unit]).map(item => item['Project']))).map(project => (
+                    <li key={project} onClick={() => handleProjectSelect(project)}>
+                      {project}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         ))}
