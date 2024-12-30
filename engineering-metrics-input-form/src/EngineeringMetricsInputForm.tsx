@@ -1,7 +1,7 @@
 import React, { useEffect, createRef, useState } from 'react';
 import { styled } from '@superset-ui/core';
 import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
-import Dropdown from 'react-multilevel-dropdown';
+//import Dropdown from 'react-multilevel-dropdown';
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   background-color: ${({ theme }) => theme.colors.secondary.light2};
@@ -34,7 +34,8 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
 export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
   const { data, height, width } = props;
   const rootElem = createRef<HTMLDivElement>();
-  const [selection, setSelection] = useState('');
+  //const [selection, setSelection] = useState('');
+  console.log('Plugin data', data);
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -44,7 +45,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   console.log('Plugin props', props);
 
   // Group data by Business Unit and Account
-  const groupedData = data.data.reduce((acc, item) => {
+  /*const groupedData = data.data.reduce((acc, item) => {
     const { "Business Unit": businessUnit, Account, Project } = item;
     if (!acc[businessUnit]) {
       acc[businessUnit] = {};
@@ -58,7 +59,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
 
   const handleSelect = (businessUnit, account, project) => {
     setSelection(`Business Unit: ${businessUnit}, Account: ${account}, Project: ${project}`);
-  };
+  };*/
 
   return (
     <Styles
@@ -69,7 +70,13 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       width={width}
     >
       <h3>{props.headerText}</h3>
-      {Object.keys(groupedData).map((businessUnit) => (
+      
+      
+    </Styles>
+  );
+}
+
+/*{Object.keys(groupedData).map((businessUnit) => (
         <Dropdown title={businessUnit} key={businessUnit}>
           {Object.keys(groupedData[businessUnit]).map((account) => (
             <Dropdown.Item key={account}>
@@ -88,7 +95,5 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
           ))}
         </Dropdown>
       ))}
-      <div className="selection">{selection}</div>
-    </Styles>
-  );
-}
+        
+      <div className="selection">{selection}</div>*/
