@@ -1,12 +1,5 @@
 import React, { useEffect, createRef, useState } from 'react';
 import { styled } from '@superset-ui/core';
-import Dropdown, {
-  DropdownToggle,
-  DropdownMenu,
-  MenuItem,
-  CustomDropdownToggleStyle,
-  CustomDropdownMenuStyle
-} from './Components/Dropdown'; // Adjust the import path as necessary
 
 const Styles = styled.div`
   background-color: ${({ theme }) => theme.colors.secondary.light2};
