@@ -1,8 +1,32 @@
-import React, { useEffect, createRef, useState } from 'react';
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+import React, { useEffect, createRef } from 'react';
 import { styled } from '@superset-ui/core';
-import { Dropdown } from 'rsuite';
-
 import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
+import { Dropdown } from 'rsuite';
+import "rsuite/dist/rsuite.css";
+// The following Styles component is a <div> element, which has been styled using Emotion
+// For docs, visit https://emotion.sh/docs/styled
+
+// Theming variables are provided for your use via a ThemeProvider
+// imported from @superset-ui/core. For variables available, please visit
+// https://github.com/apache-superset/superset-ui/blob/master/packages/superset-ui-core/src/style/index.ts
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   background-color: ${({ theme }) => theme.colors.secondary.light2};
@@ -10,67 +34,46 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   border-radius: ${({ theme }) => theme.gridUnit * 2}px;
   height: ${({ height }) => height}px;
   width: ${({ width }) => width}px;
-  display: flex; /* Use flexbox for horizontal layout */
-  gap: 16px; /* Space between dropdowns */
+
+  h3 {
+    /* You can use your props to control CSS! */
+    margin-top: 0;
+    margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
+    font-size: ${({ theme, headerFontSize }) =>
+    theme.typography.sizes[headerFontSize]}px;
+    font-weight: ${({ theme, boldText }) =>
+    theme.typography.weights[boldText ? 'bold' : 'normal']};
+  }
+
+  pre {
+    height: ${({ theme, headerFontSize, height }) =>
+    height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
+  }
 `;
 
+/**
+ * ******************* WHAT YOU CAN BUILD HERE *******************
+ *  In essence, a chart is given a few key ingredients to work with:
+ *  * Data: provided via `props.data`
+ *  * A DOM element
+ *  * FormData (your controls!) provided as props by transformProps.ts
+ */
+
 export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
+  // height and width are the height and width of the DOM element as it exists in the dashboard.
+  // There is also a `data` prop, which is, of course, your DATA 🎉
   const { data, height, width } = props;
+
   const rootElem = createRef<HTMLDivElement>();
 
-  // Transform data into a structured format
-  const businessUnits = data.reduce((acc, item) => {
-    const { "Business Unit": businessUnit, Account, Project } = item;
-
-    if (!acc[businessUnit]) {
-      acc[businessUnit] = { accounts: {} };
-    }
-
-    if (!acc[businessUnit].accounts[Account]) {
-      acc[businessUnit].accounts[Account] = [];
-    }
-
-    acc[businessUnit].accounts[Account].push(Project);
-    return acc;
-  }, {});
-
-  const [selectedPath, setSelectedPath] = useState('');
-  const [selectedAccount, setSelectedAccount] = useState({});
-  const [openDropdown, setOpenDropdown] = useState({}); // Track which business unit dropdown is open
-
+  // Often, you just want to access the DOM and do whatever you want.
+  // Here, you can do that with createRef, and the useEffect hook.
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);
   });
 
   console.log('Plugin props', props);
-
-  const handleBusinessUnitSelect = (businessUnit) => {
-    setOpenDropdown((prev) => ({
-      ...prev,
-      [businessUnit]: !prev[businessUnit], // Toggle dropdown open/close
-    }));
-  };
-
-  const handleAccountSelect = (businessUnit, account) => {
-    setSelectedAccount((prev) => ({
-      ...prev,
-      [businessUnit]: account,
-    }));
-  };
-
-  const handleProjectSelect = (businessUnit, project) => {
-    const account = selectedAccount[businessUnit];
-    setSelectedPath(`${businessUnit} > ${account} > ${project}`);
-    setSelectedAccount((prev) => ({
-      ...prev,
-      [businessUnit]: null, // Reset account selection after project selection
-    }));
-    setOpenDropdown((prev) => ({
-      ...prev,
-      [businessUnit]: false, // Close the dropdown after selection
-    }));
-  };
 
   return (
     <Styles
@@ -80,35 +83,27 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       height={height}
       width={width}
     >
-      {Object.keys(businessUnits).map((businessUnit) => (
-        <div key={businessUnit}>
-          <Dropdown title={businessUnit} placement="bottomStart" onClick={() => handleBusinessUnitSelect(businessUnit)}>
-            {openDropdown[businessUnit] && (
-              <>
-                {Object.keys(businessUnits[businessUnit].accounts).map((account) => (
-                  <Dropdown.Item key={account} onClick={() => handleAccountSelect(businessUnit, account)}>
-                    {account}
-                  </Dropdown.Item>
-                ))}
-              </>
-            )}
-          </Dropdown>
-
-          {/* Nested Dropdown for Projects */}
-          {selectedAccount[businessUnit] && (
-            <Dropdown title={selectedAccount[businessUnit]} placement="rightStart">
-              {businessUnits[businessUnit].accounts[selectedAccount[businessUnit]].map((project) => (
-                <Dropdown.Item key={project} onClick={() => handleProjectSelect(businessUnit, project)}>
-                  {project}
-                </Dropdown.Item>
-              ))}
-            </Dropdown>
-          )}
-        </div>
-      ))}
-
-      {/* Display Selected Path */}
-      {selectedPath && <div>Selected Path: {selectedPath}</div>}
+      <Dropdown title="Dropdown" menuStyle={{ minWidth }}>
+        <Dropdown.Item>Item 1</Dropdown.Item>
+        <Dropdown.Menu title="Item 2" style={{ minWidth }}>
+          <Dropdown.Menu title="Item 2-1">
+            <Dropdown.Item>Item 2-1-1</Dropdown.Item>
+            <Dropdown.Item>Item 2-1-2</Dropdown.Item>
+            <Dropdown.Item>Item 2-1-3</Dropdown.Item>
+          </Dropdown.Menu>
+          <Dropdown.Item>Item 2-2</Dropdown.Item>
+          <Dropdown.Item>Item 2-3</Dropdown.Item>
+        </Dropdown.Menu>
+        <Dropdown.Menu title="Item 3">
+          <Dropdown.Menu title="Item 3-1">
+            <Dropdown.Item>Item 3-1-1</Dropdown.Item>
+            <Dropdown.Item>Item 3-1-2</Dropdown.Item>
+            <Dropdown.Item>Item 3-1-3</Dropdown.Item>
+          </Dropdown.Menu>
+          <Dropdown.Item>Item 3-2</Dropdown.Item>
+          <Dropdown.Item>Item 3-3</Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
     </Styles>
   );
 }
