@@ -36,41 +36,6 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   height: ${({ height }) => height}px;
   width: ${({ width }) => width}px;
 
-  /* Dropdown button styling */
-  .rs-dropdown-toggle {
-    background-color: ${({ theme }) => theme.colors.primary.base}; /* Button background color */
-    color: white; /* Button text color */
-    border: none; /* Remove border */
-    border-radius: 4px; /* Rounded corners */
-    padding: 8px 16px; /* Padding for the button */
-    font-size: 14px; /* Font size */
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s; /* Smooth transition for hover effect */
-  }
-
-  .rs-dropdown-toggle:hover {
-    background-color: ${({ theme }) => theme.colors.primary.dark}; /* Darker shade on hover */
-  }
-
-  /* Dropdown menu styling */
-  .rs-dropdown-menu {
-    background-color: white; /* Set background color for dropdown menu */
-    border-radius: 4px; /* Rounded corners for dropdown */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* Subtle shadow for depth */
-    min-width: 120px; /* Minimum width for dropdown */
-    width: auto; /* Allow the width to be determined by content */
-    padding: 0; /* Remove padding from the menu */
-  }
-
-  .rs-dropdown-item {
-    padding: 8px 12px; /* Padding for dropdown items */
-    color: #333; /* Text color */
-    list-style: none; /* Remove list-style markers */
-  }
-
-  .rs-dropdown-item:hover {
-    background-color: #f5f5f5; /* Hover effect for dropdown items */
-  }
 `;
 
 /**
