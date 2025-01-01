@@ -20,8 +20,7 @@ import React, { useEffect, createRef } from 'react';
 import { styled } from '@superset-ui/core';
 import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
 import { Dropdown } from 'rsuite';
-import 'rsuite/dist/styles/rsuite-default.css';
-import './styles.css';
+import 'rsuite/dist/rsuite.css';
 
 // The following Styles component is a <div> element, which has been styled using Emotion
 // For docs, visit https://emotion.sh/docs/styled
