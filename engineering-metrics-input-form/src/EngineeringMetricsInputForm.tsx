@@ -11,7 +11,6 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   height: ${({ height }) => height}px;
   width: ${({ width }) => width}px;
   display: flex; /* Use flexbox for horizontal layout */
-  flex-direction: column; /* Stack vertically */
   gap: 16px; /* Space between dropdowns */
 `;
 
@@ -36,8 +35,8 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   }, {});
 
   const [selectedPath, setSelectedPath] = useState('');
-  const [selectedAccount, setSelectedAccount] = useState(null);
-  const [selectedBusinessUnit, setSelectedBusinessUnit] = useState(null);
+  const [selectedAccount, setSelectedAccount] = useState({});
+  const [selectedBusinessUnit, setSelectedBusinessUnit] = useState({});
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -47,18 +46,30 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   console.log('Plugin props', props);
 
   const handleBusinessUnitSelect = (businessUnit) => {
-    setSelectedBusinessUnit(businessUnit);
-    setSelectedAccount(null); // Reset account selection
+    setSelectedBusinessUnit((prev) => ({
+      ...prev,
+      [businessUnit]: !prev[businessUnit], // Toggle dropdown open/close
+    }));
   };
 
-  const handleAccountSelect = (account) => {
-    setSelectedAccount(account);
+  const handleAccountSelect = (businessUnit, account) => {
+    setSelectedAccount((prev) => ({
+      ...prev,
+      [businessUnit]: account,
+    }));
   };
 
-  const handleProjectSelect = (project) => {
-    setSelectedPath(`${selectedBusinessUnit} > ${selectedAccount} > ${project}`);
-    setSelectedAccount(null); // Reset account selection after project selection
-    setSelectedBusinessUnit(null); // Reset business unit selection after project selection
+  const handleProjectSelect = (businessUnit, project) => {
+    const account = selectedAccount[businessUnit];
+    setSelectedPath(`${businessUnit} > ${account} > ${project}`);
+    setSelectedAccount((prev) => ({
+      ...prev,
+      [businessUnit]: null, // Reset account selection after project selection
+    }));
+    setSelectedBusinessUnit((prev) => ({
+      ...prev,
+      [businessUnit]: false, // Close the dropdown after selection
+    }));
   };
 
   return (
@@ -69,39 +80,31 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       height={height}
       width={width}
     >
-      {/* Business Unit Dropdown */}
-      <Dropdown title={selectedBusinessUnit || "Select Business Unit"} placement="bottomStart">
-        {Object.keys(businessUnits).map((businessUnit) => (
-          <Dropdown.Item key={businessUnit} onClick={() => handleBusinessUnitSelect(businessUnit)}>
-            {businessUnit}
-          </Dropdown.Item>
-        ))}
-      </Dropdown>
+      {Object.keys(businessUnits).map((businessUnit) => (
+        <div key={businessUnit}>
+          <Dropdown title={businessUnit} placement="bottomStart" onClick={() => handleBusinessUnitSelect(businessUnit)}>
+            {Object.keys(businessUnits[businessUnit].accounts).map((account) => (
+              <Dropdown.Item key={account} onClick={() => handleAccountSelect(businessUnit, account)}>
+                {account}
+              </Dropdown.Item>
+            ))}
+          </Dropdown>
 
-      {/* Account Dropdown */}
-      {selectedBusinessUnit && (
-        <Dropdown title={selectedAccount || "Select Account"} placement="bottomStart">
-          {Object.keys(businessUnits[selectedBusinessUnit].accounts).map((account) => (
-            <Dropdown.Item key={account} onClick={() => handleAccountSelect(account)}>
-              {account}
-            </Dropdown.Item>
-          ))}
-        </Dropdown>
-      )}
-
-      {/* Project Dropdown */}
-      {selectedAccount && (
-        <Dropdown title="Select Project" placement="bottomStart">
-          {businessUnits[selectedBusinessUnit].accounts[selectedAccount].map((project) => (
-            <Dropdown.Item key={project} onClick={() => handleProjectSelect(project)}>
-              {project}
-            </Dropdown.Item>
-          ))}
-        </Dropdown>
-      )}
+          {/* Nested Dropdown for Projects */}
+          {selectedAccount[businessUnit] && (
+            <Dropdown title={selectedAccount[businessUnit]} placement="rightStart">
+              {businessUnits[businessUnit].accounts[selectedAccount[businessUnit]].map((project) => (
+                <Dropdown.Item key={project} onClick={() => handleProjectSelect(businessUnit, project)}>
+                  {project}
+                </Dropdown.Item>
+              ))}
+            </Dropdown>
+          )}
+        </div>
+      ))}
 
       {/* Display Selected Path */}
-      {selectedPath && <div>Selected Path: {selectedPath}</div>}
+      {selectedPath && <div>Selected Path: {selectedPath}</ div>}
     </Styles>
   );
 }
