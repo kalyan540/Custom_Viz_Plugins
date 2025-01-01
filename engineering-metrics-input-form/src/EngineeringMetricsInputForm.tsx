@@ -58,6 +58,7 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
     border-radius: 4px; /* Rounded corners for dropdown */
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* Subtle shadow for depth */
     min-width: 120px; /* Minimum width for dropdown */
+    width: auto; /* Allow the width to be determined by content */
   }
 
   .rs-dropdown-item {
