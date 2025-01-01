@@ -11,6 +11,7 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   height: ${({ height }) => height}px;
   width: ${({ width }) => width}px;
   display: flex; /* Use flexbox for horizontal layout */
+  flex-direction: column; /* Stack vertically */
   gap: 16px; /* Space between dropdowns */
 `;
 
@@ -34,7 +35,9 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     return acc;
   }, {});
 
-  const [selectedAccounts, setSelectedAccounts] = useState({});
+  const [selectedPath, setSelectedPath] = useState('');
+  const [selectedAccount, setSelectedAccount] = useState(null);
+  const [selectedBusinessUnit, setSelectedBusinessUnit] = useState(null);
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -42,6 +45,21 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   });
 
   console.log('Plugin props', props);
+
+  const handleBusinessUnitSelect = (businessUnit) => {
+    setSelectedBusinessUnit(businessUnit);
+    setSelectedAccount(null); // Reset account selection
+  };
+
+  const handleAccountSelect = (account) => {
+    setSelectedAccount(account);
+  };
+
+  const handleProjectSelect = (project) => {
+    setSelectedPath(`${selectedBusinessUnit} > ${selectedAccount} > ${project}`);
+    setSelectedAccount(null); // Reset account selection after project selection
+    setSelectedBusinessUnit(null); // Reset business unit selection after project selection
+  };
 
   return (
     <Styles
@@ -51,34 +69,39 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       height={height}
       width={width}
     >
-      {Object.keys(businessUnits).map((businessUnit) => (
-        <div key={businessUnit}>
-          <Dropdown title={businessUnit} placement="bottomStart">
-            {Object.keys(businessUnits[businessUnit].accounts).map((account) => (
-              <Dropdown.Item
-                key={account}
-                onClick={() => {
-                  setSelectedAccounts((prev) => ({
-                    ...prev,
-                    [businessUnit]: account,
-                  }));
-                }}
-              >
-                {account}
-              </Dropdown.Item>
-            ))}
-          </Dropdown>
+      {/* Business Unit Dropdown */}
+      <Dropdown title={selectedBusinessUnit || "Select Business Unit"} placement="bottomStart">
+        {Object.keys(businessUnits).map((businessUnit) => (
+          <Dropdown.Item key={businessUnit} onClick={() => handleBusinessUnitSelect(businessUnit)}>
+            {businessUnit}
+          </Dropdown.Item>
+        ))}
+      </Dropdown>
 
-          {/* Show projects for the selected account */}
-          {selectedAccounts[businessUnit] && (
-            <Dropdown title={selectedAccounts[businessUnit]} placement="bottomStart">
-              {businessUnits[businessUnit].accounts[selectedAccounts[businessUnit]].map((project) => (
-                <Dropdown.Item key={project}>{project}</Dropdown.Item>
-              ))}
-            </Dropdown>
-          )}
-        </div>
-      ))}
+      {/* Account Dropdown */}
+      {selectedBusinessUnit && (
+        <Dropdown title={selectedAccount || "Select Account"} placement="bottomStart">
+          {Object.keys(businessUnits[selectedBusinessUnit].accounts).map((account) => (
+            <Dropdown.Item key={account} onClick={() => handleAccountSelect(account)}>
+              {account}
+            </Dropdown.Item>
+          ))}
+        </Dropdown>
+      )}
+
+      {/* Project Dropdown */}
+      {selectedAccount && (
+        <Dropdown title="Select Project" placement="bottomStart">
+          {businessUnits[selectedBusinessUnit].accounts[selectedAccount].map((project) => (
+            <Dropdown.Item key={project} onClick={() => handleProjectSelect(project)}>
+              {project}
+            </Dropdown.Item>
+          ))}
+        </Dropdown>
+      )}
+
+      {/* Display Selected Path */}
+      {selectedPath && <div>Selected Path: {selectedPath}</div>}
     </Styles>
   );
 }
