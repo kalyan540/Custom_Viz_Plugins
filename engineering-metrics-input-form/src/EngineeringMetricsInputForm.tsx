@@ -50,6 +50,9 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
     height: ${({ theme, headerFontSize, height }) =>
     height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
   }
+  .rs-dropdown {
+    min-width: 120px; /* Ensuring the dropdown has a minimum width */
+  }
 `;
 
 /**
