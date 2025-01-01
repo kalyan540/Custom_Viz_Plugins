@@ -83,9 +83,9 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       height={height}
       width={width}
     >
-      <Dropdown title="Dropdown" menuStyle={{ minWidth }}>
+      <Dropdown title="Dropdown" menuStyle={{ minWidth: 120 }}>
         <Dropdown.Item>Item 1</Dropdown.Item>
-        <Dropdown.Menu title="Item 2" style={{ minWidth }}>
+        <Dropdown.Menu title="Item 2" style={{ minWidth: 120 }}>
           <Dropdown.Menu title="Item 2-1">
             <Dropdown.Item>Item 2-1-1</Dropdown.Item>
             <Dropdown.Item>Item 2-1-2</Dropdown.Item>
