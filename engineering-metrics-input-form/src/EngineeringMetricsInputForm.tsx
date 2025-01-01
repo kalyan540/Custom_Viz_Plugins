@@ -36,28 +36,28 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   height: ${({ height }) => height}px;
   width: ${({ width }) => width}px;
 
-  h3 {
-    /* You can use your props to control CSS! */
-    margin-top: 0;
-    margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
-    font-size: ${({ theme, headerFontSize }) =>
-    theme.typography.sizes[headerFontSize]}px;
-    font-weight: ${({ theme, boldText }) =>
-    theme.typography.weights[boldText ? 'bold' : 'normal']};
+  /* Dropdown button styling */
+  .rs-dropdown-toggle {
+    background-color: ${({ theme }) => theme.colors.primary.base}; /* Button background color */
+    color: white; /* Button text color */
+    border: none; /* Remove border */
+    border-radius: 4px; /* Rounded corners */
+    padding: 8px 16px; /* Padding for the button */
+    font-size: 14px; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
   }
 
-  pre {
-    height: ${({ theme, headerFontSize, height }) =>
-    height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
-  }
-  .rs-dropdown {
-    min-width: 120px; /* Ensuring the dropdown has a minimum width */
+  .rs-dropdown-toggle:hover {
+    background-color: ${({ theme }) => theme.colors.primary.dark}; /* Darker shade on hover */
   }
 
+  /* Dropdown menu styling */
   .rs-dropdown-menu {
     background-color: white; /* Set background color for dropdown menu */
     border-radius: 4px; /* Rounded corners for dropdown */
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* Subtle shadow for depth */
+    min-width: 120px; /* Minimum width for dropdown */
   }
 
   .rs-dropdown-item {
