@@ -19,6 +19,7 @@
 import React, { useEffect, createRef } from 'react';
 import { styled } from '@superset-ui/core';
 import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
+import { Dropdown } from 'rsuite';
 
 // The following Styles component is a <div> element, which has been styled using Emotion
 // For docs, visit https://emotion.sh/docs/styled
@@ -39,14 +40,14 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
     margin-top: 0;
     margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
     font-size: ${({ theme, headerFontSize }) =>
-      theme.typography.sizes[headerFontSize]}px;
+    theme.typography.sizes[headerFontSize]}px;
     font-weight: ${({ theme, boldText }) =>
-      theme.typography.weights[boldText ? 'bold' : 'normal']};
+    theme.typography.weights[boldText ? 'bold' : 'normal']};
   }
 
   pre {
     height: ${({ theme, headerFontSize, height }) =>
-      height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
+    height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
   }
 `;
 
@@ -71,6 +72,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);
   });
+  const minWidth = 120;
 
   console.log('Plugin props', props);
 
@@ -82,8 +84,27 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       height={height}
       width={width}
     >
-      <h3>{props.headerText}</h3>
-      <pre>${JSON.stringify(data, null, 2)}</pre>
+      <Dropdown title="Dropdown" menuStyle={{ minWidth }}>
+        <Dropdown.Item>Item 1</Dropdown.Item>
+        <Dropdown.Menu title="Item 2" style={{ minWidth }}>
+          <Dropdown.Menu title="Item 2-1">
+            <Dropdown.Item>Item 2-1-1</Dropdown.Item>
+            <Dropdown.Item>Item 2-1-2</Dropdown.Item>
+            <Dropdown.Item>Item 2-1-3</Dropdown.Item>
+          </Dropdown.Menu>
+          <Dropdown.Item>Item 2-2</Dropdown.Item>
+          <Dropdown.Item>Item 2-3</Dropdown.Item>
+        </Dropdown.Menu>
+        <Dropdown.Menu title="Item 3">
+          <Dropdown.Menu title="Item 3-1">
+            <Dropdown.Item>Item 3-1-1</Dropdown.Item>
+            <Dropdown.Item>Item 3-1-2</Dropdown.Item>
+            <Dropdown.Item>Item 3-1-3</Dropdown.Item>
+          </Dropdown.Menu>
+          <Dropdown.Item>Item 3-2</Dropdown.Item>
+          <Dropdown.Item>Item 3-3</Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
     </Styles>
   );
 }
