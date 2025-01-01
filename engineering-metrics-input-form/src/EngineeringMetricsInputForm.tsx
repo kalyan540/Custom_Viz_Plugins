@@ -36,7 +36,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
 
   const [selectedPath, setSelectedPath] = useState('');
   const [selectedAccount, setSelectedAccount] = useState({});
-  const [selectedBusinessUnit, setSelectedBusinessUnit] = useState({});
+  const [openDropdown, setOpenDropdown] = useState({}); // Track which business unit dropdown is open
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -46,7 +46,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   console.log('Plugin props', props);
 
   const handleBusinessUnitSelect = (businessUnit) => {
-    setSelectedBusinessUnit((prev) => ({
+    setOpenDropdown((prev) => ({
       ...prev,
       [businessUnit]: !prev[businessUnit], // Toggle dropdown open/close
     }));
@@ -66,7 +66,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       ...prev,
       [businessUnit]: null, // Reset account selection after project selection
     }));
-    setSelectedBusinessUnit((prev) => ({
+    setOpenDropdown((prev) => ({
       ...prev,
       [businessUnit]: false, // Close the dropdown after selection
     }));
@@ -83,11 +83,15 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       {Object.keys(businessUnits).map((businessUnit) => (
         <div key={businessUnit}>
           <Dropdown title={businessUnit} placement="bottomStart" onClick={() => handleBusinessUnitSelect(businessUnit)}>
-            {Object.keys(businessUnits[businessUnit].accounts).map((account) => (
-              <Dropdown.Item key={account} onClick={() => handleAccountSelect(businessUnit, account)}>
-                {account}
-              </Dropdown.Item>
-            ))}
+            {openDropdown[businessUnit] && (
+              <>
+                {Object.keys(businessUnits[businessUnit].accounts).map((account) => (
+                  <Dropdown.Item key={account} onClick={() => handleAccountSelect(businessUnit, account)}>
+                    {account}
+                  </Dropdown.Item>
+                ))}
+              </>
+            )}
           </Dropdown>
 
           {/* Nested Dropdown for Projects */}
@@ -104,7 +108,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       ))}
 
       {/* Display Selected Path */}
-      {selectedPath && <div>Selected Path: {selectedPath}</ div>}
+      {selectedPath && <div>Selected Path: {selectedPath}</div>}
     </Styles>
   );
 }
