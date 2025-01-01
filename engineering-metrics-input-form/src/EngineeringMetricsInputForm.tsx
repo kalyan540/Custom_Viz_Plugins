@@ -76,7 +76,6 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);
   });
-  const minWidth = 120;
 
   console.log('Plugin props', props);
 
@@ -88,9 +87,10 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       height={height}
       width={width}
     >
-      <Dropdown title="Dropdown" menuStyle={{ minWidth }}>
+      {/* Multilevel Dropdown Implementation */}
+      <Dropdown title="Dropdown" menuStyle={{ minWidth: 120 }}>
         <Dropdown.Item>Item 1</Dropdown.Item>
-        <Dropdown.Menu title="Item 2" style={{ minWidth }}>
+        <Dropdown.Menu title="Item 2" style={{ minWidth: 120 }}>
           <Dropdown.Menu title="Item 2-1">
             <Dropdown.Item>Item 2-1-1</Dropdown.Item>
             <Dropdown.Item>Item 2-1-2</Dropdown.Item>
