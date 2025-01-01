@@ -19,8 +19,6 @@
 import React, { useEffect, createRef } from 'react';
 import { styled } from '@superset-ui/core';
 import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
-import { Dropdown } from 'rsuite';
-import 'rsuite/dist/rsuite.css';
 
 // The following Styles component is a <div> element, which has been styled using Emotion
 // For docs, visit https://emotion.sh/docs/styled
@@ -70,28 +68,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       height={height}
       width={width}
     >
-      {/* Multilevel Dropdown Implementation */}
-      <Dropdown title="Dropdown" menuStyle={{ minWidth: 120 }} placement="bottomStart">
-        <Dropdown.Item>Item 1</Dropdown.Item>
-        <Dropdown.Menu title="Item 2" style={{ minWidth: 120 }}>
-          <Dropdown.Menu title="Item 2-1">
-            <Dropdown.Item>Item 2-1-1</Dropdown.Item>
-            <Dropdown.Item>Item 2-1-2</Dropdown.Item>
-            <Dropdown.Item>Item 2-1-3</Dropdown.Item>
-          </Dropdown.Menu>
-          <Dropdown.Item>Item 2-2</Dropdown.Item>
-          <Dropdown.Item>Item 2-3</Dropdown.Item>
-        </Dropdown.Menu>
-        <Dropdown.Menu title="Item 3">
-          <Dropdown.Menu title="Item 3-1">
-            <Dropdown.Item>Item 3-1-1</Dropdown.Item>
-            <Dropdown.Item>Item 3-1-2</Dropdown.Item>
-            <Dropdown.Item>Item 3-1-3</Dropdown.Item>
-          </Dropdown.Menu>
-          <Dropdown.Item>Item 3-2</Dropdown.Item>
-          <Dropdown.Item>Item 3-3</Dropdown.Item>
-        </Dropdown.Menu>
-      </Dropdown>
+      
     </Styles>
   );
 }
