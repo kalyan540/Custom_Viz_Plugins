@@ -116,18 +116,20 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       height={height}
       width={width}
     >
-      {uniqueBusinessUnits.map((unit, index) => (
-        <Dropdown title={unit} menuStyle={{ minWidth: 120 }}>
-          {filterAccountsByBusinessUnit(unit).map((account, idx) => (
-            <Dropdown.Menu title={account} style={{ minWidth: 120 }}>
-              {filterProjectsByAccountAndBusinessUnit(unit, account).map((project, idx) => (
+      <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
+        {uniqueBusinessUnits.map((unit, index) => (
+          <Dropdown title={unit} menuStyle={{ minWidth: 120 }}>
+            {filterAccountsByBusinessUnit(unit).map((account, idx) => (
+              <Dropdown.Menu title={account} style={{ minWidth: 120 }}>
+                {filterProjectsByAccountAndBusinessUnit(unit, account).map((project, idx) => (
                   <Dropdown.Item>{project}</Dropdown.Item>
-              ))}
-            </Dropdown.Menu>
-          ))}
+                ))}
+              </Dropdown.Menu>
+            ))}
 
-        </Dropdown>
-      ))}
+          </Dropdown>
+        ))}
+      </div>
 
     </Styles>
   );
