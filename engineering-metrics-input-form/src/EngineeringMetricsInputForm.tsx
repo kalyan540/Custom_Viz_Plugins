@@ -85,15 +85,13 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     return uniqueBusinessUnits; // Return the unique business units if needed
   };
 
-  const filterAccountsByBusinessUnit = (businessUnit) => {
+  const filterAccountsByBusinessUnit = (businessUnit: any) => {
     const filteredAccounts = data
       .filter(item => item["Business Unit"] === businessUnit)
       .map(item => item.Account);
 
     // Use a Set to get unique accounts
-    const uniqueAccounts = [...new Set(filteredAccounts)];
-
-    console.log('Accounts associated with business unit', businessUnit, ':', uniqueAccounts);
+    return [...new Set(filteredAccounts)];
   };
 
   const filterProjectsByAccountAndBusinessUnit = (businessUnit, account) => {
@@ -119,9 +117,11 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     >
       {uniqueBusinessUnits.map((unit, index) => (
         <Dropdown key={index} title={unit}>
-          <Dropdown.Item>Option 1</Dropdown.Item>
-          <Dropdown.Item>Option 2</Dropdown.Item>
-          <Dropdown.Item>Option 3</Dropdown.Item>
+          <Dropdown.Menu>
+            {filterAccountsByBusinessUnit(unit).map((account, idx) => (
+              <Dropdown.Item key={idx}>{account}</Dropdown.Item>
+            ))}
+          </Dropdown.Menu>
         </Dropdown>
       ))}
 
