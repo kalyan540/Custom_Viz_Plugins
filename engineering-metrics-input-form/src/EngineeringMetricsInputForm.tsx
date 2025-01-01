@@ -53,6 +53,21 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   .rs-dropdown {
     min-width: 120px; /* Ensuring the dropdown has a minimum width */
   }
+
+  .rs-dropdown-menu {
+    background-color: white; /* Set background color for dropdown menu */
+    border-radius: 4px; /* Rounded corners for dropdown */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* Subtle shadow for depth */
+  }
+
+  .rs-dropdown-item {
+    padding: 8px 12px; /* Padding for dropdown items */
+    color: #333; /* Text color */
+  }
+
+  .rs-dropdown-item:hover {
+    background-color: #f5f5f5; /* Hover effect for dropdown items */
+  }
 `;
 
 /**
