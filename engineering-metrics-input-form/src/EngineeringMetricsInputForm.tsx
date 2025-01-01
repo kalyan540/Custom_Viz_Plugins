@@ -104,7 +104,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       width={width}
     >
       {/* Multilevel Dropdown Implementation */}
-      <Dropdown title="Dropdown" menuStyle={{ minWidth: 120 }}>
+      <Dropdown title="Dropdown" menuStyle={{ minWidth: 120 }} placement="bottomStart">
         <Dropdown.Item>Item 1</Dropdown.Item>
         <Dropdown.Menu title="Item 2" style={{ minWidth: 120 }}>
           <Dropdown.Menu title="Item 2-1">
