@@ -1,7 +1,7 @@
 import React, { useEffect, createRef, useState } from 'react';
 import { styled } from '@superset-ui/core';
 import { Dropdown } from 'rsuite';
-
+import 'rsuite/dist/rsuite.css';
 import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
