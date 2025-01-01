@@ -1,31 +1,8 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-import React, { useEffect, createRef } from 'react';
+import React, { useEffect, createRef, useState } from 'react';
 import { styled } from '@superset-ui/core';
+import { Dropdown } from 'rsuite';
+import 'rsuite/dist/rsuite.css';
 import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
-
-// The following Styles component is a <div> element, which has been styled using Emotion
-// For docs, visit https://emotion.sh/docs/styled
-
-// Theming variables are provided for your use via a ThemeProvider
-// imported from @superset-ui/core. For variables available, please visit
-// https://github.com/apache-superset/superset-ui/blob/master/packages/superset-ui-core/src/style/index.ts
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   background-color: ${({ theme }) => theme.colors.secondary.light2};
@@ -33,26 +10,32 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   border-radius: ${({ theme }) => theme.gridUnit * 2}px;
   height: ${({ height }) => height}px;
   width: ${({ width }) => width}px;
-
+  display: flex; /* Use flexbox for horizontal layout */
+  gap: 16px; /* Space between dropdowns */
 `;
 
-/**
- * ******************* WHAT YOU CAN BUILD HERE *******************
- *  In essence, a chart is given a few key ingredients to work with:
- *  * Data: provided via `props.data`
- *  * A DOM element
- *  * FormData (your controls!) provided as props by transformProps.ts
- */
-
 export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
-  // height and width are the height and width of the DOM element as it exists in the dashboard.
-  // There is also a `data` prop, which is, of course, your DATA 🎉
   const { data, height, width } = props;
-
   const rootElem = createRef<HTMLDivElement>();
 
-  // Often, you just want to access the DOM and do whatever you want.
-  // Here, you can do that with createRef, and the useEffect hook.
+  // Transform data into a structured format
+  const businessUnits = data.reduce((acc, item) => {
+    const { "Business Unit": businessUnit, Account, Project } = item;
+
+    if (!acc[businessUnit]) {
+      acc[businessUnit] = { accounts: {} };
+    }
+
+    if (!acc[businessUnit].accounts[Account]) {
+      acc[businessUnit].accounts[Account] = [];
+    }
+
+    acc[businessUnit].accounts[Account].push(Project);
+    return acc;
+  }, {});
+
+  const [selectedAccounts, setSelectedAccounts] = useState({});
+
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);
@@ -68,7 +51,34 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       height={height}
       width={width}
     >
-      
+      {Object.keys(businessUnits).map((businessUnit) => (
+        <div key={businessUnit}>
+          <Dropdown title={businessUnit} placement="bottomStart">
+            {Object.keys(businessUnits[businessUnit].accounts).map((account) => (
+              <Dropdown.Item
+                key={account}
+                onClick={() => {
+                  setSelectedAccounts((prev) => ({
+                    ...prev,
+                    [businessUnit]: account,
+                  }));
+                }}
+              >
+                {account}
+              </Dropdown.Item>
+            ))}
+          </Dropdown>
+
+          {/* Show projects for the selected account */}
+          {selectedAccounts[businessUnit] && (
+            <Dropdown title={selectedAccounts[businessUnit]} placement="bottomStart">
+              {businessUnits[businessUnit].accounts[selectedAccounts[businessUnit]].map((project) => (
+                <Dropdown.Item key={project}>{project}</Dropdown.Item>
+              ))}
+            </Dropdown>
+          )}
+        </div>
+      ))}
     </Styles>
   );
 }
