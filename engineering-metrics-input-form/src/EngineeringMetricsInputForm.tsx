@@ -75,6 +75,40 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
 
   console.log('Plugin props', props);
 
+  const getUniqueBusinessUnits = (data: any[]) => {
+    const businessUnits = data.map(item => item["Business Unit"]);
+
+    // Use a Set to get unique business units
+    const uniqueBusinessUnits = [...new Set(businessUnits)];
+
+    console.log('Unique Business Units:', uniqueBusinessUnits);
+    return uniqueBusinessUnits; // Return the unique business units if needed
+  };
+
+  const filterAccountsByBusinessUnit = (businessUnit) => {
+    const filteredAccounts = data
+      .filter(item => item["Business Unit"] === businessUnit)
+      .map(item => item.Account);
+
+    // Use a Set to get unique accounts
+    const uniqueAccounts = [...new Set(filteredAccounts)];
+
+    console.log('Accounts associated with business unit', businessUnit, ':', uniqueAccounts);
+  };
+
+  const filterProjectsByAccountAndBusinessUnit = (businessUnit, account) => {
+    const filteredProjects = data
+      .filter(item => item["Business Unit"] === businessUnit && item.Account === account)
+      .map(item => item.Project);
+
+    // Use a Set to get unique projects
+    const uniqueProjects = [...new Set(filteredProjects)];
+
+    console.log('Projects associated with account', account, 'in business unit', businessUnit, ':', uniqueProjects);
+  };
+
+  const uniqueBusinessUnits = getUniqueBusinessUnits(data);
+
   return (
     <Styles
       ref={rootElem}
@@ -83,7 +117,19 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       height={height}
       width={width}
     >
-      <Dropdown title="Dropdown" menuStyle={{ minWidth: 120 }}>
+      {uniqueBusinessUnits.map((unit, index) => (
+        <Dropdown key={index} title={unit}>
+          <Dropdown.Item>Option 1</Dropdown.Item>
+          <Dropdown.Item>Option 2</Dropdown.Item>
+          <Dropdown.Item>Option 3</Dropdown.Item>
+        </Dropdown>
+      ))}
+
+    </Styles>
+  );
+}
+
+/*<Dropdown title="Dropdown" menuStyle={{ minWidth: 120 }}>
         <Dropdown.Item>Item 1</Dropdown.Item>
         <Dropdown.Menu title="Item 2" style={{ minWidth: 120 }}>
           <Dropdown.Menu title="Item 2-1">
@@ -103,7 +149,4 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
           <Dropdown.Item>Item 3-2</Dropdown.Item>
           <Dropdown.Item>Item 3-3</Dropdown.Item>
         </Dropdown.Menu>
-      </Dropdown>
-    </Styles>
-  );
-}
+      </Dropdown>*/
