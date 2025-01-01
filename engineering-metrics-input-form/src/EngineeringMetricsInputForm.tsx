@@ -117,9 +117,8 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     >
       {uniqueBusinessUnits.map((unit, index) => (
         <Dropdown title={unit} menuStyle={{ minWidth: 120 }}>
-          
             {filterAccountsByBusinessUnit(unit).map((account, idx) => (
-              <Dropdown.Menu title={unit} style={{ minWidth: 120 }}>
+              <Dropdown.Menu title={account} style={{ minWidth: 120 }}>
                 <Dropdown.Item>{account}</Dropdown.Item>
               </Dropdown.Menu>
             ))}
