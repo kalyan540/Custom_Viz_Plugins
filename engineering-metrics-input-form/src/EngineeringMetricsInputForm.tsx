@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, createRef } from 'react';
+import React, { useEffect, createRef, useState } from 'react';
 import { styled } from '@superset-ui/core';
 import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
-import { Dropdown } from 'rsuite';
+import { Dropdown, Modal, Button, Input } from 'rsuite';
 import "rsuite/dist/rsuite.css";
 // The following Styles component is a <div> element, which has been styled using Emotion
 // For docs, visit https://emotion.sh/docs/styled
@@ -65,6 +65,8 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const { data, height, width } = props;
 
   const rootElem = createRef<HTMLDivElement>();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [inputValue, setInputValue] = useState('');
 
   // Often, you just want to access the DOM and do whatever you want.
   // Here, you can do that with createRef, and the useEffect hook.
@@ -108,6 +110,21 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
 
   const uniqueBusinessUnits = getUniqueBusinessUnits(data);
 
+  const handleDropdownSelect = () => {
+    setModalVisible(true);
+  };
+
+  const handleSubmit = () => {
+    console.log('Submitted value:', inputValue);
+    setModalVisible(false);
+    setInputValue('');
+  };
+
+  const handleCancel = () => {
+    setModalVisible(false);
+    setInputValue('');
+  };
+
   return (
     <Styles
       ref={rootElem}
@@ -122,13 +139,30 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
             {filterAccountsByBusinessUnit(unit).map((account, idx) => (
               <Dropdown.Menu title={account} style={{ minWidth: 120 }}>
                 {filterProjectsByAccountAndBusinessUnit(unit, account).map((project, idx) => (
-                  <Dropdown.Item>{project}</Dropdown.Item>
+                  <Dropdown.Item onSelect={handleDropdownSelect}>{project}</Dropdown.Item>
                 ))}
               </Dropdown.Menu>
             ))}
 
           </Dropdown>
         ))}
+
+        <Modal show={modalVisible} onHide={handleCancel}>
+          <Modal.Header>
+            <Modal.Title>Input Form</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Input
+              placeholder="Enter your input"
+              value={inputValue}
+              onChange={value => setInputValue(value)}
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={handleSubmit} appearance="primary">Submit</Button>
+            <Button onClick={handleCancel} appearance="default">Cancel</Button>
+          </Modal.Footer>
+        </Modal>
       </div>
 
     </Styles>
