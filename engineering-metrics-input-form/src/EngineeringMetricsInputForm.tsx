@@ -110,15 +110,33 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
 
   const getUniqueBusinessUnits = (data: any[]) => {
     const businessUnits = data.map(item => item["Business Unit"]);
-    return [...new Set(businessUnits)];
+
+    // Use a Set to get unique business units
+    const uniqueBusinessUnits = [...new Set(businessUnits)];
+
+    console.log('Unique Business Units:', uniqueBusinessUnits);
+    return uniqueBusinessUnits; // Return the unique business units if needed
   };
 
   const filterAccountsByBusinessUnit = (businessUnit: any) => {
-    return [...new Set(data.filter(item => item["Business Unit"] === businessUnit).map(item => item.Account))];
+    const filteredAccounts = data
+      .filter(item => item["Business Unit"] === businessUnit)
+      .map(item => item.Account);
+
+    // Use a Set to get unique accounts
+    return [...new Set(filteredAccounts)];
   };
 
   const filterProjectsByAccountAndBusinessUnit = (businessUnit, account) => {
-    return [...new Set(data.filter(item => item["Business Unit"] === businessUnit && item.Account === account).map(item => item.Project))];
+    const filteredProjects = data
+      .filter(item => item["Business Unit"] === businessUnit && item.Account === account)
+      .map(item => item.Project);
+
+    // Use a Set to get unique projects
+    const uniqueProjects = [...new Set(filteredProjects)];
+
+    console.log('Projects associated with account', account, 'in business unit', businessUnit, ':', uniqueProjects);
+    return uniqueProjects; // Return the unique projects
   };
 
   const uniqueBusinessUnits = getUniqueBusinessUnits(data);
@@ -178,14 +196,18 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     >
       <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
         {uniqueBusinessUnits.map((unit, index) => (
-          <Dropdown key={index} title={unit} menuStyle={{ minWidth: 120 }}>
+          <Dropdown title={unit} menuStyle={{ minWidth: 120 }}>
             {filterAccountsByBusinessUnit(unit).map((account, idx) => (
-              <Dropdown.Item key={idx} onSelect={handleDropdownSelect}>
-                {account}
-              </Dropdown.Item>
+              <Dropdown.Menu title={account} style={{ minWidth: 120 }}>
+                {filterProjectsByAccountAndBusinessUnit(unit, account).map((project, idx) => (
+                  <Dropdown.Item onSelect={handleDropdownSelect}>{project}</Dropdown.Item>
+                ))}
+              </Dropdown.Menu>
             ))}
+
           </Dropdown>
         ))}
+
       </div>
       {isModalOpen && (
         <div className="modal-overlay">
