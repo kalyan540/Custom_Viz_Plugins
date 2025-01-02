@@ -17,9 +17,9 @@
  * under the License.
  */
 import React, { useEffect, createRef, useState } from 'react';
-import { styled } from '@superset-ui/core';
+import { styled, SupersetClient } from '@superset-ui/core';
 import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
-import { Dropdown, Modal, Button, Input } from 'rsuite';
+import { Dropdown } from 'rsuite';
 import "rsuite/dist/rsuite.css";
 // The following Styles component is a <div> element, which has been styled using Emotion
 // For docs, visit https://emotion.sh/docs/styled
@@ -49,6 +49,69 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
     height: ${({ theme, headerFontSize, height }) =>
     height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
   }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  .modal-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    width: 500px; /* Updated modal width */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center content */
+  }
+
+  .modal-header {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px; /* Space below the header */
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 18px;
+    cursor: pointer;
+    color: #999;
+  }
+
+  .modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%; /* Full width for input alignment */
+  }
+
+  input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+  }
+
+  button {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
 `;
 
 /**
@@ -63,6 +126,10 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   // height and width are the height and width of the DOM element as it exists in the dashboard.
   // There is also a `data` prop, which is, of course, your DATA 🎉
   const { data, height, width } = props;
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [DBName, setDBName] = useState<string | null>(null);
+  const [tableName, settableName] = useState<string | null>(null);
 
   const rootElem = createRef<HTMLDivElement>();
   const [modalVisible, setModalVisible] = useState(false);
@@ -115,6 +182,19 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     setModalVisible(true);
   };
 
+  const [formData, setFormData] = useState({
+    functionName: '',
+    group: '',
+    business: '',
+    assessmentLead: '',
+    assessmentID: '',
+    maturity: '',
+    assessmentDate: '',
+    status: '',
+    actions: '',
+    assessmentType: '',
+  });
+
   const handleSubmit = () => {
     console.log('Submitted value:', inputValue);
     setModalVisible(false);
@@ -124,6 +204,13 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const handleCancel = () => {
     setModalVisible(false);
     setInputValue('');
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [field]: value,
+    }));
   };
 
   return (
@@ -140,7 +227,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
             {filterAccountsByBusinessUnit(unit).map((account, idx) => (
               <Dropdown.Menu title={account} style={{ minWidth: 120 }}>
                 {filterProjectsByAccountAndBusinessUnit(unit, account).map((project, idx) => (
-                  <Dropdown.Item onSelect={handleDropdownSelect}>{project}</Dropdown.Item>
+                  <Dropdown.Item onSelect={setIsModalOpen(true)}>{project}</Dropdown.Item>
                 ))}
               </Dropdown.Menu>
             ))}
@@ -148,23 +235,180 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
           </Dropdown>
         ))}
 
-        <Modal show={modalVisible} onHide={handleCancel}>
-          <Modal.Header>
-            <Modal.Title>Input Form</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Input
-              placeholder="Enter your input"
-              value={inputValue}
-              onChange={value => setInputValue(value)}
-            />
-          </Modal.Body>
-          <Modal.Footer>
-            <Button onClick={handleSubmit} appearance="primary">Submit</Button>
-            <Button onClick={handleCancel} appearance="default">Cancel</Button>
-          </Modal.Footer>
-        </Modal>
       </div>
+      {isModalOpen && (
+          <div className="modal-overlay">
+            <div className="modal-card">
+              <span
+                className="modal-close"
+                onClick={() => setIsModalOpen(false)}
+              >
+                &times;
+              </span>
+              <div className="modal-header">Create NPD Assessment</div>
+              <form
+                className="modal-form"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const isAllFilled = Object.values(formData).every((value) => value !== '');
+                  if (!isAllFilled) {
+                    alert("Please fill out all fields!");
+                    return;
+                  }
+                  console.log("Form Data Submitted:", formData);
+                  try {
+                    const responser = await SupersetClient.post({
+                      endpoint: '/api/dataset/update',
+                      jsonPayload: { formData: [formData], database: DBName, table_name: tableName },
+                    });
+                    console.log(responser.json.message);
+                  } catch (error) {
+                    console.error('Error Submitting form data: ', error);
+                  }
+
+                  setFormData({
+                    functionName: '',
+                    group: '',
+                    business: '',
+                    assessmentLead: '',
+                    assessmentID: '',
+                    maturity: '',
+                    assessmentDate: '',
+                    status: '',
+                    actions: '',
+                    assessmentType: '',
+                  });
+
+                  setIsModalOpen(false);
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="Function Name"
+                  value={formData.functionName}
+                  onChange={(e) => handleInputChange('functionName', e.target.value)}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Group"
+                  value={formData.group}
+                  onChange={(e) => handleInputChange('group', e.target.value)}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Business"
+                  value={formData.business}
+                  onChange={(e) => handleInputChange('business', e.target.value)}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Assessment Lead"
+                  value={formData.assessmentLead}
+                  onChange={(e) => handleInputChange('assessmentLead', e.target.value)}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Assessment ID"
+                  value={formData.assessmentID}
+                  onChange={(e) => handleInputChange('assessmentID', e.target.value)}
+                  required
+                />
+                <select
+                  style={{
+                    height: '40px',
+                    padding: '8px',
+                    width: '100%',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    marginBottom: '10px',
+                    fontSize: '14px',
+                  }}
+                  value={formData.maturity}
+                  onChange={(e) => handleInputChange('maturity', e.target.value)}
+                  required
+                >
+                  <option value="" disabled>
+                    Maturity
+                  </option>
+                  <option value="Test">Test</option>
+                  <option value="Launch">Launch</option>
+                  <option value="Idea Screening">Idea Screening</option>
+                  <option value="Prototype Development">Prototype Development</option>
+                </select>
+
+                <input
+                  type="date"
+                  placeholder="Assessment Date"
+                  value={formData.assessmentDate}
+                  onChange={(e) => handleInputChange('assessmentDate', e.target.value)}
+                  required
+                />
+                <div>
+                  <label>Status:</label>
+                  <div>
+                    <label>
+                      <input
+                        type="radio"
+                        name="status"
+                        value="Published"
+                        checked={formData.status === 'Published'}
+                        onChange={(e) => handleInputChange('status', e.target.value)}
+                        required
+                      />
+                      Published
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="status"
+                        value="In Progress"
+                        checked={formData.status === 'In Progress'}
+                        onChange={(e) => handleInputChange('status', e.target.value)}
+                        required
+                      />
+                      In Progress
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="status"
+                        value="Pending"
+                        checked={formData.status === 'Pending'}
+                        onChange={(e) => handleInputChange('status', e.target.value)}
+                        required
+                      />
+                      Pending
+                    </label>
+                  </div>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Actions"
+                  value={formData.actions}
+                  onChange={(e) => handleInputChange('actions', e.target.value)}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Assessment Type"
+                  value={formData.assessmentType}
+                  onChange={(e) => handleInputChange('assessmentType', e.target.value)}
+                  required
+                />
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <button type="button" onClick={() => setIsModalOpen(false)}>
+                    Cancel
+                  </button>
+                  <button type="submit">Submit</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
     </Styles>
   );
