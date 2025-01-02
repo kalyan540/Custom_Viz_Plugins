@@ -193,13 +193,13 @@ const [selectedInfo, setSelectedInfo] = useState({
     setIsModalOpen(true);
   };
 
-  const handleProjectSelect = (businessUnit, account, project) => {
+  const handleProjectSelect = (businessUnit: string, account: string, project: string) => {
     setSelectedInfo({
       businessUnit,
       account,
       project,
     });
-    setIsModalOpen(true);
+    setIsModalOpen(true); // Open modal after updating selection
   };
 
 
