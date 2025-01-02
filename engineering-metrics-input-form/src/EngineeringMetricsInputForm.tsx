@@ -102,7 +102,7 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
     border-color: ${({ theme }) => theme.colors.primary.main};
   }
 
-  button {
+  .submit-button {
     padding: 10px;
     background-color: ${({ theme }) => theme.colors.primary.main};
     color: white;
@@ -112,15 +112,15 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
     transition: background-color 0.2s ease;
   }
 
-  button:hover {
+  .submit-button:hover {
     background-color: ${({ theme }) => theme.colors.primary.dark1};
   }
 
-  button[type="button"] {
+  .submit-button[type="button"] {
     background-color: ${({ theme }) => theme.colors.grayscale.light3};
   }
 
-  button[type="button"]:hover {
+  .submit-button[type="button"]:hover {
     background-color: ${({ theme }) => theme.colors.grayscale.light2};
   }
 `;
@@ -130,13 +130,13 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const rootElem = createRef<HTMLDivElement>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    codeCoverage: { scope: '', target: '', condition: '' },
-    predictability: { scope: '', target: '', condition: '' },
-    sprintVelocity: { scope: '', target: '', condition: '' },
-    cycleTime: { scope: '', target: '', condition: '' },
-    defectDistribution: { scope: '', target: '', condition: '' },
-    scopeChange: { scope: '', target: '', condition: '' },
-  });
+  codeCoverage: { scope: '', target: '', condition: '' },
+  predictability: { scope: '', target: '', condition: '' },
+  sprintVelocity: { scope: '', target: '', condition: '' },
+  cycleTime: { scope: '', target: '', condition: '' },
+  defectDistribution: { scope: '', target: '', condition: '' },
+  scopeChange: { scope: '', target: '', condition: '' },
+});
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -293,7 +293,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
                 <button type="button" onClick={() => setIsModalOpen(false)}>
                   Cancel
                 </button>
-                <button type="submit">Submit</button>
+                <button className="submit-button" type="submit">Submit</button>
               </div>
             </form>
           </div>
