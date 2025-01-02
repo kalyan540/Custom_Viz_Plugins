@@ -101,6 +101,13 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   .form-group select:focus {
     border-color: ${({ theme }) => theme.colors.primary.main};
   }
+  
+  .highlight-text {
+    background-color: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
 
   .submit-button {
     padding: 10px;
@@ -130,13 +137,19 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const rootElem = createRef<HTMLDivElement>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    codeCoverage: { scope: '', target: '', condition: '' },
-    predictability: { scope: '', target: '', condition: '' },
-    sprintVelocity: { scope: '', target: '', condition: '' },
-    cycleTime: { scope: '', target: '', condition: '' },
-    defectDistribution: { scope: '', target: '', condition: '' },
-    scopeChange: { scope: '', target: '', condition: '' },
-  });
+  codeCoverage: { scope: '', target: '', condition: '' },
+  predictability: { scope: '', target: '', condition: '' },
+  sprintVelocity: { scope: '', target: '', condition: '' },
+  cycleTime: { scope: '', target: '', condition: '' },
+  defectDistribution: { scope: '', target: '', condition: '' },
+  scopeChange: { scope: '', target: '', condition: '' },
+});
+
+const [selectedInfo, setSelectedInfo] = useState({
+  businessUnit: '',
+  account: '',
+  project: '',
+});
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -179,6 +192,16 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const handleDropdownSelect = () => {
     setIsModalOpen(true);
   };
+
+  const handleProjectSelect = (businessUnit, account, project) => {
+    setSelectedInfo({
+      businessUnit,
+      account,
+      project,
+    });
+    setIsModalOpen(true);
+  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -237,12 +260,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
               <Dropdown.Menu title={account} style={{ minWidth: 120 }}>
                 <Dropdown.Item onSelect={handleDropdownSelect}>Add New Project</Dropdown.Item>
                 {filterProjectsByAccountAndBusinessUnit(unit, account).map((project, idx) => (
-                  <Dropdown.Item onSelect={() => {
-                    console.log('Business Unit:', unit);
-                    console.log('Account:', account);
-                    console.log('Project:', project);
-                  }}
-                  >{project}</Dropdown.Item>
+                  <Dropdown.Item onSelect={handleProjectSelect(unit, account, project)}>{project}</Dropdown.Item>
                 ))}
               </Dropdown.Menu>
             ))}
@@ -255,6 +273,11 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
         <div className="modal-overlay">
           <div className="modal-card">
             <div className="modal-header">Metrics Input Form</div>
+            <div>
+                <span className="highlight-text">{selectedInfo.businessUnit}</span> -
+                <span className="highlight-text">{selectedInfo.account}</span> -
+                <span className="highlight-text">{selectedInfo.project}</span>
+              </div>
             <form className="modal-form" onSubmit={handleSubmit}>
               <div className="form-grid">
                 {[
