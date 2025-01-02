@@ -1,32 +1,8 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 import React, { useEffect, createRef, useState } from 'react';
 import { styled, SupersetClient } from '@superset-ui/core';
 import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
 import { Dropdown } from 'rsuite';
 import "rsuite/dist/rsuite.css";
-// The following Styles component is a <div> element, which has been styled using Emotion
-// For docs, visit https://emotion.sh/docs/styled
-
-// Theming variables are provided for your use via a ThemeProvider
-// imported from @superset-ui/core. For variables available, please visit
-// https://github.com/apache-superset/superset-ui/blob/master/packages/superset-ui-core/src/style/index.ts
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   background-color: ${({ theme }) => theme.colors.secondary.light2};
@@ -36,18 +12,14 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   width: ${({ width }) => width}px;
 
   h3 {
-    /* You can use your props to control CSS! */
     margin-top: 0;
     margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
-    font-size: ${({ theme, headerFontSize }) =>
-    theme.typography.sizes[headerFontSize]}px;
-    font-weight: ${({ theme, boldText }) =>
-    theme.typography.weights[boldText ? 'bold' : 'normal']};
+    font-size: ${({ theme, headerFontSize }) => theme.typography.sizes[headerFontSize]}px;
+    font-weight: ${({ theme, boldText }) => theme.typography.weights[boldText ? 'bold' : 'normal']};
   }
 
   pre {
-    height: ${({ theme, headerFontSize, height }) =>
-    height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
+    height: ${({ theme, headerFontSize, height }) => height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
   }
 
   .modal-overlay {
@@ -66,19 +38,19 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
     background: white;
     border-radius: 8px;
     padding: 20px;
-    width: 500px; /* Updated modal width */
+    width: 500px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     position: relative;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Center content */
+    align-items: center;
   }
 
   .modal-header {
     font-size: 18px;
     font-weight: bold;
     text-align: center;
-    margin-bottom: 20px; /* Space below the header */
+    margin-bottom: 20px;
   }
 
   .modal-close {
@@ -94,7 +66,7 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
     display: flex;
     flex-direction: column;
     gap: 12px;
-    width: 100%; /* Full width for input alignment */
+    width: 100%;
   }
 
   input {
@@ -114,74 +86,10 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   }
 `;
 
-/**
- * ******************* WHAT YOU CAN BUILD HERE *******************
- *  In essence, a chart is given a few key ingredients to work with:
- *  * Data: provided via `props.data`
- *  * A DOM element
- *  * FormData (your controls!) provided as props by transformProps.ts
- */
-
 export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
-  // height and width are the height and width of the DOM element as it exists in the dashboard.
-  // There is also a `data` prop, which is, of course, your DATA 🎉
   const { data, height, width } = props;
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [DBName, setDBName] = useState<string | null>(null);
-  const [tableName, settableName] = useState<string | null>(null);
-
   const rootElem = createRef<HTMLDivElement>();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [inputValue, setInputValue] = useState('');
-
-  // Often, you just want to access the DOM and do whatever you want.
-  // Here, you can do that with createRef, and the useEffect hook.
-  useEffect(() => {
-    const root = rootElem.current as HTMLElement;
-    console.log('Plugin element', root);
-  });
-
-  console.log('Plugin props', props);
-
-  const getUniqueBusinessUnits = (data: any[]) => {
-    const businessUnits = data.map(item => item["Business Unit"]);
-
-    // Use a Set to get unique business units
-    const uniqueBusinessUnits = [...new Set(businessUnits)];
-
-    console.log('Unique Business Units:', uniqueBusinessUnits);
-    return uniqueBusinessUnits; // Return the unique business units if needed
-  };
-
-  const filterAccountsByBusinessUnit = (businessUnit: any) => {
-    const filteredAccounts = data
-      .filter(item => item["Business Unit"] === businessUnit)
-      .map(item => item.Account);
-
-    // Use a Set to get unique accounts
-    return [...new Set(filteredAccounts)];
-  };
-
-  const filterProjectsByAccountAndBusinessUnit = (businessUnit, account) => {
-    const filteredProjects = data
-      .filter(item => item["Business Unit"] === businessUnit && item.Account === account)
-      .map(item => item.Project);
-
-    // Use a Set to get unique projects
-    const uniqueProjects = [...new Set(filteredProjects)];
-
-    console.log('Projects associated with account', account, 'in business unit', businessUnit, ':', uniqueProjects);
-    return uniqueProjects; // Return the unique projects
-  };
-
-  const uniqueBusinessUnits = getUniqueBusinessUnits(data);
-
-  const handleDropdownSelect = () => {
-    console.log('Dropdown item selected');
-    setModalVisible(true);
-  };
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     functionName: '',
     group: '',
@@ -195,15 +103,62 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     assessmentType: '',
   });
 
-  const handleSubmit = () => {
-    console.log('Submitted value:', inputValue);
-    setModalVisible(false);
-    setInputValue('');
+  useEffect(() => {
+    const root = rootElem.current as HTMLElement;
+    console.log('Plugin element', root);
+  }, [rootElem]);
+
+  const getUniqueBusinessUnits = (data: any[]) => {
+    const businessUnits = data.map(item => item["Business Unit"]);
+    return [...new Set(businessUnits)];
   };
 
-  const handleCancel = () => {
-    setModalVisible(false);
-    setInputValue('');
+  const filterAccountsByBusinessUnit = (businessUnit: any) => {
+    return [...new Set(data.filter(item => item["Business Unit"] === businessUnit).map(item => item.Account))];
+  };
+
+  const filterProjectsByAccountAndBusinessUnit = (businessUnit, account) => {
+    return [...new Set(data.filter(item => item["Business Unit"] === businessUnit && item.Account === account).map(item => item.Project))];
+  };
+
+  const uniqueBusinessUnits = getUniqueBusinessUnits(data);
+
+  const handleDropdownSelect = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const isAllFilled = Object.values(formData).every((value) => value !== '');
+    if (!isAllFilled) {
+      alert("Please fill out all fields!");
+      return;
+    }
+    console.log("Form Data Submitted:", formData);
+    try {
+      const response = await SupersetClient.post({
+        endpoint: '/api/dataset/update',
+        jsonPayload: { formData: [formData] },
+      });
+      console.log(response.json.message);
+    } catch (error) {
+      console.error('Error Submitting form data: ', error);
+    }
+
+    setFormData({
+      functionName: '',
+      group: '',
+      business: '',
+      assessmentLead: '',
+      assessmentID: '',
+      maturity: '',
+      assessmentDate: '',
+      status: '',
+      actions: '',
+      assessmentType: '',
+    });
+
+    setIsModalOpen(false);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -223,215 +178,144 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     >
       <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
         {uniqueBusinessUnits.map((unit, index) => (
-          <Dropdown title={unit} menuStyle={{ minWidth: 120 }}>
+          <Dropdown key={index} title={unit} menuStyle={{ minWidth: 120 }}>
             {filterAccountsByBusinessUnit(unit).map((account, idx) => (
-              <Dropdown.Menu title={account} style={{ minWidth: 120 }}>
-                {filterProjectsByAccountAndBusinessUnit(unit, account).map((project, idx) => (
-                  <Dropdown.Item onSelect={setIsModalOpen(true)}>{project}</Dropdown.Item>
-                ))}
-              </Dropdown.Menu>
+              <Dropdown.Item key={idx} onSelect={handleDropdownSelect}>
+                {account}
+              </Dropdown.Item>
             ))}
-
           </Dropdown>
         ))}
-
       </div>
       {isModalOpen && (
-          <div className="modal-overlay">
-            <div className="modal-card">
-              <span
-                className="modal-close"
-                onClick={() => setIsModalOpen(false)}
-              >
-                &times;
-              </span>
-              <div className="modal-header">Create NPD Assessment</div>
-              <form
-                className="modal-form"
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  const isAllFilled = Object.values(formData).every((value) => value !== '');
-                  if (!isAllFilled) {
-                    alert("Please fill out all fields!");
-                    return;
-                  }
-                  console.log("Form Data Submitted:", formData);
-                  try {
-                    const responser = await SupersetClient.post({
-                      endpoint: '/api/dataset/update',
-                      jsonPayload: { formData: [formData], database: DBName, table_name: tableName },
-                    });
-                    console.log(responser.json.message);
-                  } catch (error) {
-                    console.error('Error Submitting form data: ', error);
-                  }
-
-                  setFormData({
-                    functionName: '',
-                    group: '',
-                    business: '',
-                    assessmentLead: '',
-                    assessmentID: '',
-                    maturity: '',
-                    assessmentDate: '',
-                    status: '',
-                    actions: '',
-                    assessmentType: '',
-                  });
-
-                  setIsModalOpen(false);
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <span className="modal-close" onClick={() => setIsModalOpen(false)}>&times;</span>
+            <div className="modal-header">Create NPD Assessment</div>
+            <form className="modal-form" onSubmit={handleSubmit}>
+              <input
+                type="text"
+                placeholder="Function Name"
+                value={formData.functionName}
+                onChange={(e) => handleInputChange('functionName', e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Group"
+                value={formData.group}
+                onChange={(e) => handleInputChange('group', e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Business"
+                value={formData.business}
+                onChange={(e) => handleInputChange('business', e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Assessment Lead"
+                value={formData.assessmentLead}
+                onChange={(e) => handleInputChange('assessmentLead', e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Assessment ID"
+                value={formData.assessmentID}
+                onChange={(e) => handleInputChange('assessmentID', e.target.value)}
+                required
+              />
+              <select
+                style={{
+                  height: '40px',
+                  padding: '8px',
+                  width: '100%',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  marginBottom: '10px',
+                  fontSize: '14px',
                 }}
+                value={formData.maturity}
+                onChange={(e) => handleInputChange('maturity', e.target.value)}
+                required
               >
-                <input
-                  type="text"
-                  placeholder="Function Name"
-                  value={formData.functionName}
-                  onChange={(e) => handleInputChange('functionName', e.target.value)}
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Group"
-                  value={formData.group}
-                  onChange={(e) => handleInputChange('group', e.target.value)}
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Business"
-                  value={formData.business}
-                  onChange={(e) => handleInputChange('business', e.target.value)}
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Assessment Lead"
-                  value={formData.assessmentLead}
-                  onChange={(e) => handleInputChange('assessmentLead', e.target.value)}
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Assessment ID"
-                  value={formData.assessmentID}
-                  onChange={(e) => handleInputChange('assessmentID', e.target.value)}
-                  required
-                />
-                <select
-                  style={{
-                    height: '40px',
-                    padding: '8px',
-                    width: '100%',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
-                    marginBottom: '10px',
-                    fontSize: '14px',
-                  }}
-                  value={formData.maturity}
-                  onChange={(e) => handleInputChange('maturity', e.target.value)}
-                  required
-                >
-                  <option value="" disabled>
-                    Maturity
-                  </option>
-                  <option value="Test">Test</option>
-                  <option value="Launch">Launch</option>
-                  <option value="Idea Screening">Idea Screening</option>
-                  <option value="Prototype Development">Prototype Development</option>
-                </select>
-
-                <input
-                  type="date"
-                  placeholder="Assessment Date"
-                  value={formData.assessmentDate}
-                  onChange={(e) => handleInputChange('assessmentDate', e.target.value)}
-                  required
-                />
+                <option value="" disabled>Maturity</option>
+                <option value="Test">Test</option>
+                <option value="Launch">Launch</option>
+                <option value="Idea Screening">Idea Screening</option>
+                <option value="Prototype Development">Prototype Development</option>
+              </select>
+              <input
+                type="date placeholder="Assessment Date"
+                value={formData.assessmentDate}
+                onChange={(e) => handleInputChange('assessmentDate', e.target.value)}
+                required
+              />
+              <div>
+                <label>Status:</label>
                 <div>
-                  <label>Status:</label>
-                  <div>
-                    <label>
-                      <input
-                        type="radio"
-                        name="status"
-                        value="Published"
-                        checked={formData.status === 'Published'}
-                        onChange={(e) => handleInputChange('status', e.target.value)}
-                        required
-                      />
-                      Published
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="status"
-                        value="In Progress"
-                        checked={formData.status === 'In Progress'}
-                        onChange={(e) => handleInputChange('status', e.target.value)}
-                        required
-                      />
-                      In Progress
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="status"
-                        value="Pending"
-                        checked={formData.status === 'Pending'}
-                        onChange={(e) => handleInputChange('status', e.target.value)}
-                        required
-                      />
-                      Pending
-                    </label>
-                  </div>
+                  <label>
+                    <input
+                      type="radio"
+                      name="status"
+                      value="Published"
+                      checked={formData.status === 'Published'}
+                      onChange={(e) => handleInputChange('status', e.target.value)}
+                      required
+                    />
+                    Published
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="status"
+                      value="In Progress"
+                      checked={formData.status === 'In Progress'}
+                      onChange={(e) => handleInputChange('status', e.target.value)}
+                      required
+                    />
+                    In Progress
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="status"
+                      value="Pending"
+                      checked={formData.status === 'Pending'}
+                      onChange={(e) => handleInputChange('status', e.target.value)}
+                      required
+                    />
+                    Pending
+                  </label>
                 </div>
-                <input
-                  type="text"
-                  placeholder="Actions"
-                  value={formData.actions}
-                  onChange={(e) => handleInputChange('actions', e.target.value)}
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Assessment Type"
-                  value={formData.assessmentType}
-                  onChange={(e) => handleInputChange('assessmentType', e.target.value)}
-                  required
-                />
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <button type="button" onClick={() => setIsModalOpen(false)}>
-                    Cancel
-                  </button>
-                  <button type="submit">Submit</button>
-                </div>
-              </form>
-            </div>
+              </div>
+              <input
+                type="text"
+                placeholder="Actions"
+                value={formData.actions}
+                onChange={(e) => handleInputChange('actions', e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Assessment Type"
+                value={formData.assessmentType}
+                onChange={(e) => handleInputChange('assessmentType', e.target.value)}
+                required
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <button type="button" onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit">Submit</button>
+              </div>
+            </form>
           </div>
-        )}
-
+        </div>
+      )}
     </Styles>
   );
 }
-
-/*<Dropdown title="Dropdown" menuStyle={{ minWidth: 120 }}>
-        <Dropdown.Item>Item 1</Dropdown.Item>
-        <Dropdown.Menu title="Item 2" style={{ minWidth: 120 }}>
-          <Dropdown.Menu title="Item 2-1">
-            <Dropdown.Item>Item 2-1-1</Dropdown.Item>
-            <Dropdown.Item>Item 2-1-2</Dropdown.Item>
-            <Dropdown.Item>Item 2-1-3</Dropdown.Item>
-          </Dropdown.Menu>
-          <Dropdown.Item>Item 2-2</Dropdown.Item>
-          <Dropdown.Item>Item 2-3</Dropdown.Item>
-        </Dropdown.Menu>
-        <Dropdown.Menu title="Item 3">
-          <Dropdown.Menu title="Item 3-1">
-            <Dropdown.Item>Item 3-1-1</Dropdown.Item>
-            <Dropdown.Item>Item 3-1-2</Dropdown.Item>
-            <Dropdown.Item>Item 3-1-3</Dropdown.Item>
-          </Dropdown.Menu>
-          <Dropdown.Item>Item 3-2</Dropdown.Item>
-          <Dropdown.Item>Item 3-3</Dropdown.Item>
-        </Dropdown.Menu>
-      </Dropdown>*/
