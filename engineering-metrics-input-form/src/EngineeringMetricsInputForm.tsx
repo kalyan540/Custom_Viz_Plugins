@@ -101,13 +101,6 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   .form-group select:focus {
     border-color: ${({ theme }) => theme.colors.primary.main};
   }
-  
-  .highlight-text {
-    background-color: #f0f0f0;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-weight: bold;
-  }
 
   .submit-button {
     padding: 10px;
@@ -137,19 +130,13 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const rootElem = createRef<HTMLDivElement>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    codeCoverage: { scope: '', target: '', condition: '' },
-    predictability: { scope: '', target: '', condition: '' },
-    sprintVelocity: { scope: '', target: '', condition: '' },
-    cycleTime: { scope: '', target: '', condition: '' },
-    defectDistribution: { scope: '', target: '', condition: '' },
-    scopeChange: { scope: '', target: '', condition: '' },
-  });
-
-  const [selectedInfo, setSelectedInfo] = useState({
-    businessUnit: '',
-    account: '',
-    project: '',
-  });
+  codeCoverage: { scope: '', target: '', condition: '' },
+  predictability: { scope: '', target: '', condition: '' },
+  sprintVelocity: { scope: '', target: '', condition: '' },
+  cycleTime: { scope: '', target: '', condition: '' },
+  defectDistribution: { scope: '', target: '', condition: '' },
+  scopeChange: { scope: '', target: '', condition: '' },
+});
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -158,36 +145,39 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
 
   const getUniqueBusinessUnits = (data: any[]) => {
     const businessUnits = data.map(item => item["Business Unit"]);
-    return [...new Set(businessUnits)];
+
+    // Use a Set to get unique business units
+    const uniqueBusinessUnits = [...new Set(businessUnits)];
+
+    console.log('Unique Business Units:', uniqueBusinessUnits);
+    return uniqueBusinessUnits; // Return the unique business units if needed
   };
 
   const filterAccountsByBusinessUnit = (businessUnit: any) => {
     const filteredAccounts = data
       .filter(item => item["Business Unit"] === businessUnit)
       .map(item => item.Account);
+
+    // Use a Set to get unique accounts
     return [...new Set(filteredAccounts)];
   };
 
-  const filterProjectsByAccountAndBusinessUnit = (businessUnit: string, account: string) => {
+  const filterProjectsByAccountAndBusinessUnit = (businessUnit, account) => {
     const filteredProjects = data
       .filter(item => item["Business Unit"] === businessUnit && item.Account === account)
       .map(item => item.Project);
-    return [...new Set(filteredProjects)];
+
+    // Use a Set to get unique projects
+    const uniqueProjects = [...new Set(filteredProjects)];
+
+    console.log('Projects associated with account', account, 'in business unit', businessUnit, ':', uniqueProjects);
+    return uniqueProjects; // Return the unique projects
   };
 
   const uniqueBusinessUnits = getUniqueBusinessUnits(data);
 
-  const handleDropdownSelect = (businessUnit: string) => {
-    setSelectedInfo(prev => ({ ...prev, businessUnit }));
-  };
-
-  const handleAccountSelect = (account: string) => {
-    setSelectedInfo(prev => ({ ...prev, account }));
-  };
-
-  const handleProjectSelect = (project: string) => {
-    setSelectedInfo(prev => ({ ...prev, project }));
-    setIsModalOpen(true); // Open modal after updating selection
+  const handleDropdownSelect = () => {
+    setIsModalOpen(true);
   };
 
   const handleSubmit = async (e) => {
@@ -209,12 +199,16 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     }
 
     setFormData({
-      codeCoverage: { scope: '', target: '', condition: '' },
-      predictability: { scope: '', target: '', condition: '' },
-      sprintVelocity: { scope: '', target: '', condition: '' },
-      cycleTime: { scope: '', target: '', condition: '' },
-      defectDistribution: { scope: '', target: '', condition: '' },
-      scopeChange: { scope: '', target: '', condition: '' },
+      functionName: '',
+      group: '',
+      business: '',
+      assessmentLead: '',
+      assessmentID: '',
+      maturity: '',
+      assessmentDate: '',
+      status: '',
+      actions: '',
+      assessmentType: '',
     });
 
     setIsModalOpen(false);
@@ -228,53 +222,84 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   };
 
   return (
-    <Styles ref={rootElem} boldText={props.boldText} headerFontSize={props.headerFontSize} height={height} width={width}>
+    <Styles
+      ref={rootElem}
+      boldText={props.boldText}
+      headerFontSize={props.headerFontSize}
+      height={height}
+      width={width}
+    >
       <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
         {uniqueBusinessUnits.map((unit, index) => (
-          <Dropdown key={index} title={unit} menuStyle={{ minWidth: 120 }}>
-            <Dropdown.Item onSelect={() => handleDropdownSelect(unit)}>Select Business Unit</Dropdown.Item>
+          <Dropdown title={unit} menuStyle={{ minWidth: 120 }}>
+            <Dropdown.Item onSelect={handleDropdownSelect}>Add New Account</Dropdown.Item>
             {filterAccountsByBusinessUnit(unit).map((account, idx) => (
-              <Dropdown.Menu key={idx} title={account} style={{ minWidth: 120 }}>
-                <Dropdown.Item onSelect={() => handleAccountSelect(account)}>Select Account</Dropdown.Item>
+              <Dropdown.Menu title={account} style={{ minWidth: 120 }}>
+                <Dropdown.Item onSelect={handleDropdownSelect}>Add New Project</Dropdown.Item>
                 {filterProjectsByAccountAndBusinessUnit(unit, account).map((project, idx) => (
-                  <Dropdown.Item key={idx} onSelect={() => handleProjectSelect(project)}>{project}</Dropdown.Item>
+                  <Dropdown.Item onSelect={handleDropdownSelect}>{project}</Dropdown.Item>
                 ))}
               </Dropdown.Menu>
             ))}
+
           </Dropdown>
         ))}
-      </div>
 
+      </div>
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-card">
             <div className="modal-header">Metrics Input Form</div>
-            <div>
-              <span className="highlight-text">{selectedInfo.businessUnit}</span> -
-              <span className="highlight-text">{selectedInfo.account}</span> -
-              <span className="highlight-text">{selectedInfo.project}</span>
-            </div>
-
             <form className="modal-form" onSubmit={handleSubmit}>
               <div className="form-grid">
-                {/* Render form fields for each category */}
-                {['codeCoverage', 'predictability', 'sprintVelocity', 'cycleTime', 'defectDistribution', 'scopeChange'].map((category) => (
-                  <div className="form-group" key={category}>
-                    <label>{category} Scope</label>
+                {[
+                  "Code Coverage",
+                  "Predictability",
+                  "Sprint Velocity",
+                  "Cycle Time",
+                  "Defect Distribution",
+                  "Scope Change",
+                ].map((category, index) => (
+                  <div key={index} className="form-group">
+                    <label>{category}</label>
                     <input
-                      type="text"
-                      value={formData[category].scope}
+                      type="number"
+                      placeholder="Scope"
                       onChange={(e) => handleInputChange(`${category}_scope`, e.target.value)}
+                      required
                     />
+                    <input
+                      type="number"
+                      placeholder="Target"
+                      onChange={(e) => handleInputChange(`${category}_target`, e.target.value)}
+                      required
+                    />
+                    <select
+                      onChange={(e) => handleInputChange(`${category}_condition`, e.target.value)}
+                      required
+                    >
+                      <option value="" disabled>
+                        Condition
+                      </option>
+                      <option value="greater_than">Greater Than</option>
+                      <option value="less_than">Less Than</option>
+                      <option value="greater_than_equal">Greater Than or Equal</option>
+                      <option value="less_than_equal">Less Than or Equal</option>
+                    </select>
                   </div>
                 ))}
               </div>
-
-              <button type="submit" className="submit-button">Submit</button>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <button type="button" onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </button>
+                <button className="submit-button" type="submit">Submit</button>
+              </div>
             </form>
           </div>
         </div>
       )}
+
     </Styles>
   );
 }
