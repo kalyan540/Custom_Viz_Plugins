@@ -190,7 +190,8 @@ const [selectedInfo, setSelectedInfo] = useState({
   const uniqueBusinessUnits = getUniqueBusinessUnits(data);
 
   const handleDropdownSelect = () => {
-    setIsModalOpen(true);
+    //setIsModalOpen(true);
+    console.log('Add New Account or Project');
   };
 
   const handleProjectSelect = (businessUnit: string, account: string, project: string) => {
