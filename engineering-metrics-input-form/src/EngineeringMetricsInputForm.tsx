@@ -104,7 +104,7 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
 
   .submit-button {
     padding: 10px;
-    background-color: ${({ theme }) => theme.colors.primary.main};
+    background-color: ${({ theme }) => theme.colors.primary.dark1};
     color: white;
     border: none;
     border-radius: 4px;
