@@ -69,20 +69,59 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
     width: 100%;
   }
 
-  input {
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    width: 100%;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-group label {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .form-group input,
+  .form-group select {
     padding: 8px;
+    font-size: 14px;
     border: 1px solid #ccc;
     border-radius: 4px;
     width: 100%;
+    transition: border-color 0.2s ease;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    border-color: ${({ theme }) => theme.colors.primary.main};
   }
 
   button {
     padding: 10px;
-    background-color: #007bff;
+    background-color: ${({ theme }) => theme.colors.primary.main};
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  button:hover {
+    background-color: ${({ theme }) => theme.colors.primary.dark1};
+  }
+
+  button[type="button"] {
+    background-color: ${({ theme }) => theme.colors.grayscale.light3};
+  }
+
+  button[type="button"]:hover {
+    background-color: ${({ theme }) => theme.colors.grayscale.light2};
   }
 `;
 
@@ -91,16 +130,12 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const rootElem = createRef<HTMLDivElement>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    functionName: '',
-    group: '',
-    business: '',
-    assessmentLead: '',
-    assessmentID: '',
-    maturity: '',
-    assessmentDate: '',
-    status: '',
-    actions: '',
-    assessmentType: '',
+    codeCoverage: { scope: '', target: '', condition: '' },
+    predictability: { scope: '', target: '', condition: '' },
+    sprintVelocity: { scope: '', target: '', condition: '' },
+    cycleTime: { scope: '', target: '', condition: '' },
+    defectDistribution: { scope: '', target: '', condition: '' },
+    scopeChange: { scope: '', target: '', condition: '' },
   });
 
   useEffect(() => {
@@ -197,8 +232,10 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
         {uniqueBusinessUnits.map((unit, index) => (
           <Dropdown title={unit} menuStyle={{ minWidth: 120 }}>
+            <Dropdown.Item onSelect={handleDropdownSelect}>Add New Account</Dropdown.Item>
             {filterAccountsByBusinessUnit(unit).map((account, idx) => (
               <Dropdown.Menu title={account} style={{ minWidth: 120 }}>
+                <Dropdown.Item onSelect={handleDropdownSelect}>Add New Project</Dropdown.Item>
                 {filterProjectsByAccountAndBusinessUnit(unit, account).map((project, idx) => (
                   <Dropdown.Item onSelect={handleDropdownSelect}>{project}</Dropdown.Item>
                 ))}
@@ -212,123 +249,47 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-card">
-            <span className="modal-close" onClick={() => setIsModalOpen(false)}>&times;</span>
-            <div className="modal-header">Create NPD Assessment</div>
+            <div className="modal-header">Metrics Input Form</div>
             <form className="modal-form" onSubmit={handleSubmit}>
-              <input
-                type="text"
-                placeholder="Function Name"
-                value={formData.functionName}
-                onChange={(e) => handleInputChange('functionName', e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Group"
-                value={formData.group}
-                onChange={(e) => handleInputChange('group', e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Business"
-                value={formData.business}
-                onChange={(e) => handleInputChange('business', e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Assessment Lead"
-                value={formData.assessmentLead}
-                onChange={(e) => handleInputChange('assessmentLead', e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Assessment ID"
-                value={formData.assessmentID}
-                onChange={(e) => handleInputChange('assessmentID', e.target.value)}
-                required
-              />
-              <select
-                style={{
-                  height: '40px',
-                  padding: '8px',
-                  width: '100%',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  marginBottom: '10px',
-                  fontSize: '14px',
-                }}
-                value={formData.maturity}
-                onChange={(e) => handleInputChange('maturity', e.target.value)}
-                required
-              >
-                <option value="" disabled>Maturity</option>
-                <option value="Test">Test</option>
-                <option value="Launch">Launch</option>
-                <option value="Idea Screening">Idea Screening</option>
-                <option value="Prototype Development">Prototype Development</option>
-              </select>
-              <input
-                type="date placeholder="Assessment Date"
-                value={formData.assessmentDate}
-                onChange={(e) => handleInputChange('assessmentDate', e.target.value)}
-                required
-              />
-              <div>
-                <label>Status:</label>
-                <div>
-                  <label>
+              <div className="form-grid">
+                {[
+                  "Code Coverage",
+                  "Predictability",
+                  "Sprint Velocity",
+                  "Cycle Time",
+                  "Defect Distribution",
+                  "Scope Change",
+                ].map((category, index) => (
+                  <div key={index} className="form-group">
+                    <label>{category}</label>
                     <input
-                      type="radio"
-                      name="status"
-                      value="Published"
-                      checked={formData.status === 'Published'}
-                      onChange={(e) => handleInputChange('status', e.target.value)}
+                      type="number"
+                      placeholder="Scope"
+                      onChange={(e) => handleInputChange(`${category}_scope`, e.target.value)}
                       required
                     />
-                    Published
-                  </label>
-                  <label>
                     <input
-                      type="radio"
-                      name="status"
-                      value="In Progress"
-                      checked={formData.status === 'In Progress'}
-                      onChange={(e) => handleInputChange('status', e.target.value)}
+                      type="number"
+                      placeholder="Target"
+                      onChange={(e) => handleInputChange(`${category}_target`, e.target.value)}
                       required
                     />
-                    In Progress
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="status"
-                      value="Pending"
-                      checked={formData.status === 'Pending'}
-                      onChange={(e) => handleInputChange('status', e.target.value)}
+                    <select
+                      onChange={(e) => handleInputChange(`${category}_condition`, e.target.value)}
                       required
-                    />
-                    Pending
-                  </label>
-                </div>
+                    >
+                      <option value="" disabled>
+                        Condition
+                      </option>
+                      <option value="greater_than">Greater Than</option>
+                      <option value="less_than">Less Than</option>
+                      <option value="greater_than_equal">Greater Than or Equal</option>
+                      <option value="less_than_equal">Less Than or Equal</option>
+                    </select>
+                  </div>
+                ))}
               </div>
-              <input
-                type="text"
-                placeholder="Actions"
-                value={formData.actions}
-                onChange={(e) => handleInputChange('actions', e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Assessment Type"
-                value={formData.assessmentType}
-                onChange={(e) => handleInputChange('assessmentType', e.target.value)}
-                required
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <button type="button" onClick={() => setIsModalOpen(false)}>
                   Cancel
                 </button>
@@ -338,6 +299,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
           </div>
         </div>
       )}
+
     </Styles>
   );
 }
