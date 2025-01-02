@@ -111,6 +111,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const uniqueBusinessUnits = getUniqueBusinessUnits(data);
 
   const handleDropdownSelect = () => {
+    console.log('Dropdown item selected');
     setModalVisible(true);
   };
 
