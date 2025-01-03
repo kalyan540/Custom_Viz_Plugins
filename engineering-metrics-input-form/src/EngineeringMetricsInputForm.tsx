@@ -221,12 +221,12 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   };
 
   const handleAccountSubmit = async (e) => {
-    e.preventDefault();
+    /*e.preventDefault();
     const isAllFilled = Object.values(accountformData).every((value) => value !== '');
     if (!isAllFilled) {
       alert("Please fill out all fields!");
       return;
-    }
+    }*/
     
     setaccountFormData({  "Business Unit": bussinessUnit, Account: accountName });
     console.log("Form Data Submitted:", accountformData);
