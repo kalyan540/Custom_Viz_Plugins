@@ -129,6 +129,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const { data, height, width, datasource } = props;
   const rootElem = createRef<HTMLDivElement>();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bussinessUnit, setbussinessUnit] = useState('');
   const [accountName, setAccountName] = useState('');
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [DBName, setDBName] = useState<string | null>(null);
@@ -142,8 +143,8 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     scopeChange: { scope: '', target: '', condition: '' },
   });
   const [accountformData, setaccountFormData] = useState({
-    businessunit: '',
-    account: '',
+    "Business Unit": '',
+    Account: '',
 
   });
 
@@ -221,16 +222,18 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
 
   const handleAccountSubmit = async (e) => {
     e.preventDefault();
-    const isAllFilled = Object.values(formData).every((value) => value !== '');
+    const isAllFilled = Object.values(accountformData).every((value) => value !== '');
     if (!isAllFilled) {
       alert("Please fill out all fields!");
       return;
     }
-    console.log("Form Data Submitted:", formData);
+    
+    setaccountFormData({  "Business Unit": bussinessUnit, Account: accountName });
+    console.log("Form Data Submitted:", accountformData);
     try {
       const response = await SupersetClient.post({
         endpoint: '/api/dataset/update',
-        jsonPayload: { formData: [formData], database: DBName, table_name: tableName },
+        jsonPayload: { formData: [accountformData], database: DBName, table_name: tableName },
       });
       console.log(response.json.message);
     } catch (error) {
@@ -298,10 +301,13 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
         {uniqueBusinessUnits.map((unit, index) => (
           <Dropdown title={unit} menuStyle={{ minWidth: 120 }}>
             <Dropdown.Item onSelect={handleAccountDropdownSelect}>Add New Account</Dropdown.Item>
-            {filterAccountsByBusinessUnit(unit).map((account, idx) => (
-              <Dropdown.Menu title={account} style={{ minWidth: 120 }}>
-                <Dropdown.Item onSelect={handleDropdownSelect}>Add New Project</Dropdown.Item>
-                {filterProjectsByAccountAndBusinessUnit(unit, account).map((project, idx) => (
+            {filterAccountsByBusinessUnit(unit).map((accounts, idx) => (
+              <Dropdown.Menu title={accounts} style={{ minWidth: 120 }}>
+                <Dropdown.Item onSelect={()=>{
+                  handleDropdownSelect;
+                  setbussinessUnit(unit);
+                  setAccountName(accounts);}}>Add New Project</Dropdown.Item>
+                {filterProjectsByAccountAndBusinessUnit(unit, accounts).map((project, idx) => (
                   <Dropdown.Item onSelect={handleDropdownSelect}>{project}</Dropdown.Item>
                 ))}
               </Dropdown.Menu>
