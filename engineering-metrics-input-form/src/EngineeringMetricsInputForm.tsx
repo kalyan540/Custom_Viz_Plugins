@@ -131,6 +131,8 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [accountName, setAccountName] = useState('');
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [DBName, setDBName] = useState<string | null>(null);
+  const [tableName, settableName] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     codeCoverage: { scope: '', target: '', condition: '' },
     predictability: { scope: '', target: '', condition: '' },
@@ -139,11 +141,42 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     defectDistribution: { scope: '', target: '', condition: '' },
     scopeChange: { scope: '', target: '', condition: '' },
   });
+  const [accountformData, setaccountFormData] = useState({
+    businessunit: '',
+    account: '',
+
+  });
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);
+    
   }, [rootElem]);
+
+  useEffect(() => {
+    async function fetchExploreData() {
+      try {
+        const [datasource_id, datasource_type]=datasource.split('__');
+        const response = await SupersetClient.get({
+          endpoint: `/api/v1/explore/?datasource_type=${datasource_type}&datasource_id=${datasource_id}`,
+        });
+        
+        const dbName = response.json?.result?.dataset?.database?.name;
+        const TableName = response.json?.result?.dataset?.datasource_name;
+        if (dbName) {
+          setDBName(dbName);
+          settableName(TableName);
+          console.log('Database Name:', dbName);
+          console.log('Table Name:', TableName);
+        } else {
+          console.warn('Database name not found in response');
+        }  
+      } catch (error) {
+        console.error('Error fetching explore API:', error);
+      }
+    }
+    fetchExploreData();
+  }, [datasource]);
 
   const getUniqueBusinessUnits = (data: any[]) => {
     const businessUnits = data.map(item => item["Business Unit"]);
@@ -172,7 +205,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     // Use a Set to get unique projects
     const uniqueProjects = [...new Set(filteredProjects)];
 
-    console.log('Projects associated with account', account, 'in business unit', businessUnit, ':', uniqueProjects);
+    //console.log('Projects associated with account', account, 'in business unit', businessUnit, ':', uniqueProjects);
     return uniqueProjects; // Return the unique projects
   };
 
@@ -197,15 +230,13 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     try {
       const response = await SupersetClient.post({
         endpoint: '/api/dataset/update',
-        jsonPayload: { formData: [formData] },
+        jsonPayload: { formData: [formData], database: DBName, table_name: tableName },
       });
       console.log(response.json.message);
     } catch (error) {
       console.error('Error Submitting form data: ', error);
     }
-    const [datasource_id, datasource_type] = datasource.split('__');
-    console.log('datasource_id:', datasource_id);
-    console.log('datasource_type:', datasource_type);
+    
     setIsAccountModalOpen(false);
   };
 
@@ -241,7 +272,6 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     });
 
     setIsModalOpen(false);
-    setIsAccountModalOpen(false);
   };
 
   const handleInputChange = (field: string, value: string) => {
