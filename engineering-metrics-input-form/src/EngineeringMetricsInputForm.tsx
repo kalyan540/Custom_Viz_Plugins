@@ -256,7 +256,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       {isAccountModalOpen && (
         <div className="modal-overlay">
           <div className="modal-card">
-            <div className="modal-header">Metrics Input Form</div>
+            <div className="modal-header">Add New Account</div>
             <form className="modal-form" onSubmit={handleSubmit}>
               <input
                 type="text"
