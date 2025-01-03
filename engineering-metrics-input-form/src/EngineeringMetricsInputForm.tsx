@@ -266,7 +266,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
                 required
               />
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <button type="button" onClick={() => setIsModalOpen(false)}>
+                <button type="button" onClick={() => setIsAccountModalOpen(false)}>
                   Cancel
                 </button>
                 <button className="submit-button" type="submit">Submit</button>
