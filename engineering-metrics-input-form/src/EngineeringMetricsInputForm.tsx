@@ -129,6 +129,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const { data, height, width, datasource } = props;
   const rootElem = createRef<HTMLDivElement>();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [accountName, setAccountName] = useState('');
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     codeCoverage: { scope: '', target: '', condition: '' },
@@ -284,7 +285,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
               <input
                 type="text"
                 placeholder="Enter Account name"
-                value=''
+                value={accountName}
                 onChange={(e) => handleInputChange('functionName', e.target.value)}
                 required
               />
