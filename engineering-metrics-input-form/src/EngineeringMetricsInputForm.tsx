@@ -126,7 +126,7 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
 `;
 
 export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
-  const { data, height, width } = props;
+  const { data, height, width, datasource } = props;
   const rootElem = createRef<HTMLDivElement>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
@@ -183,6 +183,29 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
 
   const handleAccountDropdownSelect = () => {
     setIsAccountModalOpen(true);
+  };
+
+  const handleAccountSubmit = async (e) => {
+    e.preventDefault();
+    const isAllFilled = Object.values(formData).every((value) => value !== '');
+    if (!isAllFilled) {
+      alert("Please fill out all fields!");
+      return;
+    }
+    console.log("Form Data Submitted:", formData);
+    try {
+      const response = await SupersetClient.post({
+        endpoint: '/api/dataset/update',
+        jsonPayload: { formData: [formData] },
+      });
+      console.log(response.json.message);
+    } catch (error) {
+      console.error('Error Submitting form data: ', error);
+    }
+    const [datasource_id, datasource_type]=datasource.split('__');
+    console.log('datasource_id:', datasource_id);
+    console.log('datasource_type:', datasource_type);
+    setIsAccountModalOpen(false);
   };
 
   const handleSubmit = async (e) => {
@@ -257,7 +280,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
         <div className="modal-overlay">
           <div className="modal-card">
             <div className="modal-header">Add New Account</div>
-            <form className="modal-form" onSubmit={handleSubmit}>
+            <form className="modal-form" onSubmit={handleAccountSubmit}>
               <input
                 type="text"
                 placeholder="Enter Account name"

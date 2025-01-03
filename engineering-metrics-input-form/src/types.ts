@@ -40,5 +40,6 @@ export type EngineeringMetricsInputFormQueryFormData = QueryFormData &
 export type EngineeringMetricsInputFormProps = EngineeringMetricsInputFormStylesProps &
   EngineeringMetricsInputFormCustomizeProps & {
     data: TimeseriesDataRecord[];
+    datasource: string;
     // add typing here for the props you pass in from transformProps.ts!
   };
