@@ -129,14 +129,15 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const { data, height, width } = props;
   const rootElem = createRef<HTMLDivElement>();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-  codeCoverage: { scope: '', target: '', condition: '' },
-  predictability: { scope: '', target: '', condition: '' },
-  sprintVelocity: { scope: '', target: '', condition: '' },
-  cycleTime: { scope: '', target: '', condition: '' },
-  defectDistribution: { scope: '', target: '', condition: '' },
-  scopeChange: { scope: '', target: '', condition: '' },
-});
+    codeCoverage: { scope: '', target: '', condition: '' },
+    predictability: { scope: '', target: '', condition: '' },
+    sprintVelocity: { scope: '', target: '', condition: '' },
+    cycleTime: { scope: '', target: '', condition: '' },
+    defectDistribution: { scope: '', target: '', condition: '' },
+    scopeChange: { scope: '', target: '', condition: '' },
+  });
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -180,6 +181,10 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     setIsModalOpen(true);
   };
 
+  const handleAccountDropdownSelect = () => {
+    setIsAccountModalOpen(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const isAllFilled = Object.values(formData).every((value) => value !== '');
@@ -212,6 +217,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     });
 
     setIsModalOpen(false);
+    setIsAccountModalOpen(false);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -232,7 +238,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
         {uniqueBusinessUnits.map((unit, index) => (
           <Dropdown title={unit} menuStyle={{ minWidth: 120 }}>
-            <Dropdown.Item onSelect={handleDropdownSelect}>Add New Account</Dropdown.Item>
+            <Dropdown.Item onSelect={handleAccountDropdownSelect}>Add New Account</Dropdown.Item>
             {filterAccountsByBusinessUnit(unit).map((account, idx) => (
               <Dropdown.Menu title={account} style={{ minWidth: 120 }}>
                 <Dropdown.Item onSelect={handleDropdownSelect}>Add New Project</Dropdown.Item>
@@ -246,6 +252,30 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
         ))}
 
       </div>
+
+      {isAccountModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <div className="modal-header">Metrics Input Form</div>
+            <form className="modal-form" onSubmit={handleSubmit}>
+              <input
+                type="text"
+                placeholder="Enter Account name"
+                value=''
+                onChange={(e) => handleInputChange('functionName', e.target.value)}
+                required
+              />
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <button type="button" onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </button>
+                <button className="submit-button" type="submit">Submit</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-card">
