@@ -203,7 +203,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     } catch (error) {
       console.error('Error Submitting form data: ', error);
     }
-    const [datasource_id, datasource_type]=datasource.split('__');
+    const [datasource_id, datasource_type] = datasource.split('__');
     console.log('datasource_id:', datasource_id);
     console.log('datasource_type:', datasource_type);
     setIsAccountModalOpen(false);
@@ -245,10 +245,15 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [field]: value,
-    }));
+    if(field === 'account') { 
+      setAccountName(value); 
+    } 
+    else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [field]: value,
+      }));
+    }
   };
 
   return (
@@ -286,7 +291,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
                 type="text"
                 placeholder="Enter Account name"
                 value={accountName}
-                onChange={(e) => handleInputChange('functionName', e.target.value)}
+                onChange={(e) => handleInputChange('account', e.target.value)}
                 required
               />
               <div style={{ display: "flex", justifyContent: "space-between" }}>
