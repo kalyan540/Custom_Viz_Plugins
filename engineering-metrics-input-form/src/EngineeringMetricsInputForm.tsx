@@ -264,7 +264,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       (metric) =>
         formData[`${metric}_scope`] !== undefined &&
         formData[`${metric}_target`] !== undefined &&
-        formData[`${metric}_condition`] !== undefined
+        //formData[`${metric}_condition`] !== undefined
     );
   
     if (!isAllFilled) {
@@ -280,7 +280,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       Key: metric,
       Scope: formData[`${metric}_scope`],
       Target: formData[`${metric}_target`],
-      condition: formData[`${metric}_condition`],
+      //condition: formData[`${metric}_condition`],
     }));
   
     console.log("Form Data Submitted:", payload);
