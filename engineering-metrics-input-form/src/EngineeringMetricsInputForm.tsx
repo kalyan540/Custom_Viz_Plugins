@@ -217,6 +217,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   };
 
   const handleAccountDropdownSelect = () => {
+    console.log("Bussiness unit",bussinessUnit);
     setIsAccountModalOpen(true);
   };
 
@@ -230,7 +231,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     
     setaccountFormData({  "Business Unit": bussinessUnit, Account: accountName });
     console.log("Form Data Submitted:", accountformData);
-    try {
+    /*try {
       const response = await SupersetClient.post({
         endpoint: '/api/dataset/update',
         jsonPayload: { formData: [accountformData], database: DBName, table_name: tableName },
@@ -238,7 +239,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       console.log(response.json.message);
     } catch (error) {
       console.error('Error Submitting form data: ', error);
-    }
+    }*/
     
     setIsAccountModalOpen(false);
   };
@@ -300,7 +301,9 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
         {uniqueBusinessUnits.map((unit, index) => (
           <Dropdown title={unit} menuStyle={{ minWidth: 120 }}>
-            <Dropdown.Item onSelect={handleAccountDropdownSelect}>Add New Account</Dropdown.Item>
+            <Dropdown.Item onSelect={()=>{
+                  setbussinessUnit(unit);
+                  handleAccountDropdownSelect;}}>Add New Account</Dropdown.Item>
             {filterAccountsByBusinessUnit(unit).map((accounts, idx) => (
               <Dropdown.Menu title={accounts} style={{ minWidth: 120 }}>
                 <Dropdown.Item onSelect={()=>{
