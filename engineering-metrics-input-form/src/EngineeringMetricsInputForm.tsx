@@ -230,7 +230,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     
     setaccountFormData({  "Business Unit": bussinessUnit, Account: accountName });
     console.log("Form Data Submitted:", accountformData);
-    /*try {
+    try {
       const response = await SupersetClient.post({
         endpoint: '/api/dataset/update',
         jsonPayload: { formData: [accountformData], database: DBName, table_name: tableName },
@@ -238,7 +238,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       console.log(response.json.message);
     } catch (error) {
       console.error('Error Submitting form data: ', error);
-    }*/
+    }
     
     setIsAccountModalOpen(false);
   };
