@@ -228,7 +228,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       alert("Please fill out all fields!");
       return;
     }*/
-    
+    console.log("Account Name",accountName);
     setaccountFormData({  "Business Unit": bussinessUnit, Account: accountName });
     console.log("Form Data Submitted:", accountformData);
     /*try {
