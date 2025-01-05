@@ -210,6 +210,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     setProjectName('');
     setbussinessUnit('');
     setIsModalOpen(false);
+    setIsEditing(false);
     setIsAccountModalOpen(false);
   };
 
