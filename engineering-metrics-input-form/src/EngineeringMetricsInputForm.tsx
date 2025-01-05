@@ -301,9 +301,8 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
         {uniqueBusinessUnits.map((unit, index) => (
           <Dropdown title={unit} menuStyle={{ minWidth: 120 }}>
-            <Dropdown.Item onSelect={()=>{
-                  setbussinessUnit(unit);
-                  handleAccountDropdownSelect;}}>Add New Account</Dropdown.Item>
+            <Dropdown.Item onSelect={
+                  handleAccountDropdownSelect}>Add New Account</Dropdown.Item>
             {filterAccountsByBusinessUnit(unit).map((accounts, idx) => (
               <Dropdown.Menu title={accounts} style={{ minWidth: 120 }}>
                 <Dropdown.Item onSelect={()=>{
