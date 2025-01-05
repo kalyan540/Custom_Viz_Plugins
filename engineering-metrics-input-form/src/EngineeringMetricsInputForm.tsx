@@ -263,7 +263,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     const isAllFilled = metrics.every(
       (metric) =>
         formData[`${metric}_scope`] !== undefined &&
-        formData[`${metric}_target`] !== undefined &&
+        formData[`${metric}_target`] !== undefined //&&
         //formData[`${metric}_condition`] !== undefined
     );
   
