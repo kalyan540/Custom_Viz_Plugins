@@ -288,7 +288,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     try {
       const response = await SupersetClient.post({
         endpoint: "/api/dataset/update",
-        jsonPayload: { formData: payload },
+        jsonPayload: { formData: payload, database: DBName, table_name: tableName },
       });
       console.log(response.json.message);
     } catch (error) {
