@@ -39,7 +39,6 @@
   ],
   "include": [
     "src/**/*",
-    "types/**/*",
-    "src/Components/Dropdown/**/*"
+    "types/**/*"
   ]
 }
