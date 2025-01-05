@@ -131,32 +131,26 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bussinessUnit, setbussinessUnit] = useState('');
   const [accountName, setAccountName] = useState('');
+  const [projectName, setProjectName] = useState('');
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [DBName, setDBName] = useState<string | null>(null);
   const [tableName, settableName] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    codeCoverage: { scope: '', target: '', condition: '' },
-    predictability: { scope: '', target: '', condition: '' },
-    sprintVelocity: { scope: '', target: '', condition: '' },
-    cycleTime: { scope: '', target: '', condition: '' },
-    defectDistribution: { scope: '', target: '', condition: '' },
-    scopeChange: { scope: '', target: '', condition: '' },
-  });
+  const [formData, setFormData] = useState<Record<string, string | number>>({});
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);
-    
+
   }, [rootElem]);
 
   useEffect(() => {
     async function fetchExploreData() {
       try {
-        const [datasource_id, datasource_type]=datasource.split('__');
+        const [datasource_id, datasource_type] = datasource.split('__');
         const response = await SupersetClient.get({
           endpoint: `/api/v1/explore/?datasource_type=${datasource_type}&datasource_id=${datasource_id}`,
         });
-        
+
         const dbName = response.json?.result?.dataset?.database?.name;
         const TableName = response.json?.result?.dataset?.datasource_name;
         if (dbName) {
@@ -166,7 +160,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
           console.log('Table Name:', TableName);
         } else {
           console.warn('Database name not found in response');
-        }  
+        }
       } catch (error) {
         console.error('Error fetching explore API:', error);
       }
@@ -212,21 +206,21 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   };
 
   const handleAccountDropdownSelect = () => {
-    console.log("Bussiness unit",bussinessUnit);
+    console.log("Bussiness unit", bussinessUnit);
     setIsAccountModalOpen(true);
   };
 
   const handleAccountSubmit = async (e) => {
     e.preventDefault();
-  
+
     // Construct the account form data directly
     const accountformData = {
       "Business Unit": bussinessUnit,
       Account: accountName,
     };
-  
+
     console.log("Form Data Submitted:", accountformData);
-  
+
     try {
       const response = await SupersetClient.post({
         endpoint: '/api/dataset/update',
@@ -236,50 +230,71 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     } catch (error) {
       console.error('Error Submitting form data: ', error);
     }
-  
+    setAccountName('');
+    setProjectName('');
+    setbussinessUnit('');
     // Close the modal after submission
     setIsAccountModalOpen(false);
   };
-  
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const isAllFilled = Object.values(formData).every((value) => value !== '');
+  
+    const metrics = [
+      "Code Coverage",
+      "Predictability",
+      "Sprint Velocity",
+      "Cycle Time",
+      "Defect Distribution",
+      "Scope Change",
+    ];
+  
+    const isAllFilled = metrics.every(
+      (metric) =>
+        formData[`${metric}_scope`] !== undefined &&
+        formData[`${metric}_target`] !== undefined &&
+        formData[`${metric}_condition`] !== undefined
+    );
+  
     if (!isAllFilled) {
-      alert("Please fill out all fields!");
+      alert("Please fill out all fields for each metric!");
       return;
     }
-    console.log("Form Data Submitted:", formData);
+  
+    // Construct payload for each metric
+    const payload = metrics.map((metric) => ({
+      "Business Unit": bussinessUnit,
+      Account: accountName,
+      Project: projectName,
+      key: metric,
+      Scope: formData[`${metric}_scope`],
+      Target: formData[`${metric}_target`],
+      condition: formData[`${metric}_condition`],
+    }));
+  
+    console.log("Form Data Submitted:", payload);
+  
     try {
       const response = await SupersetClient.post({
-        endpoint: '/api/dataset/update',
-        jsonPayload: { formData: [formData] },
+        endpoint: "/api/dataset/update",
+        jsonPayload: { formData: payload },
       });
       console.log(response.json.message);
     } catch (error) {
-      console.error('Error Submitting form data: ', error);
+      console.error("Error Submitting form data: ", error);
     }
-
-    setFormData({
-      functionName: '',
-      group: '',
-      business: '',
-      assessmentLead: '',
-      assessmentID: '',
-      maturity: '',
-      assessmentDate: '',
-      status: '',
-      actions: '',
-      assessmentType: '',
-    });
-
-    setIsModalOpen(false);
+    setAccountName('');
+    setProjectName('');
+    setbussinessUnit('');
+    setFormData({}); // Clear the form data after submission
+    setIsModalOpen(false); // Close the modal
   };
 
   const handleInputChange = (field: string, value: string) => {
-    if(field === 'account') { 
-      setAccountName(value); 
-    } 
+    if (field === 'account') {
+      setAccountName(value);
+    }
     else {
       setFormData((prevData) => ({
         ...prevData,
@@ -299,17 +314,24 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
         {uniqueBusinessUnits.map((unit, index) => (
           <Dropdown title={unit} menuStyle={{ minWidth: 120 }}>
-            <Dropdown.Item onSelect={()=>{
-                  setbussinessUnit(unit);
-                  handleAccountDropdownSelect();}}>Add New Account</Dropdown.Item>
+            <Dropdown.Item onSelect={() => {
+              setbussinessUnit(unit);
+              handleAccountDropdownSelect();
+            }}>Add New Account</Dropdown.Item>
             {filterAccountsByBusinessUnit(unit).map((accounts, idx) => (
               <Dropdown.Menu title={accounts} style={{ minWidth: 120 }}>
-                <Dropdown.Item onSelect={()=>{
+                <Dropdown.Item onSelect={() => {
                   setbussinessUnit(unit);
                   setAccountName(accounts);
-                  handleDropdownSelect();}}>Add New Project</Dropdown.Item>
+                  handleDropdownSelect();
+                }}>Add New Project</Dropdown.Item>
                 {filterProjectsByAccountAndBusinessUnit(unit, accounts).map((project, idx) => (
-                  <Dropdown.Item onSelect={handleDropdownSelect}>{project}</Dropdown.Item>
+                  <Dropdown.Item onSelect={() => {
+                    setbussinessUnit(unit);
+                    setAccountName(accounts);
+                    setProjectName(project);
+                    handleDropdownSelect();
+                  }}>{project}</Dropdown.Item>
                 ))}
               </Dropdown.Menu>
             ))}
@@ -347,6 +369,20 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
           <div className="modal-card">
             <div className="modal-header">Metrics Input Form</div>
             <form className="modal-form" onSubmit={handleSubmit}>
+              {projectName === '' && (
+                <div className="form-group" style={{ display: 'flex', justifyContent: 'center' }}>
+                  <label htmlFor="projectName" style={{ fontSize: '14px', fontWeight: '600' }}>Project Name</label>
+                  <input
+                    type="text"
+                    id="projectName"
+                    placeholder="Enter Project Name"
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                    required
+                    style={{ textAlign: 'center' }}
+                  />
+                </div>
+              )}
               <div className="form-grid">
                 {[
                   "Code Coverage",
