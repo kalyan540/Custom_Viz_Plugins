@@ -136,6 +136,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const [DBName, setDBName] = useState<string | null>(null);
   const [tableName, settableName] = useState<string | null>(null);
   const [formData, setFormData] = useState<Record<string, string | number>>({});
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -295,6 +296,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     setProjectName('');
     setbussinessUnit('');
     setFormData({}); // Clear the form data after submission
+    setIsEditing(false);
     setIsModalOpen(false); // Close the modal
   };
 
@@ -330,6 +332,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
                 <Dropdown.Item onSelect={() => {
                   setbussinessUnit(unit);
                   setAccountName(accounts);
+                  setIsEditing(true);
                   handleDropdownSelect();
                 }}>Add New Project</Dropdown.Item>
                 {filterProjectsByAccountAndBusinessUnit(unit, accounts).map((project, idx) => (
@@ -376,7 +379,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
           <div className="modal-card">
             <div className="modal-header">Metrics Input Form</div>
             <form className="modal-form" onSubmit={handleSubmit}>
-              {projectName === '' && (
+              {projectName === '' || isEditing ? ( 
                 <div className="form-group" style={{ display: 'flex', justifyContent: 'center' }}>
                   <label htmlFor="projectName" style={{ fontSize: '14px', fontWeight: '600' }}>Project Name</label>
                   <input
@@ -389,7 +392,9 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
                     style={{ textAlign: 'center' }}
                   />
                 </div>
-              )}
+              ): (
+                <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '600' }}>
+                  Project Name: {projectName}</div>)}
               <div className="form-grid">
                 {[
                   "Code Coverage",
