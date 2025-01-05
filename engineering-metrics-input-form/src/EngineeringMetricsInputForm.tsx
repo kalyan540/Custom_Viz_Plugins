@@ -277,7 +277,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       "Business Unit": bussinessUnit,
       Account: accountName,
       Project: projectName,
-      key: metric,
+      Key: metric,
       Scope: formData[`${metric}_scope`],
       Target: formData[`${metric}_target`],
       condition: formData[`${metric}_condition`],
