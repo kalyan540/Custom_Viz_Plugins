@@ -137,6 +137,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const [tableName, settableName] = useState<string | null>(null);
   const [formData, setFormData] = useState<Record<string, string | number>>({});
   const [isEditing, setIsEditing] = useState(false);
+  const [triggerFetch, setTriggerFetch] = useState(false);
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -167,7 +168,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       }
     }
     fetchExploreData();
-  }, [datasource]);
+  }, [datasource, triggerFetch]);
 
   const getUniqueBusinessUnits = (data: any[]) => {
     const businessUnits = data.map(item => item["Business Unit"]);
@@ -244,6 +245,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     setbussinessUnit('');
     // Close the modal after submission
     setIsAccountModalOpen(false);
+    setTriggerFetch(prev => !prev);
   };
 
 
@@ -300,6 +302,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     setFormData({}); // Clear the form data after submission
     setIsEditing(false);
     setIsModalOpen(false); // Close the modal
+    setTriggerFetch(prev => !prev);
   };
 
   const handleInputChange = (field: string, value: string) => {
