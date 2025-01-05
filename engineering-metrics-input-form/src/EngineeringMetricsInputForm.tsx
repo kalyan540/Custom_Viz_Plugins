@@ -258,6 +258,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       "Defect Distribution",
       "Scope Change",
     ];
+    console.log("Form Data:", formData);
   
     const isAllFilled = metrics.every(
       (metric) =>
