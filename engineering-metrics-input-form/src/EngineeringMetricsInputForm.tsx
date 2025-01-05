@@ -204,6 +204,13 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const handleDropdownSelect = () => {
     setIsModalOpen(true);
   };
+  const closeDropdownSelect = () => {
+    setAccountName('');
+    setProjectName('');
+    setbussinessUnit('');
+    setIsModalOpen(false);
+    setIsAccountModalOpen(false);
+  };
 
   const handleAccountDropdownSelect = () => {
     console.log("Bussiness unit", bussinessUnit);
@@ -354,7 +361,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
                 required
               />
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <button type="button" onClick={() => setIsAccountModalOpen(false)}>
+                <button type="button" onClick={closeDropdownSelect}>
                   Cancel
                 </button>
                 <button className="submit-button" type="submit">Submit</button>
@@ -422,7 +429,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
                 ))}
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <button type="button" onClick={() => setIsModalOpen(false)}>
+                <button type="button" onClick={closeDropdownSelect}>
                   Cancel
                 </button>
                 <button className="submit-button" type="submit">Submit</button>
