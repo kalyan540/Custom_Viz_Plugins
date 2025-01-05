@@ -142,11 +142,6 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     defectDistribution: { scope: '', target: '', condition: '' },
     scopeChange: { scope: '', target: '', condition: '' },
   });
-  const [accountformData, setaccountFormData] = useState({
-    "Business Unit": '',
-    Account: '',
-
-  });
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -222,16 +217,17 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   };
 
   const handleAccountSubmit = async (e) => {
-    /*e.preventDefault();
-    const isAllFilled = Object.values(accountformData).every((value) => value !== '');
-    if (!isAllFilled) {
-      alert("Please fill out all fields!");
-      return;
-    }*/
-    console.log("Account Name",accountName);
-    setaccountFormData({  "Business Unit": bussinessUnit, Account: accountName });
+    e.preventDefault();
+  
+    // Construct the account form data directly
+    const accountformData = {
+      "Business Unit": bussinessUnit,
+      Account: accountName,
+    };
+  
     console.log("Form Data Submitted:", accountformData);
-    /*try {
+  
+    try {
       const response = await SupersetClient.post({
         endpoint: '/api/dataset/update',
         jsonPayload: { formData: [accountformData], database: DBName, table_name: tableName },
@@ -239,10 +235,12 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       console.log(response.json.message);
     } catch (error) {
       console.error('Error Submitting form data: ', error);
-    }*/
-    
+    }
+  
+    // Close the modal after submission
     setIsAccountModalOpen(false);
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
