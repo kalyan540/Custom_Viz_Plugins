@@ -479,7 +479,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           </div>
         ))}
       </div>
-      <div style={{ overflowX: 'auto', maxHeight: '100%', width: '100%', padding: '0 0 25px 0' }}>
+      <div style={{ overflowX: 'auto', maxHeight: '100%', width: '100%' }}>
         <table>
           <thead>
             <tr>
