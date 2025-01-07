@@ -123,6 +123,26 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   .submit-button[type="button"]:hover {
     background-color: ${({ theme }) => theme.colors.grayscale.light2};
   }
+
+  .table-container {
+    margin-top: 20px;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  th, td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+  }
+
+  th {
+    background-color: #f4f4f4;
+  }
 `;
 
 export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
@@ -138,6 +158,9 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const [formData, setFormData] = useState<Record<string, string | number>>({});
   const [isEditing, setIsEditing] = useState(false);
   const [triggerFetch, setTriggerFetch] = useState(false);
+  const [tableFetch, setTableFetch] = useState(false);
+
+  const [filteredTableData, setFilteredTableData] = useState<any[]>([]);
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -169,6 +192,19 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     }
     fetchExploreData();
   }, [datasource, triggerFetch]);
+
+  useEffect(() => {
+    if (bussinessUnit && accountName && projectName) {
+      // Filter table data based on the selected filters (Business Unit, Account, Project)
+      const filteredData = data.filter(
+        item =>
+          item['Business Unit'] === bussinessUnit &&
+          item.Account === accountName &&
+          item.Project === projectName
+      );
+      setFilteredTableData(filteredData);
+    }
+  }, [bussinessUnit, accountName, projectName, data]);
 
   const getUniqueBusinessUnits = (data: any[]) => {
     const businessUnits = data.map(item => item["Business Unit"]);
@@ -251,7 +287,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const metrics = [
       "Code Coverage",
       "Predictability",
@@ -261,19 +297,19 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       "Scope Change",
     ];
     console.log("Form Data:", formData);
-  
+
     const isAllFilled = metrics.every(
       (metric) =>
         formData[`${metric}_scope`] !== undefined &&
         formData[`${metric}_target`] !== undefined //&&
-        //formData[`${metric}_condition`] !== undefined
+      //formData[`${metric}_condition`] !== undefined
     );
-  
+
     if (!isAllFilled) {
       alert("Please fill out all fields for each metric!");
       return;
     }
-  
+
     // Construct payload for each metric
     const payload = metrics.map((metric) => ({
       "Business Unit": bussinessUnit,
@@ -284,9 +320,9 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       Target: formData[`${metric}_target`],
       //condition: formData[`${metric}_condition`],
     }));
-  
+
     console.log("Form Data Submitted:", payload);
-  
+
     try {
       const response = await SupersetClient.post({
         endpoint: "/api/dataset/update",
@@ -317,6 +353,18 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     }
   };
 
+  const handletableData = () => {
+    const filteredData = data.filter(
+      item =>
+        item['Business Unit'] === bussinessUnit &&
+        item.Account === accountName &&
+        item.Project === projectName
+    );
+    setFilteredTableData(filteredData);
+    console.log("Table Data:", filteredTableData);
+    setTableFetch(true);
+  }
+
   return (
     <Styles
       ref={rootElem}
@@ -345,7 +393,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
                     setbussinessUnit(unit);
                     setAccountName(accounts);
                     setProjectName(project);
-                    handleDropdownSelect();
+                    handletableData();
                   }}>{project}</Dropdown.Item>
                 ))}
               </Dropdown.Menu>
@@ -353,6 +401,34 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
 
           </Dropdown>
         ))}
+
+        {tableFetch && (<div className="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Business Unit</th>
+                <th>Account</th>
+                <th>Project</th>
+                <th>Key</th>
+                <th>Scope</th>
+                <th>Condition</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTableData.map((row, index) => (
+                <tr key={index}>
+                  <td>{row['Business Unit']}</td>
+                  <td>{row.Account}</td>
+                  <td>{row.Project}</td>
+                  <td>{row.Key}</td>
+                  <td>{row.Scope}</td>
+                  <td>{row.Condition}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        )}
 
       </div>
 
@@ -384,7 +460,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
           <div className="modal-card">
             <div className="modal-header">Metrics Input Form</div>
             <form className="modal-form" onSubmit={handleSubmit}>
-              {projectName === '' || isEditing ? ( 
+              {projectName === '' || isEditing ? (
                 <div className="form-group" style={{ display: 'flex', justifyContent: 'center' }}>
                   <label htmlFor="projectName" style={{ fontSize: '14px', fontWeight: '600' }}>Project Name</label>
                   <input
@@ -397,7 +473,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
                     style={{ textAlign: 'center' }}
                   />
                 </div>
-              ): (
+              ) : (
                 <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '600' }}>
                   Project Name: {projectName}</div>)}
               <div className="form-grid">
