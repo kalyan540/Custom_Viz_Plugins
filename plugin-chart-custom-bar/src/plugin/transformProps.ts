@@ -212,7 +212,7 @@ export default function transformProps(
     return { ...acc, [entry[0]]: entry[1] };
   }, {});
   console.log(data);
-  
+
   const monthOrder: { [key: string]: number } = {
     Jan: 0,
     Feb: 1,
@@ -235,17 +235,17 @@ export default function transformProps(
       if (!a[xAxisOrig] || !b[xAxisOrig]) {
         return 0; // Leave the order unchanged if either is missing
       }
-  
+
       // Split the "Selection Month" into month and year
       const [monthA, yearA] = a[xAxisOrig].split("'");
       const [monthB, yearB] = b[xAxisOrig].split("'");
-  
+
       // Compare by year first
       const yearComparison = parseInt(yearA) - parseInt(yearB);
       if (yearComparison !== 0) {
         return yearComparison;
       }
-  
+
       // If years are the same, compare by month order
       return (monthOrder[monthA] || 0) - (monthOrder[monthB] || 0);
     });
@@ -253,7 +253,7 @@ export default function transformProps(
   console.log(data, xAxisOrig);
   const colorScale = CategoricalColorNamespace.getScale(colorScheme as string);
   const rebasedData = rebaseForecastDatum(data, verboseMap);
-  console.log('rebasedData: ',rebasedData);
+  console.log('rebasedData: ', rebasedData);
   let xAxisLabel = getXAxisLabel(chartProps.rawFormData) as string;
   if (
     isPhysicalColumn(chartProps.rawFormData?.x_axis) &&
@@ -274,7 +274,7 @@ export default function transformProps(
   const extraMetricLabels = extractExtraMetrics(chartProps.rawFormData).map(
     getMetricLabel,
   );
-  console.log('xAxisTimeFormat',xAxisTimeFormat);
+  console.log('xAxisTimeFormat', xAxisTimeFormat);
   const isMultiSeries = groupBy.length || metrics?.length > 1;
 
   console.log('rebasedData:', rebasedData);
@@ -306,9 +306,9 @@ export default function transformProps(
         : undefined,
     },
   );
-  console.log('rawSeries:',rawSeries);
+  console.log('rawSeries:', rawSeries);
   console.log('totalStackedValues:', totalStackedValues);
-  console.log('sortedTotalValues:',sortedTotalValues);
+  console.log('sortedTotalValues:', sortedTotalValues);
 
   const showValueIndexes = extractShowValueIndexes(rawSeries, {
     stack,
@@ -325,7 +325,7 @@ export default function transformProps(
 
   const xAxisType = getAxisType(stack, xAxisForceCategorical, xAxisDataType);
   const series: SeriesOption[] = [];
-  console.log('series:',series);
+  console.log('series:', series);
 
   const forcePercentFormatter = Boolean(contributionMode || isAreaExpand);
   const percentFormatter = forcePercentFormatter
@@ -402,7 +402,7 @@ export default function transformProps(
         timeShiftColor,
       },
     );
-    console.log('transformedSeries:',transformedSeries);
+    console.log('transformedSeries:', transformedSeries);
     if (transformedSeries) {
       if (stack === StackControlsValue.Stream) {
         // bug in Echarts - `stackStrategy: 'all'` doesn't work with nulls, so we cast them to 0
@@ -417,7 +417,7 @@ export default function transformProps(
       }
     }
   });
-  console.log('series:',series);
+  console.log('series:', series);
 
   if (stack === StackControlsValue.Stream) {
     const baselineSeries = getBaselineSeriesForStream(
@@ -427,7 +427,7 @@ export default function transformProps(
 
     series.unshift(baselineSeries);
   }
-  console.log('series:',series);
+  console.log('series:', series);
   const selectedValues = (filterState.selectedValues || []).reduce(
     (acc: Record<string, number>, selectedValue: string) => {
       const index = series.findIndex(({ name }) => name === selectedValue);
@@ -438,7 +438,7 @@ export default function transformProps(
     },
     {},
   );
-  console.log('series:',series);
+  console.log('series:', series);
 
   annotationLayers
     .filter((layer: AnnotationLayer) => layer.show)
@@ -493,7 +493,7 @@ export default function transformProps(
         );
       }
     });
-  console.log('series:',series);
+  console.log('series:', series);
   // axis bounds need to be parsed to replace incompatible values with undefined
   const [xAxisMin, xAxisMax] = (xAxisBounds || []).map(parseAxisBound);
   let [yAxisMin, yAxisMax] = (yAxisBounds || []).map(parseAxisBound);
@@ -632,23 +632,23 @@ export default function transformProps(
         Nov: 10,
         Dec: 11,
       };
-  
+
       // Sort each series' data array
       return series.map((serie) => {
         const sortedData = serie.data.sort((a: [string, number], b: [string, number]) => {
           const [monthA, yearA] = a[0].split("'"); // Extract month and year from the date string
           const [monthB, yearB] = b[0].split("'");
-  
+
           // Compare by year first
           const yearComparison = parseInt(yearA) - parseInt(yearB);
           if (yearComparison !== 0) {
             return yearComparison;
           }
-  
+
           // If years are the same, compare by month order
           return (monthOrder[monthA] || 0) - (monthOrder[monthB] || 0);
         });
-  
+
         // Return the updated series with sorted data
         return {
           ...serie,
@@ -663,7 +663,7 @@ export default function transformProps(
   if (xAxisOrig) {
     console.log('Process Series:', processSeries(series, data, xAxisTimeFormat || '', xAxisOrig));
   }
-  
+
 
 
   const echartOptions: EChartsCoreOption = {
@@ -741,7 +741,7 @@ export default function transformProps(
             focusedRow = rows.length - focusedRow - 1;
           }
         }
-        console.log('rows:',rows);
+        console.log('rows:', rows);
         if (allowTotal && showTooltipTotal) {
           const totalRow = ['Total', formatter.format(total)];
           if (showPercentage) {
@@ -749,11 +749,50 @@ export default function transformProps(
           }
           rows.push(totalRow);
         }
-        if (showTooltipTotalNet) {
-          const totalRow = ['Total', formatter.format(total)];
-          if (showPercentage) {
-            totalRow.push(percentFormatter.format(1));
+
+        function calculateCumulativeTotalNetFromSeries(series: any[]) {
+          const monthlyNetCounts: { [key: string]: number } = {}; // To store net counts per month
+          const totalNetList: { [key: string]: number } = {};    // To store cumulative total net per month
+          let cumulativeTotal = 0;    // Running total net
+
+          // Calculate net counts directly from sorted series
+          series.forEach((item) => {
+            item.data.forEach(([month, count]: [string, number]) => {
+              // Ignore null counts
+              if (count === null) return;
+
+              // Check if it's an onboard or offboard category
+              const isOnboard = item.id.includes("Onboarded");
+              const isOffboard = item.id.includes("No Show");
+
+              // Initialize the month's net count if not present
+              if (!monthlyNetCounts[month]) {
+                monthlyNetCounts[month] = 0;
+              }
+
+              // Update net count
+              if (isOnboard) {
+                monthlyNetCounts[month] += count;
+              } else if (isOffboard) {
+                monthlyNetCounts[month] -= count;
+              }
+            });
+          });
+
+          // Calculate cumulative totals for each month
+          for (const month in monthlyNetCounts) {
+            cumulativeTotal += monthlyNetCounts[month];
+            totalNetList[month] = cumulativeTotal;
           }
+
+          return totalNetList;
+        }
+
+        const totalNetList = calculateCumulativeTotalNetFromSeries(series);
+        console.log('totalNetList:', totalNetList);
+
+        if (showTooltipTotalNet) {
+          const totalRow = ['Total Net', totalNetList[xValue].toString()];
           rows.push(totalRow);
         }
         console.log(rows);
@@ -797,84 +836,84 @@ export default function transformProps(
           }
           
         }*/
-          if (customTooltip) {
-            // Initialize formattedRow based on legendData
-            const formattedRow = legendData.map((rowName, index) => {
-              const matchedRow = rows.find(item => item[0].replace(/<[^>]+>/g, '').trim() === rowName);
-              const rowKey = `row${index + 1}`;
-          
-              return {
-                [rowKey]: {
-                  name: matchedRow ? matchedRow[0].replace(/<[^>]+>/g, '').trim() : rowName,
-                  value: matchedRow ? parseInt(matchedRow[1], 10) : 0,
-                  percentage: matchedRow ? matchedRow[2] : '0%'
-                }
-              };
-            });
-          
-            // Add "Total" row in the formattedRow
-            const total = rows.find(item => item[0] === "Total");
-            formattedRow.push({
-              total: {
-                name: total[0],
-                value: parseInt(total[1], 10),
-                percentage: total[2]
+        if (customTooltip) {
+          // Initialize formattedRow based on legendData
+          const formattedRow = legendData.map((rowName, index) => {
+            const matchedRow = rows.find(item => item[0].replace(/<[^>]+>/g, '').trim() === rowName);
+            const rowKey = `row${index + 1}`;
+
+            return {
+              [rowKey]: {
+                name: matchedRow ? matchedRow[0].replace(/<[^>]+>/g, '').trim() : rowName,
+                value: matchedRow ? parseInt(matchedRow[1], 10) : 0,
+                percentage: matchedRow ? matchedRow[2] : '0%'
               }
-            });
-          
-            console.log(formattedRow);
-          
-            let tooltipText = customTooltipText;
-          
-            // Replace <xValue> with the dynamic month value
-            tooltipText = tooltipText.replace("<xValue>", xValue);
-          
-            // Replace <total.value> and <total.name> using the last row (Total)
-            const totalRow = formattedRow.find(row => row.total);
-            tooltipText = tooltipText.replace("<total.value>", totalRow.total.value)
-              .replace("<total.name>", totalRow.total.name);
-          
-            // Prepare to handle dynamic parts
-            const dynamicParts = [];
-            const staticParts = tooltipText.split(/(\{[^}]+\})/); // Split by curly braces
-          
-            staticParts.forEach(part => {
-              if (part.startsWith('{') && part.endsWith('}')) {
-                // Extract the row number from the part
-                const rowMatch = part.match(/<row(\d+)\.(value|name)>/);
-                if (rowMatch) {
-                  const rowIndex = parseInt(rowMatch[1], 10) - 1; // Convert to zero-based index
-                  const row = formattedRow[rowIndex][`row${rowIndex + 1}`];
-          
-                  // Check if the value is not zero
-                  if (row.value !== 0) {
-                    // Replace placeholders with actual values and add to dynamic parts
-                    const replacedPart = part
-                      .replace(`<row${rowIndex + 1}.value>`, row.value)
-                      .replace(`<row${rowIndex + 1}.name>`, row.name);
-                    dynamicParts.push(replacedPart); // Keep the curly brackets
-                  }
+            };
+          });
+
+          // Add "Total" row in the formattedRow
+          const total = rows.find(item => item[0] === "Total");
+          formattedRow.push({
+            total: {
+              name: total[0],
+              value: parseInt(total[1], 10),
+              percentage: total[2]
+            }
+          });
+
+          console.log(formattedRow);
+
+          let tooltipText = customTooltipText;
+
+          // Replace <xValue> with the dynamic month value
+          tooltipText = tooltipText.replace("<xValue>", xValue);
+
+          // Replace <total.value> and <total.name> using the last row (Total)
+          const totalRow = formattedRow.find(row => row.total);
+          tooltipText = tooltipText.replace("<total.value>", totalRow.total.value)
+            .replace("<total.name>", totalRow.total.name);
+
+          // Prepare to handle dynamic parts
+          const dynamicParts = [];
+          const staticParts = tooltipText.split(/(\{[^}]+\})/); // Split by curly braces
+
+          staticParts.forEach(part => {
+            if (part.startsWith('{') && part.endsWith('}')) {
+              // Extract the row number from the part
+              const rowMatch = part.match(/<row(\d+)\.(value|name)>/);
+              if (rowMatch) {
+                const rowIndex = parseInt(rowMatch[1], 10) - 1; // Convert to zero-based index
+                const row = formattedRow[rowIndex][`row${rowIndex + 1}`];
+
+                // Check if the value is not zero
+                if (row.value !== 0) {
+                  // Replace placeholders with actual values and add to dynamic parts
+                  const replacedPart = part
+                    .replace(`<row${rowIndex + 1}.value>`, row.value)
+                    .replace(`<row${rowIndex + 1}.name>`, row.name);
+                  dynamicParts.push(replacedPart); // Keep the curly brackets
+                }
               } else {
                 // Static part, just add it
                 dynamicParts.push(part);
               }
             });
-          
-            // Join the static parts and dynamic parts to form the final tooltip text
-            const finalTooltipText = dynamicParts.join('').replace(/,\s*$/, ''); // Remove trailing comma if any
-          
-            // Remove any remaining curly brackets from the final output
-            const cleanedFinalText = finalTooltipText.replace(/\{|\}/g, ''); // Remove curly brackets
-          
-            console.log(cleanedFinalText);
-          
-            // Final output
-            if (defaultTooltip) {
-              return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow, cleanedFinalText);
-            } else {
-              return tooltipHtml(undefined, undefined, undefined, cleanedFinalText);
-            }
+
+          // Join the static parts and dynamic parts to form the final tooltip text
+          const finalTooltipText = dynamicParts.join('').replace(/,\s*$/, ''); // Remove trailing comma if any
+
+          // Remove any remaining curly brackets from the final output
+          const cleanedFinalText = finalTooltipText.replace(/\{|\}/g, ''); // Remove curly brackets
+
+          console.log(cleanedFinalText);
+
+          // Final output
+          if (defaultTooltip) {
+            return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow, cleanedFinalText);
+          } else {
+            return tooltipHtml(undefined, undefined, undefined, cleanedFinalText);
           }
+        }
 
 
 
@@ -936,7 +975,7 @@ export default function transformProps(
       ]
       : [],
   };
-  console.log('dedupSeries series:',dedupSeries(series));
+  console.log('dedupSeries series:', dedupSeries(series));
 
   const onFocusedSeries = (seriesName: string | null) => {
     focusedSeries = seriesName;
