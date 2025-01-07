@@ -195,6 +195,7 @@ export default function transformProps(
     defaultTooltip,
     customTooltip,
     customTooltipText,
+    showTooltipTotalNet,
   }: EchartsTimeseriesFormData = { ...DEFAULT_FORM_DATA, ...formData };
   const refs: Refs = {};
   const groupBy = ensureIsArray(groupby);
@@ -740,7 +741,15 @@ export default function transformProps(
             focusedRow = rows.length - focusedRow - 1;
           }
         }
+        console.log('rows:',rows);
         if (allowTotal && showTooltipTotal) {
+          const totalRow = ['Total', formatter.format(total)];
+          if (showPercentage) {
+            totalRow.push(percentFormatter.format(1));
+          }
+          rows.push(totalRow);
+        }
+        if (showTooltipTotalNet) {
           const totalRow = ['Total', formatter.format(total)];
           if (showPercentage) {
             totalRow.push(percentFormatter.format(1));

@@ -58,6 +58,7 @@ const {
   defaultTooltip = true,
   customTooltip,
   customTooltipText,
+  showTooltipTotalNet = false,
 } = DEFAULT_FORM_DATA;
 
 function createAxisTitleControl(axis: 'x' | 'y'): ControlSetRow[] {
@@ -451,6 +452,20 @@ const config: ControlPanelConfig = {
               renderTrigger: true,
               default: customTooltip,
               description: t('Enables the custom Tooltip'),
+              disableStash: true,
+              resetOnHide: false,
+            },
+          },
+        ],
+        [
+          {
+            name: 'show_tooltip_total_net',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Show Total Net'),
+              renderTrigger: true,
+              default: showTooltipTotalNet,
+              description: t('Show Total Net in Tooltip'),
               disableStash: true,
               resetOnHide: false,
             },
