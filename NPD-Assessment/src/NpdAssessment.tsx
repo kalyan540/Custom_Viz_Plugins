@@ -44,26 +44,8 @@ import 'primeicons/primeicons.css';
 // https://github.com/apache-superset/superset-ui/blob/master/packages/superset-ui-core/src/style/index.ts
 
 const Styles = styled.div<NpdAssessmentStylesProps>`
-  background-color: ${({ theme }) => theme.colors.secondary.light2};
-  padding: ${({ theme }) => theme.gridUnit * 4}px;
-  border-radius: ${({ theme }) => theme.gridUnit * 2}px;
   height: ${({ height }) => height}px;
   width: ${({ width }) => width}px;
-
-  h3 {
-    /* You can use your props to control CSS! */
-    margin-top: 0;
-    margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
-    font-size: ${({ theme, headerFontSize }) =>
-    theme.typography.sizes[headerFontSize]}px;
-    font-weight: ${({ theme, boldText }) =>
-    theme.typography.weights[boldText ? 'bold' : 'normal']};
-  }
-
-  pre {
-    height: ${({ theme, headerFontSize, height }) =>
-    height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
-  }
 
   .card {
     background: var(--surface-card);
@@ -241,7 +223,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   const productDialogFooter = (
     <React.Fragment>
       <Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
-      <Button label="Save" icon="pi pi-check" onClick={console.log("Save Clicked")} />
+      <Button label="Save" icon="pi pi-check" onClick={hideDialog} />
     </React.Fragment>
   );
 
