@@ -192,18 +192,23 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   };
 
   const header = (
-    <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-      {leftToolbarTemplate()}
-      <IconField iconPosition="left">
-        <InputIcon className="pi pi-search" />
-        <InputText
-          type="search"
-          onInput={(e) => setGlobalFilter(e.target.value)}
-          placeholder="Search..."
-        />
-      </IconField>
+    <div className="flex justify-content-between align-items-center">
+        <div className="flex align-items-center">
+            {leftToolbarTemplate()}
+        </div>
+        <div className="flex align-items-center">
+            <IconField iconPosition="left">
+                <InputIcon className="pi pi-search" />
+                <InputText
+                    type="search"
+                    onInput={(e) => setGlobalFilter(e.target.value)}
+                    placeholder="Search..."
+                    style={{ width: '200px' }} // Adjust width as needed
+                />
+            </IconField>
+        </div>
     </div>
-  );
+);
 
   const editProduct = (data) => {
     console.log(data);
@@ -308,7 +313,8 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           globalFilter={globalFilter}
           header={header}
           scrollable
-          scrollHeight="300px"
+          scrollHeight={height-100+"px"}
+          
         >
           {columns.map((col) => (
             <Column
