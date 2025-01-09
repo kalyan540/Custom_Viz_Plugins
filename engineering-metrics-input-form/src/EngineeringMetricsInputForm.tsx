@@ -373,63 +373,65 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       height={height}
       width={width}
     >
-      <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
-        {uniqueBusinessUnits.map((unit, index) => (
-          <Dropdown title={unit} menuStyle={{ minWidth: 120 }}>
-            <Dropdown.Item onSelect={() => {
-              setbussinessUnit(unit);
-              handleAccountDropdownSelect();
-            }}>Add New Account</Dropdown.Item>
-            {filterAccountsByBusinessUnit(unit).map((accounts, idx) => (
-              <Dropdown.Menu title={accounts} style={{ minWidth: 120 }}>
-                <Dropdown.Item onSelect={() => {
-                  setbussinessUnit(unit);
-                  setAccountName(accounts);
-                  setIsEditing(true);
-                  handleDropdownSelect();
-                }}>Add New Project</Dropdown.Item>
-                {filterProjectsByAccountAndBusinessUnit(unit, accounts).map((project, idx) => (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
+          {uniqueBusinessUnits.map((unit, index) => (
+            <Dropdown title={unit} menuStyle={{ minWidth: 120 }}>
+              <Dropdown.Item onSelect={() => {
+                setbussinessUnit(unit);
+                handleAccountDropdownSelect();
+              }}>Add New Account</Dropdown.Item>
+              {filterAccountsByBusinessUnit(unit).map((accounts, idx) => (
+                <Dropdown.Menu title={accounts} style={{ minWidth: 120 }}>
                   <Dropdown.Item onSelect={() => {
                     setbussinessUnit(unit);
                     setAccountName(accounts);
-                    setProjectName(project);
-                    handletableData();
-                  }}>{project}</Dropdown.Item>
-                ))}
-              </Dropdown.Menu>
-            ))}
-
-          </Dropdown>
-        ))}
-
-        {tableFetch && (<div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Business Unit</th>
-                <th>Account</th>
-                <th>Project</th>
-                <th>Key</th>
-                <th>Scope</th>
-                <th>Condition</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTableData.map((row, index) => (
-                <tr key={index}>
-                  <td>{row['Business Unit']}</td>
-                  <td>{row.Account}</td>
-                  <td>{row.Project}</td>
-                  <td>{row.Key}</td>
-                  <td>{row.Scope}</td>
-                  <td>{row.Condition}</td>
-                </tr>
+                    setIsEditing(true);
+                    handleDropdownSelect();
+                  }}>Add New Project</Dropdown.Item>
+                  {filterProjectsByAccountAndBusinessUnit(unit, accounts).map((project, idx) => (
+                    <Dropdown.Item onSelect={() => {
+                      setbussinessUnit(unit);
+                      setAccountName(accounts);
+                      setProjectName(project);
+                      handletableData();
+                    }}>{project}</Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
               ))}
-            </tbody>
-          </table>
-        </div>
-        )}
 
+            </Dropdown>
+          ))}
+
+          {tableFetch && (<div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Business Unit</th>
+                  <th>Account</th>
+                  <th>Project</th>
+                  <th>Key</th>
+                  <th>Scope</th>
+                  <th>Condition</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTableData.map((row, index) => (
+                  <tr key={index}>
+                    <td>{row['Business Unit']}</td>
+                    <td>{row.Account}</td>
+                    <td>{row.Project}</td>
+                    <td>{row.Key}</td>
+                    <td>{row.Scope}</td>
+                    <td>{row.Condition}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          )}
+
+        </div>
       </div>
 
       {isAccountModalOpen && (
