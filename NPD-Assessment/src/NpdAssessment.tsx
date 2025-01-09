@@ -30,7 +30,7 @@ import { RadioButton } from 'primereact/radiobutton';
 import { InputNumber } from 'primereact/inputnumber';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import "primereact/resources/themes/lara-light-cyan/theme.css";
+import "primereact/resources/themes/lara-light-indigo/theme.css";
 import 'primeicons/primeicons.css';
         
 
@@ -72,7 +72,7 @@ const Styles = styled.div<NpdAssessmentStylesProps>`
     margin-bottom: 1rem;
   }
 
-  
+
 `;
 
 /**
