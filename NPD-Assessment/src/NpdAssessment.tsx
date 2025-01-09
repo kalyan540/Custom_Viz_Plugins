@@ -307,6 +307,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
           globalFilter={globalFilter}
           header={header}
+          scrollable
         >
           {columns.map((col) => (
             <Column
