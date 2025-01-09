@@ -30,7 +30,7 @@ import { RadioButton } from 'primereact/radiobutton';
 import { InputNumber } from 'primereact/inputnumber';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import "primereact/resources/themes/bootstrap4-light-blue/theme.css";
+import 'primereact/resources/themes/lara-light-cyan/theme.css';
 import 'primeicons/primeicons.css';
         
 
@@ -308,6 +308,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           globalFilter={globalFilter}
           header={header}
           scrollable
+          scrollHeight="50px"
         >
           {columns.map((col) => (
             <Column
