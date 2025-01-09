@@ -64,6 +64,15 @@ const Styles = styled.div<NpdAssessmentStylesProps>`
     height: ${({ theme, headerFontSize, height }) =>
     height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
   }
+
+  .card {
+    background: var(--surface-card);
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+  }
+
+  
 `;
 
 /**
