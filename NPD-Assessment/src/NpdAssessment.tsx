@@ -30,7 +30,7 @@ import { RadioButton } from 'primereact/radiobutton';
 import { InputNumber } from 'primereact/inputnumber';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import "primereact/resources/themes/lara-light-indigo/theme.css"; // Choose your theme
+import "primereact/resources/themes/lara-light-cyan/theme.css"; // Choose your theme
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
 
