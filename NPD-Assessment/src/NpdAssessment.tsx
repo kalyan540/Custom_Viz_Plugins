@@ -30,10 +30,12 @@ import { RadioButton } from 'primereact/radiobutton';
 import { InputNumber } from 'primereact/inputnumber';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import 'primereact/resources/themes/lara-light-cyan/theme.css';
+import "primereact/resources/themes/lara-light-indigo/theme.css"; // Choose your theme
+import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
+
 import "primeflex/primeflex.css";
-        
+
 
 
 
@@ -193,23 +195,20 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   };
 
   const header = (
-    <div className="flex justify-content-between align-items-center">
-        <div className="flex align-items-center">
-            {leftToolbarTemplate()}
-        </div>
-        <div className="flex align-items-center">
-            <IconField iconPosition="left">
-                <InputIcon className="pi pi-search" />
-                <InputText
-                    type="search"
-                    onInput={(e) => setGlobalFilter(e.target.value)}
-                    placeholder="Search..."
-                    style={{ width: '200px' }} // Adjust width as needed
-                />
-            </IconField>
-        </div>
+    <div className="flex flex-wrap justify-content-between align-items-center">
+
+      {leftToolbarTemplate()}
+      <IconField iconPosition="left">
+        <InputIcon className="pi pi-search" />
+        <InputText
+          type="search"
+          onInput={(e) => setGlobalFilter(e.target.value)}
+          placeholder="Search..."
+          style={{ width: '200px' }} // Adjust width as needed
+        />
+      </IconField>
     </div>
-);
+  );
 
   const editProduct = (data) => {
     console.log(data);
@@ -272,7 +271,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
 
   const deleteProduct = () => {
     setDeleteProductDialog(false);
-    setProduct(emptyProduct);    
+    setProduct(emptyProduct);
   };
 
   const deleteProductDialogFooter = (
@@ -292,7 +291,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
     </React.Fragment>
   );
 
-  
+
 
   return (
     <Styles
@@ -314,8 +313,8 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           globalFilter={globalFilter}
           header={header}
           scrollable
-          scrollHeight={height-100+"px"}
-          
+          scrollHeight={height - 100 + "px"}
+
         >
           {columns.map((col) => (
             <Column
@@ -323,7 +322,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
               header={col}
               style={{ minWidth: '12rem' }}
             ></Column>
-            
+
           ))}
           <Column
             body={actionBodyTemplate}
