@@ -291,6 +291,132 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
     </React.Fragment>
   );
 
+  const InputForm = () => {
+    return (
+      <div>
+        <div className="field">
+          <label htmlFor="functionName" className="font-bold">Function Name</label>
+          <InputText
+            id="functionName"
+            value={formData.functionName}
+            onChange={(e) => handleInputChange('functionName', e.target.value)}
+            required
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="group" className="font-bold">Group</label>
+          <InputText
+            id="group"
+            value={formData.group}
+            onChange={(e) => handleInputChange('group', e.target.value)}
+            required
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="business" className="font-bold">Business</label>
+          <InputText
+            id="business"
+            value={formData.business}
+            onChange={(e) => handleInputChange('business', e.target.value)}
+            required
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="assessmentLead" className="font-bold">Assessment Lead</label>
+          <InputText
+            id="assessmentLead"
+            value={formData.assessmentLead}
+            onChange={(e) => handleInputChange('assessmentLead', e.target.value)}
+            required
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="assessmentID" className="font-bold">Assessment ID</label>
+          <InputText
+            id="assessmentID"
+            value={formData.assessmentID}
+            onChange={(e) => handleInputChange('assessmentID', e.target.value)}
+            required
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="maturity" className="font-bold">Maturity</label>
+          <InputText
+            id="maturity"
+            value={formData.maturity}
+            onChange={(e) => handleInputChange('maturity', e.target.value)}
+            required
+            placeholder="Select Maturity"
+          />
+          {/* You can replace this with a dropdown or select component */}
+        </div>
+        <div className="field">
+          <label htmlFor="assessmentDate" className="font-bold">Assessment Date</label>
+          <InputText
+            id="assessmentDate"
+            type="date"
+            value={formData.assessmentDate}
+            onChange={(e) => handleInputChange('assessmentDate', e.target.value)}
+            required
+          />
+        </div>
+        <div className="field">
+          <label className="mb-3 font-bold">Status</label>
+          <div className="formgrid grid">
+            <div className="field-radiobutton col-4">
+              <RadioButton
+                inputId="statusPublished"
+                name="status"
+                value="Published"
+                onChange={(e) => handleInputChange('status', e.target.value)}
+                checked={formData.status === 'Published'}
+              />
+              <label htmlFor="statusPublished">Published</label>
+            </div>
+            <div className="field-radiobutton col-4">
+              <RadioButton
+                inputId="statusInProgress"
+                name="status"
+                value="In Progress"
+                onChange={(e) => handleInputChange('status', e.target.value)}
+                checked={formData.status === 'In Progress'}
+              />
+              <label htmlFor="statusInProgress">In Progress</label>
+            </div>
+            <div className="field-radiobutton col-4">
+              <RadioButton
+                inputId="statusPending"
+                name="status"
+                value="Pending"
+                onChange={(e) => handleInputChange('status', e.target.value)}
+                checked={formData.status === 'Pending'}
+              />
+              <label htmlFor="statusPending">Pending</label>
+            </div>
+          </div>
+        </div>
+        <div className="field">
+          <label htmlFor="actions" className="font-bold">Actions</label>
+          <InputText
+            id="actions"
+            value={formData.actions}
+            onChange={(e) => handleInputChange('actions', e.target.value)}
+            required
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="assessmentType" className="font-bold">Assessment Type</label>
+          <InputText
+            id="assessmentType"
+            value={formData.assessmentType}
+            onChange={(e) => handleInputChange('assessmentType', e.target.value)}
+            required
+          />
+        </div>
+      </div>
+    );
+  };
+
 
 
   return (
@@ -336,113 +462,13 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
         visible={productDialog}
         style={{ width: '32rem' }}
         breakpoints={{ '960px': '75vw', '641px': '90vw' }}
-        header="Product Details"
+        header="Create NPD Assessment"
         modal
         className="p-fluid"
         footer={productDialogFooter}
         onHide={hideDialog}
       >
-        <div className="field">
-          <label htmlFor="name" className="font-bold">
-            Name
-          </label>
-          <InputText
-            id="name"
-            value={product.name}
-            onChange={(e) => onInputChange(e, 'name')}
-            required
-            autoFocus
-            className={classNames({ 'p-invalid': submitted && !product.name })}
-          />
-          {submitted && !product.name && (
-            <small className="p-error">Name is required.</small>
-          )}
-        </div>
-        <div className="field">
-          <label htmlFor="description" className="font-bold">
-            Description
-          </label>
-          <InputTextarea
-            id="description"
-            value={product.description}
-            onChange={(e) => onInputChange(e, 'description')}
-            required
-            rows={3}
-            cols={20}
-          />
-        </div>
-
-        <div className="field">
-          <label className="mb-3 font-bold">Category</label>
-          <div className="formgrid grid">
-            <div className="field-radiobutton col-6">
-              <RadioButton
-                inputId="category1"
-                name="category"
-                value="Accessories"
-                onChange={onCategoryChange}
-                checked={product.category === 'Accessories'}
-              />
-              <label htmlFor="category1">Accessories</label>
-            </div>
-            <div className="field-radiobutton col-6">
-              <RadioButton
-                inputId="category2"
-                name="category"
-                value="Clothing"
-                onChange={onCategoryChange}
-                checked={product.category === 'Clothing'}
-              />
-              <label htmlFor="category2">Clothing</label>
-            </div>
-            <div className="field-radiobutton col-6">
-              <RadioButton
-                inputId="category3"
-                name="category"
-                value="Electronics"
-                onChange={onCategoryChange}
-                checked={product.category === 'Electronics'}
-              />
-              <label htmlFor="category3">Electronics</label>
-            </div>
-            <div className="field-radiobutton col-6">
-              <RadioButton
-                inputId="category4"
-                name="category"
-                value="Fitness"
-                onChange={onCategoryChange}
-                checked={product.category === 'Fitness'}
-              />
-              <label htmlFor="category4">Fitness</label>
-            </div>
-          </div>
-        </div>
-
-        <div className="formgrid grid">
-          <div className="field col">
-            <label htmlFor="price" className="font-bold">
-              Price
-            </label>
-            <InputNumber
-              id="price"
-              value={product.price}
-              onValueChange={(e) => onInputNumberChange(e, 'price')}
-              mode="currency"
-              currency="USD"
-              locale="en-US"
-            />
-          </div>
-          <div className="field col">
-            <label htmlFor="quantity" className="font-bold">
-              Quantity
-            </label>
-            <InputNumber
-              id="quantity"
-              value={product.quantity}
-              onValueChange={(e) => onInputNumberChange(e, 'quantity')}
-            />
-          </div>
-        </div>
+        <InputForm />
       </Dialog>
 
       <Dialog
