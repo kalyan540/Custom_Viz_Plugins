@@ -456,11 +456,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           globalFilter={globalFilter}
           header={header}
           scrollable
-          scrollHeight={height - 105 + "px"}
-          style={{
-            minHeight: '20px', // Set minimum height for the table
-          }}
-
+          scrollHeight={height - 150 + "px"}
         >
           {columns.map((col) => (
             <Column
