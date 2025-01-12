@@ -255,7 +255,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           icon="pi pi-pencil"
           rounded
           outlined
-          className="mr-2"
+          className="p-button-rounded p-button-outlined"
           onClick={() => editProduct(rowData)}
         />
         <Button
@@ -472,6 +472,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           <Column
             body={actionBodyTemplate}
             header="Actions"
+            headerStyle={{ textAlign: 'center' }}
             exportable={false}
             frozen // Freezes the column
             alignFrozen="right" // Aligns the frozen column to the right
