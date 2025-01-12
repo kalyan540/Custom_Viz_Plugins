@@ -441,7 +441,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
       <div className="card">
         <DataTable
           value={data}
-          paginator={filteredData.length > 0}
+          paginator
           rows={10}
           rowsPerPageOptions={[5, 10, 25]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
