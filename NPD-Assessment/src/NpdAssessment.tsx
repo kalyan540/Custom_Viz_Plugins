@@ -57,12 +57,6 @@ const Styles = styled.div<NpdAssessmentStylesProps>`
     margin-bottom: 1rem;
   }
 
-  .p-paginator {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-  }
 
   .dialog-footer-buttons {
     display: flex;
