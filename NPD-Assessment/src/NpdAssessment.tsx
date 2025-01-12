@@ -240,14 +240,17 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
 
   const productDialogFooter = (
     <React.Fragment>
+      <div className="card flex flex-wrap justify-content-end gap-3">
       <Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
       <Button label="Save" icon="pi pi-check" onClick={hideDialog} />
+      </div>
     </React.Fragment>
   );
 
   const actionBodyTemplate = (rowData) => {
     return (
       <React.Fragment>
+
         <Button
           icon="pi pi-pencil"
           rounded
@@ -289,7 +292,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
 
   const deleteProductDialogFooter = (
     <React.Fragment>
-      <div className="card flex flex-wrap justify-content-center gap-3">
+      <div className="card flex flex-wrap justify-content-end gap-3">
         <Button
           label="No"
           icon="pi pi-times"
