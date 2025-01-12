@@ -57,7 +57,6 @@ const Styles = styled.div<NpdAssessmentStylesProps>`
     margin-bottom: 1rem;
   }
 
-
   .dialog-footer-buttons {
     display: flex;
     gap: 1rem; /* Adds spacing between buttons */
@@ -450,7 +449,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           globalFilter={globalFilter}
           header={header}
           scrollable
-          scrollHeight={height - 150 + "px"}
+          scrollHeight={height - 125 + "px"}
         >
           {columns.map((col) => (
             <Column
