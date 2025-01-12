@@ -242,8 +242,8 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   const productDialogFooter = (
     <React.Fragment>
       <div className="card flex flex-wrap justify-content-end gap-3">
-      <Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
-      <Button label="Save" icon="pi pi-check" onClick={hideDialog} />
+      <Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} style={{ color: 'white' }} />
+      <Button label="Save" icon="pi pi-check" onClick={hideDialog} style={{ color: 'white' }}/>
       </div>
     </React.Fragment>
   );
@@ -299,12 +299,14 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           icon="pi pi-times"
           outlined
           onClick={hideDeleteProductDialog}
+          style={{ color: 'white' }}
         />
         <Button
           label="Yes"
           icon="pi pi-check"
           severity="danger"
           onClick={deleteProduct}
+          style={{ color: 'white' }}
         />
       </div>
     </React.Fragment>
