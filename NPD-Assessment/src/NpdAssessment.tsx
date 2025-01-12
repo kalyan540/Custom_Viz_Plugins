@@ -449,7 +449,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           globalFilter={globalFilter}
           header={header}
           scrollable
-          scrollHeight={height - 125 + "px"}
+          scrollHeight={height - 175 + "px"}
         >
           {columns.map((col) => (
             <Column
