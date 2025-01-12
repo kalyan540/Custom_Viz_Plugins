@@ -254,12 +254,14 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
         <Button
           icon="pi pi-pencil"
           rounded
+          outlined
           className="mr-2"
           onClick={() => editProduct(rowData)}
         />
         <Button
           icon="pi pi-trash"
           rounded
+          outlined
           severity="danger"
           onClick={() => confirmDeleteProduct(rowData)}
         />
@@ -469,7 +471,10 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           ))}
           <Column
             body={actionBodyTemplate}
+            header="Actions"
             exportable={false}
+            frozen // Freezes the column
+            alignFrozen="right" // Aligns the frozen column to the right
             style={{ minWidth: '12rem' }}
           ></Column>
         </DataTable>
