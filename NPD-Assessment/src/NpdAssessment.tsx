@@ -471,6 +471,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
             body={actionBodyTemplate}
             header="Actions"
             headerStyle={{ textAlign: 'center' }}
+            bodyStyle={{ textAlign: 'center', padding: '8px' }}
             exportable={false}
             frozen // Freezes the column
             alignFrozen="right" // Aligns the frozen column to the right
