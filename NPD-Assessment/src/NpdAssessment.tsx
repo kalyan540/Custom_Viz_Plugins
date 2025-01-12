@@ -456,7 +456,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           globalFilter={globalFilter}
           header={header}
           scrollable
-          scrollHeight={height - 50 + "px"}
+          scrollHeight={height - 100 + "px"}
 
         >
           {columns.map((col) => (
@@ -507,7 +507,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           />
           {product && (
             <span>
-              Are you sure you want to delete <b>{formData.assessmentID}</b>?
+              Are you sure you want to delete <b>{product.name}</b>?
             </span>
           )}
         </div>
