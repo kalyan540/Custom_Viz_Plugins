@@ -507,7 +507,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           />
           {product && (
             <span>
-              Are you sure you want to delete <b>{product.name}</b>?
+              Are you sure you want to delete <b>{formData.assessmentID}</b>?
             </span>
           )}
         </div>
