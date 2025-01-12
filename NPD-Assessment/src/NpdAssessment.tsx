@@ -289,18 +289,20 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
 
   const deleteProductDialogFooter = (
     <React.Fragment>
-      <Button
-        label="No"
-        icon="pi pi-times"
-        outlined
-        onClick={hideDeleteProductDialog}
-      />
-      <Button
-        label="Yes"
-        icon="pi pi-check"
-        severity="danger"
-        onClick={deleteProduct}
-      />
+      <div className="card flex flex-wrap justify-content-center gap-3">
+        <Button
+          label="No"
+          icon="pi pi-times"
+          outlined
+          onClick={hideDeleteProductDialog}
+        />
+        <Button
+          label="Yes"
+          icon="pi pi-check"
+          severity="danger"
+          onClick={deleteProduct}
+        />
+      </div>
     </React.Fragment>
   );
 
