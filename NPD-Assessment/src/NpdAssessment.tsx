@@ -64,6 +64,12 @@ const Styles = styled.div<NpdAssessmentStylesProps>`
     right: 0;
   }
 
+  .dialog-footer-buttons {
+    display: flex;
+    gap: 1rem; /* Adds spacing between buttons */
+    justify-content: flex-end; /* Aligns buttons to the right */
+  }
+
 
 `;
 
@@ -442,7 +448,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           rows={10}
           rowsPerPageOptions={[5, 10, 25]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} assessments"
           globalFilter={globalFilter}
           header={header}
           scrollable
