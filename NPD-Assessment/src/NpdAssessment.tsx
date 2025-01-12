@@ -202,6 +202,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           icon="pi pi-plus"
           severity="success"
           onClick={openNew}
+          style={{ color: 'white' }}
         />
       </div>
     );
