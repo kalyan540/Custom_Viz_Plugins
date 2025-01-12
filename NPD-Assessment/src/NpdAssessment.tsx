@@ -219,6 +219,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
 
   const editProduct = (data) => {
     console.log(data);
+    setFormData({ ...data });
     setProductDialog(true);
   };
 
@@ -232,281 +233,311 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
     setProductDialog(false);
   };
 
-  const productDialogFooter = (
-    <React.Fragment>
-      <div className="card flex flex-wrap justify-content-end gap-3">
+  const saveProduct = () => {
+    setSubmitted(true);
+
+    console.log("Form Data Submitted:", formData);
+    try {
+      const responser = await SupersetClient.post({
+        endpoint: '/api/dataset/update',
+        jsonPayload: { formData: [formData], database: DBName, table_name: tableName },
+      });
+      console.log(responser.json.message);
+      setFormData({
+        functionName: '',
+        group: '',
+        business: '',
+        assessmentLead: '',
+        assessmentID: '',
+        maturity: '',
+        assessmentDate: '',
+        status: '',
+        actions: '',
+        assessmentType: '',
+      });
+
+      setProductDialog(false);
+    } catch (error) {
+      console.error('Error Submitting form data: ', error);
+    }
+  }
+};
+
+const productDialogFooter = (
+  <React.Fragment>
+    <div className="card flex flex-wrap justify-content-end gap-3">
       <Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
-      <Button label="Save" icon="pi pi-check" onClick={hideDialog} style={{ color: 'white' }}/>
-      </div>
-    </React.Fragment>
+      <Button label="Save" icon="pi pi-check" onClick={hideDialog} style={{ color: 'white' }} />
+    </div>
+  </React.Fragment>
+);
+
+const actionBodyTemplate = (rowData) => {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+      <Button
+        icon="pi pi-pencil"
+        className="p-button-rounded p-button-outlined"
+        style={{ padding: '4px', width: '30px', height: '30px' }}
+        onClick={() => editProduct(rowData)}
+      />
+      <Button
+        icon="pi pi-trash"
+        className="p-button-rounded p-button-outlined p-button-danger"
+        style={{ padding: '4px', width: '30px', height: '30px' }}
+        onClick={() => confirmDeleteProduct(rowData)}
+      />
+    </div>
   );
+};
 
-  const actionBodyTemplate = (rowData) => {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
-        <Button
-          icon="pi pi-pencil"
-          className="p-button-rounded p-button-outlined"
-          style={{ padding: '4px', width: '30px', height: '30px' }}
-          onClick={() => editProduct(rowData)}
-        />
-        <Button
-          icon="pi pi-trash"
-          className="p-button-rounded p-button-outlined p-button-danger"
-          style={{ padding: '4px', width: '30px', height: '30px' }}
-          onClick={() => confirmDeleteProduct(rowData)}
-        />
-      </div>
-    );
-  };
+const onInputChange = (e, name) => {
+  console.log(e.value, name);
+};
 
-  const onInputChange = (e, name) => {
-    console.log(e.value, name);
-  };
+const onCategoryChange = (e) => {
+  console.log(e.value);
+};
 
-  const onCategoryChange = (e) => {
-    console.log(e.value);
-  };
+const onInputNumberChange = (e, name) => {
+  console.log(e.value, name);
+};
 
-  const onInputNumberChange = (e, name) => {
-    console.log(e.value, name);
-  };
+const hideDeleteProductDialog = () => {
+  setDeleteProductDialog(false);
+};
 
-  const hideDeleteProductDialog = () => {
-    setDeleteProductDialog(false);
-  };
+const deleteProduct = () => {
+  setDeleteProductDialog(false);
+  setProduct(emptyProduct);
+};
 
-  const deleteProduct = () => {
-    setDeleteProductDialog(false);
-    setProduct(emptyProduct);
-  };
+const deleteProductDialogFooter = (
+  <React.Fragment>
+    <div className="card flex flex-wrap justify-content-end gap-3">
+      <Button
+        label="No"
+        icon="pi pi-times"
+        outlined
+        onClick={hideDeleteProductDialog}
+      />
+      <Button
+        label="Yes"
+        icon="pi pi-check"
+        severity="danger"
+        onClick={deleteProduct}
+        style={{ color: 'white' }}
+      />
+    </div>
+  </React.Fragment>
+);
 
-  const deleteProductDialogFooter = (
-    <React.Fragment>
-      <div className="card flex flex-wrap justify-content-end gap-3">
-        <Button
-          label="No"
-          icon="pi pi-times"
-          outlined
-          onClick={hideDeleteProductDialog}
-        />
-        <Button
-          label="Yes"
-          icon="pi pi-check"
-          severity="danger"
-          onClick={deleteProduct}
-          style={{ color: 'white' }}
+const InputForm = () => {
+  return (
+    <div>
+      <div className="field">
+        <label htmlFor="functionName" className="font-bold">Function Name</label>
+        <InputText
+          id="functionName"
+          value={formData.functionName}
+          onChange={(e) => handleInputChange('functionName', e.target.value)}
+          required
         />
       </div>
-    </React.Fragment>
-  );
-
-  const InputForm = () => {
-    return (
-      <div>
-        <div className="field">
-          <label htmlFor="functionName" className="font-bold">Function Name</label>
-          <InputText
-            id="functionName"
-            value={formData.functionName}
-            onChange={(e) => handleInputChange('functionName', e.target.value)}
-            required
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="group" className="font-bold">Group</label>
-          <InputText
-            id="group"
-            value={formData.group}
-            onChange={(e) => handleInputChange('group', e.target.value)}
-            required
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="business" className="font-bold">Business</label>
-          <InputText
-            id="business"
-            value={formData.business}
-            onChange={(e) => handleInputChange('business', e.target.value)}
-            required
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="assessmentLead" className="font-bold">Assessment Lead</label>
-          <InputText
-            id="assessmentLead"
-            value={formData.assessmentLead}
-            onChange={(e) => handleInputChange('assessmentLead', e.target.value)}
-            required
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="assessmentID" className="font-bold">Assessment ID</label>
-          <InputText
-            id="assessmentID"
-            value={formData.assessmentID}
-            onChange={(e) => handleInputChange('assessmentID', e.target.value)}
-            required
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="maturity" className="font-bold">Maturity</label>
-          <InputText
-            id="maturity"
-            value={formData.maturity}
-            onChange={(e) => handleInputChange('maturity', e.target.value)}
-            required
-            placeholder="Select Maturity"
-          />
-          {/* You can replace this with a dropdown or select component */}
-        </div>
-        <div className="field">
-          <label htmlFor="assessmentDate" className="font-bold">Assessment Date</label>
-          <InputText
-            id="assessmentDate"
-            type="date"
-            value={formData.assessmentDate}
-            onChange={(e) => handleInputChange('assessmentDate', e.target.value)}
-            required
-          />
-        </div>
-        <div className="field">
-          <label className="mb-3 font-bold">Status</label>
-          <div className="formgrid grid">
-            <div className="field-radiobutton col-4">
-              <RadioButton
-                inputId="statusPublished"
-                name="status"
-                value="Published"
-                onChange={(e) => handleInputChange('status', e.target.value)}
-                checked={formData.status === 'Published'}
-              />
-              <label htmlFor="statusPublished">Published</label>
-            </div>
-            <div className="field-radiobutton col-4">
-              <RadioButton
-                inputId="statusInProgress"
-                name="status"
-                value="In Progress"
-                onChange={(e) => handleInputChange('status', e.target.value)}
-                checked={formData.status === 'In Progress'}
-              />
-              <label htmlFor="statusInProgress">In Progress</label>
-            </div>
-            <div className="field-radiobutton col-4">
-              <RadioButton
-                inputId="statusPending"
-                name="status"
-                value="Pending"
-                onChange={(e) => handleInputChange('status', e.target.value)}
-                checked={formData.status === 'Pending'}
-              />
-              <label htmlFor="statusPending">Pending</label>
-            </div>
+      <div className="field">
+        <label htmlFor="group" className="font-bold">Group</label>
+        <InputText
+          id="group"
+          value={formData.group}
+          onChange={(e) => handleInputChange('group', e.target.value)}
+          required
+        />
+      </div>
+      <div className="field">
+        <label htmlFor="business" className="font-bold">Business</label>
+        <InputText
+          id="business"
+          value={formData.business}
+          onChange={(e) => handleInputChange('business', e.target.value)}
+          required
+        />
+      </div>
+      <div className="field">
+        <label htmlFor="assessmentLead" className="font-bold">Assessment Lead</label>
+        <InputText
+          id="assessmentLead"
+          value={formData.assessmentLead}
+          onChange={(e) => handleInputChange('assessmentLead', e.target.value)}
+          required
+        />
+      </div>
+      <div className="field">
+        <label htmlFor="assessmentID" className="font-bold">Assessment ID</label>
+        <InputText
+          id="assessmentID"
+          value={formData.assessmentID}
+          onChange={(e) => handleInputChange('assessmentID', e.target.value)}
+          required
+        />
+      </div>
+      <div className="field">
+        <label htmlFor="maturity" className="font-bold">Maturity</label>
+        <InputText
+          id="maturity"
+          value={formData.maturity}
+          onChange={(e) => handleInputChange('maturity', e.target.value)}
+          required
+          placeholder="Select Maturity"
+        />
+        {/* You can replace this with a dropdown or select component */}
+      </div>
+      <div className="field">
+        <label htmlFor="assessmentDate" className="font-bold">Assessment Date</label>
+        <InputText
+          id="assessmentDate"
+          type="date"
+          value={formData.assessmentDate}
+          onChange={(e) => handleInputChange('assessmentDate', e.target.value)}
+          required
+        />
+      </div>
+      <div className="field">
+        <label className="mb-3 font-bold">Status</label>
+        <div className="formgrid grid">
+          <div className="field-radiobutton col-4">
+            <RadioButton
+              inputId="statusPublished"
+              name="status"
+              value="Published"
+              onChange={(e) => handleInputChange('status', e.target.value)}
+              checked={formData.status === 'Published'}
+            />
+            <label htmlFor="statusPublished">Published</label>
+          </div>
+          <div className="field-radiobutton col-4">
+            <RadioButton
+              inputId="statusInProgress"
+              name="status"
+              value="In Progress"
+              onChange={(e) => handleInputChange('status', e.target.value)}
+              checked={formData.status === 'In Progress'}
+            />
+            <label htmlFor="statusInProgress">In Progress</label>
+          </div>
+          <div className="field-radiobutton col-4">
+            <RadioButton
+              inputId="statusPending"
+              name="status"
+              value="Pending"
+              onChange={(e) => handleInputChange('status', e.target.value)}
+              checked={formData.status === 'Pending'}
+            />
+            <label htmlFor="statusPending">Pending</label>
           </div>
         </div>
-        <div className="field">
-          <label htmlFor="actions" className="font-bold">Actions</label>
-          <InputText
-            id="actions"
-            value={formData.actions}
-            onChange={(e) => handleInputChange('actions', e.target.value)}
-            required
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="assessmentType" className="font-bold">Assessment Type</label>
-          <InputText
-            id="assessmentType"
-            value={formData.assessmentType}
-            onChange={(e) => handleInputChange('assessmentType', e.target.value)}
-            required
-          />
-        </div>
       </div>
-    );
-  };
+      <div className="field">
+        <label htmlFor="actions" className="font-bold">Actions</label>
+        <InputText
+          id="actions"
+          value={formData.actions}
+          onChange={(e) => handleInputChange('actions', e.target.value)}
+          required
+        />
+      </div>
+      <div className="field">
+        <label htmlFor="assessmentType" className="font-bold">Assessment Type</label>
+        <InputText
+          id="assessmentType"
+          value={formData.assessmentType}
+          onChange={(e) => handleInputChange('assessmentType', e.target.value)}
+          required
+        />
+      </div>
+    </div>
+  );
+};
 
 
 
-  return (
-    <Styles
-      ref={rootElem}
-      boldText={props.boldText}
-      headerFontSize={props.headerFontSize}
-      height={height}
-      width={width}
-      datasource={datasource}
-    >
-      <div className="card">
-        <DataTable
-          value={data}
-          paginator
-          rows={10}
-          rowsPerPageOptions={[5, 10, 25]}
-          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} assessments"
-          globalFilter={globalFilter}
-          header={header}
-          scrollable
-          scrollHeight={height - 175 + "px"}
-        >
-          {columns.map((col) => (
-            <Column
-              field={col}
-              header={col}
-              style={{ minWidth: '12rem' }}
-            ></Column>
-
-          ))}
+return (
+  <Styles
+    ref={rootElem}
+    boldText={props.boldText}
+    headerFontSize={props.headerFontSize}
+    height={height}
+    width={width}
+    datasource={datasource}
+  >
+    <div className="card">
+      <DataTable
+        value={data}
+        paginator
+        rows={10}
+        rowsPerPageOptions={[5, 10, 25]}
+        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} assessments"
+        globalFilter={globalFilter}
+        header={header}
+        scrollable
+        scrollHeight={height - 175 + "px"}
+      >
+        {columns.map((col) => (
           <Column
-            body={actionBodyTemplate}
-            bodyStyle={{ textAlign: 'center', padding: '8px' }}
-            exportable={false}
-            frozen // Freezes the column
-            alignFrozen="right" // Aligns the frozen column to the right
+            field={col}
+            header={col}
             style={{ minWidth: '12rem' }}
           ></Column>
-        </DataTable>
+
+        ))}
+        <Column
+          body={actionBodyTemplate}
+          bodyStyle={{ textAlign: 'center', padding: '8px' }}
+          exportable={false}
+          frozen // Freezes the column
+          alignFrozen="right" // Aligns the frozen column to the right
+          style={{ minWidth: '12rem' }}
+        ></Column>
+      </DataTable>
+    </div>
+
+    <Dialog
+      visible={productDialog}
+      style={{ width: '32rem' }}
+      breakpoints={{ '960px': '75vw', '641px': '90vw' }}
+      header="Create NPD Assessment"
+      modal
+      className="p-fluid"
+      footer={productDialogFooter}
+      onHide={hideDialog}
+    >
+      <InputForm />
+    </Dialog>
+
+    <Dialog
+      visible={deleteProductDialog}
+      style={{ width: '32rem' }}
+      breakpoints={{ '960px': '75vw', '641px': '90vw' }}
+      header="Confirm"
+      modal
+      footer={deleteProductDialogFooter}
+      onHide={hideDeleteProductDialog}
+    >
+      <div className="confirmation-content">
+        <i
+          className="pi pi-exclamation-triangle mr-3"
+          style={{ fontSize: '2rem' }}
+        />
+        {product && (
+          <span>
+            Are you sure you want to delete <b>{formData.assessmentID}</b>?
+          </span>
+        )}
       </div>
+    </Dialog>
+  </Styles>
 
-      <Dialog
-        visible={productDialog}
-        style={{ width: '32rem' }}
-        breakpoints={{ '960px': '75vw', '641px': '90vw' }}
-        header="Create NPD Assessment"
-        modal
-        className="p-fluid"
-        footer={productDialogFooter}
-        onHide={hideDialog}
-      >
-        <InputForm />
-      </Dialog>
-
-      <Dialog
-        visible={deleteProductDialog}
-        style={{ width: '32rem' }}
-        breakpoints={{ '960px': '75vw', '641px': '90vw' }}
-        header="Confirm"
-        modal
-        footer={deleteProductDialogFooter}
-        onHide={hideDeleteProductDialog}
-      >
-        <div className="confirmation-content">
-          <i
-            className="pi pi-exclamation-triangle mr-3"
-            style={{ fontSize: '2rem' }}
-          />
-          {product && (
-            <span>
-              Are you sure you want to delete <b>{product.name}</b>?
-            </span>
-          )}
-        </div>
-      </Dialog>
-    </Styles>
-
-  );
+);
 
 }
 
