@@ -233,7 +233,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
     setProductDialog(false);
   };
 
-  const saveProduct = () => {
+  const saveProduct = async () => {
     setSubmitted(true);
 
     console.log("Form Data Submitted:", formData);
@@ -260,14 +260,13 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
     } catch (error) {
       console.error('Error Submitting form data: ', error);
     }
-  }
-};
+  };
 
 const productDialogFooter = (
   <React.Fragment>
     <div className="card flex flex-wrap justify-content-end gap-3">
       <Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
-      <Button label="Save" icon="pi pi-check" onClick={hideDialog} style={{ color: 'white' }} />
+      <Button label="Save" icon="pi pi-check" onClick={saveProduct} style={{ color: 'white' }} />
     </div>
   </React.Fragment>
 );
