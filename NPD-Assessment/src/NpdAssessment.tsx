@@ -255,9 +255,8 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           icon="pi pi-pencil"
           rounded
           outlined
-          className="mr-2"
+          className="mr-20"
           onClick={() => editProduct(rowData)}
-          style={{ padding: '5px' }}
         />
         <Button
           icon="pi pi-trash"
@@ -265,7 +264,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           outlined
           severity="danger"
           onClick={() => confirmDeleteProduct(rowData)}
-          style={{ padding: '5px' }}
+          style={{ padding: '5px', height: 'auto' }}
         />
       </React.Fragment>
     );
