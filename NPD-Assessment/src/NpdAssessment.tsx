@@ -276,7 +276,17 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
     </React.Fragment>
   );
 
-  function InputForm({ fields, formData, onInputChange }) {
+  function InputForm({ fields, initialFormData, onFormUpdate }) {
+    const [localFormData, setLocalFormData] = useState(initialFormData);
+  
+    const handleLocalChange = (field, value) => {
+      setLocalFormData((prev) => ({ ...prev, [field]: value }));
+    };
+  
+    const handleBlur = (field) => {
+      onFormUpdate(field, localFormData[field]);
+    };
+  
     return (
       <div>
         {fields.map((field) => (
@@ -284,8 +294,9 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
             <label htmlFor={field} className="font-bold">{field}</label>
             <InputText
               id={field}
-              value={formData[field]}
-              onChange={(e) => onInputChange(field, e.target.value)}
+              value={localFormData[field]}
+              onChange={(e) => handleLocalChange(field, e.target.value)}
+              onBlur={() => handleBlur(field)}
               required
             />
           </div>
