@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, useState, createRef, useRef } from 'react';
+import React, { useEffect, useState, createRef, useCallback } from 'react';
 import { styled, SupersetClient } from '@superset-ui/core';
 import { NpdAssessmentProps, NpdAssessmentStylesProps } from './types';
 import { classNames } from 'primereact/utils';
@@ -114,46 +114,15 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   }, [datasource]);
 
   const columns = Object.keys(data[0] || {});
-  const [formData, setFormData] = useState({
-    functionName: '',
-    group: '',
-    business: '',
-    assessmentLead: '',
-    assessmentID: '',
-    maturity: '',
-    assessmentDate: '',
-    status: '',
-    actions: '',
-    assessmentType: '',
-  });
+  const initialFormData = data.length > 0
+    ? Object.keys(data[0]).reduce((acc, key) => ({ ...acc, [key]: '' }), {})
+    : {};
+  
+  const [formData, setFormData] = useState(initialFormData);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [field]: value,
-    }));
-  };
-
-  // Update the filtered data based on selected filters
-  /*useEffect(() => {
-    let updatedData = data;
-
-    Object.entries(filters).forEach(([column, value]) => {
-      if (value) {
-        updatedData = updatedData.filter((row) => row[column] === value);
-      }
-    });
-
-    setFilteredData(updatedData);
-  }, [filters, data]);
-
-  // Handle filter changes
-  const handleFilterChange = (column: string, value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      [column]: value,
-    }));
-  };*/
+  const handleInputChange = useCallback((field, value) => {
+    setFormData((prevData) => ({ ...prevData, [field]: value }));
+  }, []);
 
   // Often, you just want to access the DOM and do whatever you want.
   // Here, you can do that with createRef, and the useEffect hook.
@@ -171,6 +140,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   const [row, setselectedrow] = useState<string | null>(null);
 
   const openNew = () => {
+    setFormData(initialFormData);
     setProductDialog(true);
   };
 
@@ -229,18 +199,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
         jsonPayload: { formData: [formData], database: DBName, table_name: tableName },
       });
       console.log(responser.json.message);
-      setFormData({
-        functionName: '',
-        group: '',
-        business: '',
-        assessmentLead: '',
-        assessmentID: '',
-        maturity: '',
-        assessmentDate: '',
-        status: '',
-        actions: '',
-        assessmentType: '',
-      });
+      setFormData(initialFormData);
 
       setProductDialog(false);
     } catch (error) {
@@ -318,7 +277,6 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   );
 
   const InputForm = React.memo(() => {
-    console.log(formData);
     return (
       <div>
         <div className="field">
@@ -470,6 +428,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
         >
           {columns.map((col) => (
             <Column
+              key={col}
               field={col}
               header={col}
               style={{ minWidth: '12rem' }}
