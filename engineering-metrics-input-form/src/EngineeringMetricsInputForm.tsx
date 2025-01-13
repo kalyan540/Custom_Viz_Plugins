@@ -105,11 +105,14 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const treeData = buildDynamicTree(data);
 
   const onSelectionChange = (e) => {
-    // If the clicked node is already selected, deselect it (uncheck the box)
-    if (e.value === selectedKeys) {
+    // Only allow one selection, reset selection if the same node is selected
+    const selectedKey = e.value;
+
+    // If the selected node is already selected, deselect it
+    if (selectedKey === selectedKeys) {
       setSelectedKeys(null); // Deselect
     } else {
-      setSelectedKeys(e.value); // Select the new node
+      setSelectedKeys(selectedKey); // Select the new node
     }
   };
 
