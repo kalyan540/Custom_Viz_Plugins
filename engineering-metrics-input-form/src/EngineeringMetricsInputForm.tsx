@@ -1,8 +1,11 @@
 import React, { useEffect, createRef, useState } from 'react';
 import { styled, SupersetClient } from '@superset-ui/core';
 import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
-import { Dropdown } from 'rsuite';
-import "rsuite/dist/rsuite.css";
+import { Tree } from 'primereact/tree';
+import 'primeflex/primeflex.css';
+import 'primereact/resources/primereact.css';
+import 'primereact/resources/themes/lara-light-indigo/theme.css';
+import 'primeicons/primeicons.css';
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   background-color: ${({ theme }) => theme.colors.secondary.light2};
@@ -11,138 +14,12 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   height: ${({ height }) => height}px;
   width: ${({ width }) => width}px;
 
-  h3 {
-    margin-top: 0;
-    margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
-    font-size: ${({ theme, headerFontSize }) => theme.typography.sizes[headerFontSize]}px;
-    font-weight: ${({ theme, boldText }) => theme.typography.weights[boldText ? 'bold' : 'normal']};
-  }
-
-  pre {
-    height: ${({ theme, headerFontSize, height }) => height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
-  }
-
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  .modal-card {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    width: 500px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .modal-header {
-    font-size: 18px;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-
-  .modal-close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 18px;
-    cursor: pointer;
-    color: #999;
-  }
-
-  .modal-form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    width: 100%;
-  }
-
-  .form-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    width: 100%;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .form-group label {
-    font-size: 14px;
-    font-weight: 600;
-  }
-
-  .form-group input,
-  .form-group select {
-    padding: 8px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    width: 100%;
-    transition: border-color 0.2s ease;
-  }
-
-  .form-group input:focus,
-  .form-group select:focus {
-    border-color: ${({ theme }) => theme.colors.primary.main};
-  }
-
-  .submit-button {
-    padding: 10px;
-    background-color: ${({ theme }) => theme.colors.primary.dark1};
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-
-  .submit-button:hover {
-    background-color: ${({ theme }) => theme.colors.primary.dark1};
-  }
-
-  .submit-button[type="button"] {
-    background-color: ${({ theme }) => theme.colors.grayscale.light3};
-  }
-
-  .submit-button[type="button"]:hover {
-    background-color: ${({ theme }) => theme.colors.grayscale.light2};
-  }
-
-  .table-container {
-    margin-top: 20px;
-    overflow-x: auto;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-  }
-
-  th, td {
-    padding: 12px 15px;
-    border: 1px solid #ddd;
-  }
-
-  th {
-    background-color: #f4f4f4;
-  }
+  .card {
+    background: var(--surface-card);
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
 `;
 
 export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
@@ -159,6 +36,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const [isEditing, setIsEditing] = useState(false);
   const [triggerFetch, setTriggerFetch] = useState(false);
   const [tableFetch, setTableFetch] = useState(false);
+  const [selectedKeys, setSelectedKeys] = useState({});
 
   const [filteredTableData, setFilteredTableData] = useState<any[]>([]);
 
@@ -195,7 +73,67 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     fetchExploreData();
   }, [datasource, triggerFetch]);
 
-  useEffect(() => {
+  // Helper function to build a tree dynamically based on keys in the data
+  const buildDynamicTree = (data) => {
+    const keys = Object.keys(data[0]); // Dynamically get keys from the first data entry
+    const tree = [];
+
+    data.forEach((item) => {
+      let currentLevel = tree;
+
+      keys.forEach((key, index) => {
+        const value = item[key];
+        let node = currentLevel.find((n) => n.label === value);
+
+        if (!node) {
+          node = {
+            key: currentLevel.length + '-' + value,
+            label: value,
+            children: [],
+            selectable: index === keys.length - 1, // Only mark the last level as selectable
+          };
+          currentLevel.push(node);
+        }
+
+        currentLevel = node.children;
+      });
+    });
+
+    return tree;
+  };
+
+  // Build the tree structure dynamically
+  const treeData = buildDynamicTree(data);
+
+  return (
+    <Styles
+      ref={rootElem}
+      boldText={props.boldText}
+      headerFontSize={props.headerFontSize}
+      height={height}
+      width={width}
+    >
+      <div>
+
+        <Tree
+          value={treeData}
+          selectionMode="checkbox"
+          selectionKeys={selectedKeys}
+          onSelectionChange={(e) => setSelectedKeys(e.value)}
+          nodeTemplate={(node, options) => (
+            <span>
+              {node.label}
+              {node.selectable && options.checkboxElement}
+            </span>
+          )}
+        />
+      </div>
+    </Styles>
+  );
+}
+
+
+  /*useEffect(() => {
     if (bussinessUnit && accountName && projectName) {
       // Filter table data based on the selected filters (Business Unit, Account, Project)
       const filteredData = data.filter(
@@ -530,5 +468,4 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       )}
 
     </Styles>
-  );
-}
+  );*/
