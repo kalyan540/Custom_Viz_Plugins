@@ -79,12 +79,13 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   // There is also a `data` prop, which is, of course, your DATA 🎉
   const { data, height, width, datasource } = props;
   const rootElem = createRef<HTMLDivElement>();
-  const [filters, setFilters] = useState<Record<string, string>>({});
-  const [filteredData, setFilteredData] = useState(data);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  //const [filters, setFilters] = useState<Record<string, string>>({});
+  //const [filteredData, setFilteredData] = useState(data);
+  //const [isModalOpen, setIsModalOpen] = useState(false);
   const [DBName, setDBName] = useState<string | null>(null);
   const [tableName, settableName] = useState<string | null>(null);
   console.log(datasource);
+  console.log('Data:', data);
 
   useEffect(() => {
     async function fetchExploreData() {
@@ -134,7 +135,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   };
 
   // Update the filtered data based on selected filters
-  useEffect(() => {
+  /*useEffect(() => {
     let updatedData = data;
 
     Object.entries(filters).forEach(([column, value]) => {
@@ -152,7 +153,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
       ...prev,
       [column]: value,
     }));
-  };
+  };*/
 
   // Often, you just want to access the DOM and do whatever you want.
   // Here, you can do that with createRef, and the useEffect hook.
@@ -182,7 +183,6 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   const [productDialog, setProductDialog] = useState(false);
 
   const openNew = () => {
-    setProduct(emptyProduct);
     setSubmitted(false);
     setProductDialog(true);
   };
@@ -308,7 +308,6 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
 
   const deleteProduct = () => {
     setDeleteProductDialog(false);
-    setProduct(emptyProduct);
   };
 
   const deleteProductDialogFooter = (
@@ -527,9 +526,9 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
             className="pi pi-exclamation-triangle mr-3"
             style={{ fontSize: '2rem' }}
           />
-          {product && (
+          {data && (
             <span>
-              Are you sure you want to delete <b>{formData.assessmentID}</b>?
+              Are you sure you want to delete <b>{data['assessmentID']}</b>?
             </span>
           )}
         </div>
