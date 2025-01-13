@@ -105,6 +105,16 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   // Build the tree structure dynamically
   const treeData = buildDynamicTree(data);
 
+  const onSelectionChange = (e) => {
+    // Only allow one selection, if there's already a selected key, reset the previous one
+    const selectedKey = e.value;
+    if (selectedKey !== selectedKeys) {
+      setSelectedKeys(selectedKey); // Set the new selected key
+    } else {
+      setSelectedKeys(null); // Deselect if the same node is clicked
+    }
+  };
+
   return (
     <Styles
       ref={rootElem}
@@ -119,7 +129,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
           value={treeData}
           selectionMode="checkbox"
           selectionKeys={selectedKeys}
-          onSelectionChange={(e) => setSelectedKeys(e.value)}
+          onSelectionChange={onSelectionChange}
           nodeTemplate={(node, options) => (
             <span>
               {node.label}
