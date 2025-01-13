@@ -164,27 +164,13 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
 
   console.log('Plugin props', props);
 
-  let emptyProduct = {
-    id: null,
-    name: '',
-    image: null,
-    description: '',
-    category: null,
-    price: 0,
-    quantity: 0,
-    rating: 0,
-    inventoryStatus: 'INSTOCK',
-  };
-
   const [deleteProductDialog, setDeleteProductDialog] = useState(false);
-  const [product, setProduct] = useState(emptyProduct);
-  const [submitted, setSubmitted] = useState(false);
+  //const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
   const [productDialog, setProductDialog] = useState(false);
   const [row, setselectedrow] = useState<string | null>(null);
 
   const openNew = () => {
-    setSubmitted(false);
     setProductDialog(true);
   };
 
@@ -231,12 +217,10 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   };
 
   const hideDialog = () => {
-    setSubmitted(false);
     setProductDialog(false);
   };
 
   const saveProduct = async () => {
-    setSubmitted(true);
 
     console.log("Form Data Submitted:", formData);
     try {
@@ -334,6 +318,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   );
 
   const InputForm = React.memo(() => {
+    console.log(formData);
     return (
       <div>
         <div className="field">
