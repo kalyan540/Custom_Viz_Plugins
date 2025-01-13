@@ -162,6 +162,8 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
 
   const [filteredTableData, setFilteredTableData] = useState<any[]>([]);
 
+  console.log('Data:', data);
+
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);
