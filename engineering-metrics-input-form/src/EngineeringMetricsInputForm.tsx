@@ -8,7 +8,6 @@ import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import 'primeicons/primeicons.css';
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
-  background-color: ${({ theme }) => theme.colors.secondary.light2};
   padding: ${({ theme }) => theme.gridUnit * 4}px;
   border-radius: ${({ theme }) => theme.gridUnit * 2}px;
   height: ${({ height }) => height}px;
@@ -106,12 +105,11 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const treeData = buildDynamicTree(data);
 
   const onSelectionChange = (e) => {
-    // Only allow one selection, if there's already a selected key, reset the previous one
-    const selectedKey = e.value;
-    if (selectedKey !== selectedKeys) {
-      setSelectedKeys(selectedKey); // Set the new selected key
+    // If the clicked node is already selected, deselect it (uncheck the box)
+    if (e.value === selectedKeys) {
+      setSelectedKeys(null); // Deselect
     } else {
-      setSelectedKeys(null); // Deselect if the same node is clicked
+      setSelectedKeys(e.value); // Select the new node
     }
   };
 
@@ -128,7 +126,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
         <Tree
           value={treeData}
           selectionMode="checkbox"
-          selectionKeys={selectedKeys}
+          selectionKeys={selectedKeys ? { [selectedKeys]: true } : {}}
           onSelectionChange={onSelectionChange}
           nodeTemplate={(node, options) => (
             <span>
