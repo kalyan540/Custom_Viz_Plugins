@@ -126,7 +126,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       <div>
 
         <Tree
-        style={{ height:'100%', width :'100%', overflowY: 'auto' }}
+        style={{ overflowY: 'auto' }}
           value={treeData}
           selectionMode="checkbox"
           selectionKeys={selectedKeys ? { [selectedKeys]: true } : {}}
