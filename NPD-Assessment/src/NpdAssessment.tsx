@@ -74,35 +74,6 @@ const Styles = styled.div<NpdAssessmentStylesProps>`
  *  * FormData (your controls!) provided as props by transformProps.ts
  */
 
-function InputForm({ fields, initialFormData, onFormUpdate }) {
-  const [localFormData, setLocalFormData] = useState(initialFormData);
-
-  const handleLocalChange = (field, value) => {
-    setLocalFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleBlur = (field) => {
-    onFormUpdate(field, localFormData[field]);
-  };
-
-  return (
-    <div>
-      {fields.map((field) => (
-        <div className="field" key={field}>
-          <label htmlFor={field} className="font-bold">{field}</label>
-          <InputText
-            id={field}
-            value={localFormData[field]}
-            onChange={(e) => handleLocalChange(field, e.target.value)}
-            onBlur={() => handleBlur(field)}
-            required
-          />
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function NpdAssessment(props: NpdAssessmentProps) {
   // height and width are the height and width of the DOM element as it exists in the dashboard.
   // There is also a `data` prop, which is, of course, your DATA 🎉
@@ -146,15 +117,12 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   const initialFormData = data.length > 0
     ? Object.keys(data[0]).reduce((acc, key) => ({ ...acc, [key]: '' }), {})
     : {};
-  
+
   const [formData, setFormData] = useState(initialFormData);
 
   const handleInputChange = useCallback((field, value) => {
     setFormData((prevData) => ({ ...prevData, [field]: value }));
   }, []);
-  const handleFormUpdate = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
 
   // Often, you just want to access the DOM and do whatever you want.
   // Here, you can do that with createRef, and the useEffect hook.
@@ -308,8 +276,6 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
     </React.Fragment>
   );
 
-  
-
 
 
   return (
@@ -364,11 +330,127 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
         footer={productDialogFooter}
         onHide={hideDialog}
       >
-        <InputForm
-          fields={Object.keys(initialFormData)}
-          formData={formData}
-          onInputChange={handleFormUpdate}
-        />
+        <div>
+          <div className="field">
+            <label htmlFor="functionName" className="font-bold">Function Name</label>
+            <InputText
+              id="functionName"
+              value={formData.functionName}
+              onChange={(e) => handleInputChange('functionName', e.target.value)}
+              required
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="group" className="font-bold">Group</label>
+            <InputText
+              id="group"
+              value={formData.group}
+              onChange={(e) => handleInputChange('group', e.target.value)}
+              required
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="business" className="font-bold">Business</label>
+            <InputText
+              id="business"
+              value={formData.business}
+              onChange={(e) => handleInputChange('business', e.target.value)}
+              required
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="assessmentLead" className="font-bold">Assessment Lead</label>
+            <InputText
+              id="assessmentLead"
+              value={formData.assessmentLead}
+              onChange={(e) => handleInputChange('assessmentLead', e.target.value)}
+              required
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="assessmentID" className="font-bold">Assessment ID</label>
+            <InputText
+              id="assessmentID"
+              value={formData.assessmentID}
+              onChange={(e) => handleInputChange('assessmentID', e.target.value)}
+              required
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="maturity" className="font-bold">Maturity</label>
+            <InputText
+              id="maturity"
+              value={formData.maturity}
+              onChange={(e) => handleInputChange('maturity', e.target.value)}
+              required
+              placeholder="Select Maturity"
+            />
+            {/* You can replace this with a dropdown or select component */}
+          </div>
+          <div className="field">
+            <label htmlFor="assessmentDate" className="font-bold">Assessment Date</label>
+            <InputText
+              id="assessmentDate"
+              type="date"
+              value={formData.assessmentDate}
+              onChange={(e) => handleInputChange('assessmentDate', e.target.value)}
+              required
+            />
+          </div>
+          <div className="field">
+            <label className="mb-3 font-bold">Status</label>
+            <div className="formgrid grid">
+              <div className="field-radiobutton col-4">
+                <RadioButton
+                  inputId="statusPublished"
+                  name="status"
+                  value="Published"
+                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  checked={formData.status === 'Published'}
+                />
+                <label htmlFor="statusPublished">Published</label>
+              </div>
+              <div className="field-radiobutton col-4">
+                <RadioButton
+                  inputId="statusInProgress"
+                  name="status"
+                  value="In Progress"
+                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  checked={formData.status === 'In Progress'}
+                />
+                <label htmlFor="statusInProgress">In Progress</label>
+              </div>
+              <div className="field-radiobutton col-4">
+                <RadioButton
+                  inputId="statusPending"
+                  name="status"
+                  value="Pending"
+                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  checked={formData.status === 'Pending'}
+                />
+                <label htmlFor="statusPending">Pending</label>
+              </div>
+            </div>
+          </div>
+          <div className="field">
+            <label htmlFor="actions" className="font-bold">Actions</label>
+            <InputText
+              id="actions"
+              value={formData.actions}
+              onChange={(e) => handleInputChange('actions', e.target.value)}
+              required
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="assessmentType" className="font-bold">Assessment Type</label>
+            <InputText
+              id="assessmentType"
+              value={formData.assessmentType}
+              onChange={(e) => handleInputChange('assessmentType', e.target.value)}
+              required
+            />
+          </div>
+        </div>
       </Dialog>
 
       <Dialog
