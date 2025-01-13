@@ -181,6 +181,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
   const [productDialog, setProductDialog] = useState(false);
+  const [row, setselectedrow] = useState<string | null>(null);
 
   const openNew = () => {
     setSubmitted(false);
@@ -225,6 +226,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
 
   const confirmDeleteProduct = (data) => {
     console.log(data);
+    setselectedrow(data.assessmentID);
     setDeleteProductDialog(true);
   };
 
@@ -307,6 +309,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   };
 
   const deleteProduct = () => {
+    setselectedrow(null);
     setDeleteProductDialog(false);
   };
 
@@ -528,7 +531,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           />
           {data && (
             <span>
-              Are you sure you want to delete <b>{data['assessmentID']}</b>?
+              Are you sure you want to delete <b>{row}</b>?
             </span>
           )}
         </div>
