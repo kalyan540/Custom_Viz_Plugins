@@ -74,6 +74,35 @@ const Styles = styled.div<NpdAssessmentStylesProps>`
  *  * FormData (your controls!) provided as props by transformProps.ts
  */
 
+function InputForm({ fields, initialFormData, onFormUpdate }) {
+  const [localFormData, setLocalFormData] = useState(initialFormData);
+
+  const handleLocalChange = (field, value) => {
+    setLocalFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleBlur = (field) => {
+    onFormUpdate(field, localFormData[field]);
+  };
+
+  return (
+    <div>
+      {fields.map((field) => (
+        <div className="field" key={field}>
+          <label htmlFor={field} className="font-bold">{field}</label>
+          <InputText
+            id={field}
+            value={localFormData[field]}
+            onChange={(e) => handleLocalChange(field, e.target.value)}
+            onBlur={() => handleBlur(field)}
+            required
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function NpdAssessment(props: NpdAssessmentProps) {
   // height and width are the height and width of the DOM element as it exists in the dashboard.
   // There is also a `data` prop, which is, of course, your DATA 🎉
@@ -123,6 +152,9 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   const handleInputChange = useCallback((field, value) => {
     setFormData((prevData) => ({ ...prevData, [field]: value }));
   }, []);
+  const handleFormUpdate = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   // Often, you just want to access the DOM and do whatever you want.
   // Here, you can do that with createRef, and the useEffect hook.
@@ -276,34 +308,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
     </React.Fragment>
   );
 
-  function InputForm({ fields, initialFormData, onFormUpdate }) {
-    const [localFormData, setLocalFormData] = useState(initialFormData);
   
-    const handleLocalChange = (field, value) => {
-      setLocalFormData((prev) => ({ ...prev, [field]: value }));
-    };
-  
-    const handleBlur = (field) => {
-      onFormUpdate(field, localFormData[field]);
-    };
-  
-    return (
-      <div>
-        {fields.map((field) => (
-          <div className="field" key={field}>
-            <label htmlFor={field} className="font-bold">{field}</label>
-            <InputText
-              id={field}
-              value={localFormData[field]}
-              onChange={(e) => handleLocalChange(field, e.target.value)}
-              onBlur={() => handleBlur(field)}
-              required
-            />
-          </div>
-        ))}
-      </div>
-    );
-  }
 
 
 
@@ -362,7 +367,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
         <InputForm
           fields={Object.keys(initialFormData)}
           formData={formData}
-          onInputChange={handleInputChange}
+          onInputChange={handleFormUpdate}
         />
       </Dialog>
 
