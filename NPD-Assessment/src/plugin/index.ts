@@ -22,7 +22,7 @@ import controlPanel from './controlPanel';
 import transformProps from './transformProps';
 //import thumbnail from '../images/thumbnail.png';
 import thumbnail from '../images/image.png';
-import example from './images/image1.png';
+import example from '../images/image1.png';
 
 export default class NpdAssessment extends ChartPlugin {
   /**
