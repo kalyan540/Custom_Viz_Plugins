@@ -22,6 +22,7 @@ import controlPanel from './controlPanel';
 import transformProps from './transformProps';
 //import thumbnail from '../images/thumbnail.png';
 import thumbnail from '../images/image.png';
+import example from './images/image1.png';
 
 export default class NpdAssessment extends ChartPlugin {
   /**
@@ -38,6 +39,7 @@ export default class NpdAssessment extends ChartPlugin {
     const metadata = new ChartMetadata({
       description: 'This plugin, developed by Altimetrian, is designed to facilitate the viewing and modification of the New Product Development Assessment, streamlining workflows and enhancing usability for teams.',
       name: t('Npd Assessment'),
+      exampleGallery: [{ url: example }],
       thumbnail,
     });
 
