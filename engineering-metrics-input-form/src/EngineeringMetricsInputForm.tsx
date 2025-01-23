@@ -104,16 +104,40 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   // Build the tree structure dynamically
   const treeData = buildDynamicTree(data);
 
+  // Helper function to find a node by its key
+  const findNodeByKey = (nodes: any[], key: string): any => {
+    for (const node of nodes) {
+      if (node.key === key) {
+        return node;
+      }
+      if (node.children) {
+        const found = findNodeByKey(node.children, key);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
   const onSelectionChange = (e) => {
     const selectedKey = e.value;
-
-    // Only allow one selection
-    if (selectedKey === selectedKeys) {
-      setSelectedKeys(null); // Deselect if same node is clicked
+  
+    // Check if the selected node is a leaf (nth-level child)
+    const isLeafNode = (key) => {
+      const node = findNodeByKey(treeData, key); // Helper function to find node
+      return node && (!node.children || node.children.length === 0); // No children = leaf
+    };
+  
+    if (isLeafNode(selectedKey)) {
+      // Allow only one nth-level child selection
+      setSelectedKeys({ [selectedKey]: true });
     } else {
-      setSelectedKeys(selectedKey); // Select the new node
+      // Clear selection if it's not a leaf node
+      setSelectedKeys({});
     }
   };
+  
+  
+  
 
   return (
     <Styles
