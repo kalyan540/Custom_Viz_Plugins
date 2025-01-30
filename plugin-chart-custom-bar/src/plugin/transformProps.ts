@@ -237,8 +237,8 @@ export default function transformProps(
       }
 
       // Split the "Selection Month" into month and year
-      const [monthA, yearA] = a[xAxisOrig].split("'");
-      const [monthB, yearB] = b[xAxisOrig].split("'");
+      const [monthA, yearA] = String(a[xAxisOrig]).split("'");
+      const [monthB, yearB] = String(b[xAxisOrig]).split("'");
 
       // Compare by year first
       const yearComparison = parseInt(yearA) - parseInt(yearB);
@@ -678,7 +678,11 @@ export default function transformProps(
       ...getDefaultTooltip(refs),
       show: !inContextMenu,
       trigger: richTooltip ? 'axis' : 'item',
-      formatter: (params: any) => {
+      formatter: (params: any): string => {
+        // @ts-ignore
+        if (!params) {
+          return '';
+        }
         const [xIndex, yIndex] = isHorizontal ? [1, 0] : [0, 1];
         const xValue: number = richTooltip
           ? params[0].value[xIndex]
@@ -855,9 +859,9 @@ export default function transformProps(
           const total = rows.find(item => item[0] === "Total");
           formattedRow.push({
             total: {
-              name: total[0],
-              value: parseInt(total[1], 10),
-              percentage: total[2]
+              name: total ? total[0] : '',
+              value: total ? parseInt(total[1], 10) : 0,
+              percentage: total ? total[2] : '0%'
             }
           });
 
@@ -870,14 +874,16 @@ export default function transformProps(
 
           // Replace <total.value> and <total.name> using the last row (Total)
           const totalRow = formattedRow.find(row => row.total);
-          tooltipText = tooltipText.replace("<total.value>", totalRow.total.value)
-            .replace("<total.name>", totalRow.total.name);
+          if (totalRow) {
+            tooltipText = tooltipText.replace("<total.value>", totalRow.total.value)
+              .replace("<total.name>", totalRow.total.name);
+          }
 
           // Prepare to handle dynamic parts
-          const dynamicParts = [];
+          const dynamicParts: string[] = [];
           const staticParts = tooltipText.split(/(\{[^}]+\})/); // Split by curly braces
 
-          staticParts.forEach(part => {
+          staticParts.forEach((part: string) => {
             if (part.startsWith('{') && part.endsWith('}')) {
               // Extract the row number from the part
               const rowMatch = part.match(/<row(\d+)\.(value|name)>/);
@@ -889,15 +895,16 @@ export default function transformProps(
                 if (row.value !== 0) {
                   // Replace placeholders with actual values and add to dynamic parts
                   const replacedPart = part
-                    .replace(`<row${rowIndex + 1}.value>`, row.value)
-                    .replace(`<row${rowIndex + 1}.name>`, row.name);
+                    .replace(`<row${rowIndex + 1}.value>`, row.value?.toString() || '')
+                    .replace(`<row${rowIndex + 1}.name>`, row.name?.toString() || '');
                   dynamicParts.push(replacedPart); // Keep the curly brackets
                 }
               } else {
                 // Static part, just add it
                 dynamicParts.push(part);
               }
-            });
+            }
+          });
 
           // Join the static parts and dynamic parts to form the final tooltip text
           const finalTooltipText = dynamicParts.join('').replace(/,\s*$/, ''); // Remove trailing comma if any
@@ -922,8 +929,9 @@ export default function transformProps(
         }
 
 
-
+        return '';
       },
+
     },
     legend: {
       ...getLegendProps(

@@ -34,7 +34,7 @@ import {
   LegendFormData,
   StackType,
   TitleFormData,
-} from '../types';
+} from '../Timeseries/types';
 import {
   DEFAULT_LEGEND_FORM_DATA,
   DEFAULT_TITLE_FORM_DATA,

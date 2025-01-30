@@ -60,7 +60,7 @@ import {
   MarkLineComponent,
 } from 'echarts/components';
 import { LabelLayout } from 'echarts/features';
-import { EchartsHandler, EchartsProps, EchartsStylesProps } from '../types';
+import { EchartsHandler, EchartsProps, EchartsStylesProps } from '../Timeseries/types';
 
 const Styles = styled.div<EchartsStylesProps>`
   height: ${({ height }) => height};
