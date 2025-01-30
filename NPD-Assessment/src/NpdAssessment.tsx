@@ -113,14 +113,24 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
     fetchExploreData();
   }, [datasource]);
 
-  const columns = Object.keys(data[0] || {});
-  const initialFormData = data.length > 0
-    ? Object.keys(data[0]).reduce((acc, key) => ({ ...acc, [key]: '' }), {})
-    : {};
-
+  const columns = Object.keys(data?.[0] || {});
+  const initialFormData = {
+    functionName: '',
+    group: '',
+    business: '',
+    assessmentLead: '',
+    assessmentID: '',
+    maturity: '',
+    assessmentDate: '',
+    status: '',
+    actions: '',
+    assessmentType: '',
+  };
+  
   const [formData, setFormData] = useState(initialFormData);
+  
 
-  const handleInputChange = useCallback((field, value) => {
+  const handleInputChange = useCallback((field: string, value: string) => {
     setFormData((prevData) => ({ ...prevData, [field]: value }));
   }, []);
 
@@ -166,7 +176,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
         <InputIcon className="pi pi-search" />
         <InputText
           type="search"
-          onInput={(e) => setGlobalFilter(e.target.value)}
+          onInput={(e: any) => setGlobalFilter(e.target.value)}
           placeholder="Search..."
           style={{ width: '200px' }} // Adjust width as needed
         />
@@ -174,13 +184,13 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
     </div>
   );
 
-  const editProduct = (data) => {
+  const editProduct = (data: any) => {
     console.log(data);
     setFormData({ ...data });
     setProductDialog(true);
   };
 
-  const confirmDeleteProduct = (data) => {
+  const confirmDeleteProduct = (data: any) => {
     console.log(data);
     setselectedrow(data.assessmentID);
     setDeleteProductDialog(true);
@@ -216,7 +226,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
     </React.Fragment>
   );
 
-  const actionBodyTemplate = (rowData) => {
+  const actionBodyTemplate = (rowData: any) => {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
         <Button
@@ -235,15 +245,15 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
     );
   };
 
-  const onInputChange = (e, name) => {
+  /*const onInputChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
     console.log(e.value, name);
   };
 
-  const onCategoryChange = (e) => {
+  const onCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log(e.value);
-  };
+  };*/
 
-  const onInputNumberChange = (e, name) => {
+  const onInputNumberChange = (e: any, name: string) => {
     console.log(e.value, name);
   };
 
@@ -336,7 +346,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
             <InputText
               id="functionName"
               value={formData.functionName}
-              onChange={(e) => handleInputChange('functionName', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('functionName', e.target.value)}
               required
             />
           </div>
@@ -345,7 +355,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
             <InputText
               id="group"
               value={formData.group}
-              onChange={(e) => handleInputChange('group', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('group', e.target.value)}
               required
             />
           </div>
@@ -354,7 +364,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
             <InputText
               id="business"
               value={formData.business}
-              onChange={(e) => handleInputChange('business', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('business', e.target.value)}
               required
             />
           </div>
@@ -363,7 +373,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
             <InputText
               id="assessmentLead"
               value={formData.assessmentLead}
-              onChange={(e) => handleInputChange('assessmentLead', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('assessmentLead', e.target.value)}
               required
             />
           </div>
@@ -372,7 +382,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
             <InputText
               id="assessmentID"
               value={formData.assessmentID}
-              onChange={(e) => handleInputChange('assessmentID', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('assessmentID', e.target.value)}
               required
             />
           </div>
@@ -381,7 +391,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
             <InputText
               id="maturity"
               value={formData.maturity}
-              onChange={(e) => handleInputChange('maturity', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('maturity', e.target.value)}
               required
               placeholder="Select Maturity"
             />
@@ -393,7 +403,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
               id="assessmentDate"
               type="date"
               value={formData.assessmentDate}
-              onChange={(e) => handleInputChange('assessmentDate', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('assessmentDate', e.target.value)}
               required
             />
           </div>
@@ -405,7 +415,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
                   inputId="statusPublished"
                   name="status"
                   value="Published"
-                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  onChange={(e: any) => handleInputChange('status', e.target.value)}
                   checked={formData.status === 'Published'}
                 />
                 <label htmlFor="statusPublished">Published</label>
@@ -415,7 +425,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
                   inputId="statusInProgress"
                   name="status"
                   value="In Progress"
-                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  onChange={(e: any) => handleInputChange('status', e.target.value)}
                   checked={formData.status === 'In Progress'}
                 />
                 <label htmlFor="statusInProgress">In Progress</label>
@@ -425,7 +435,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
                   inputId="statusPending"
                   name="status"
                   value="Pending"
-                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  onChange={(e: any) => handleInputChange('status', e.target.value)}
                   checked={formData.status === 'Pending'}
                 />
                 <label htmlFor="statusPending">Pending</label>
@@ -437,7 +447,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
             <InputText
               id="actions"
               value={formData.actions}
-              onChange={(e) => handleInputChange('actions', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('actions', e.target.value)}
               required
             />
           </div>
@@ -446,7 +456,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
             <InputText
               id="assessmentType"
               value={formData.assessmentType}
-              onChange={(e) => handleInputChange('assessmentType', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('assessmentType', e.target.value)}
               required
             />
           </div>

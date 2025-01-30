@@ -2,6 +2,7 @@ import React, { useEffect, createRef, useState } from 'react';
 import { styled, SupersetClient } from '@superset-ui/core';
 import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
 import { Tree } from 'primereact/tree';
+import { TreeSelectionEvent, TreeCheckboxSelectionKeys } from 'primereact/tree';
 import 'primeflex/primeflex.css';
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
@@ -73,11 +74,11 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   }, [datasource, triggerFetch]);
 
   // Helper function to build a tree dynamically based on keys in the data
-  const buildDynamicTree = (data) => {
+  const buildDynamicTree = (data: any[]) => {
     const keys = Object.keys(data[0]); // Dynamically get keys from the first data entry
-    const tree = [];
+    const tree: any[] = [];
 
-    data.forEach((item) => {
+    data.forEach((item: any) => {
       let currentLevel = tree;
 
       keys.forEach((key, index) => {
@@ -118,11 +119,11 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
     return null;
   };
 
-  const onSelectionChange = (e) => {
+  /*const onSelectionChange = (e: { value: string }) => {
     const selectedKey = e.value;
   
     // Check if the selected node is a leaf (nth-level child)
-    const isLeafNode = (key) => {
+    const isLeafNode = (key: string) => {
       const node = findNodeByKey(treeData, key); // Helper function to find node
       return node && (!node.children || node.children.length === 0); // No children = leaf
     };
@@ -134,6 +135,9 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       // Clear selection if it's not a leaf node
       setSelectedKeys({});
     }
+  };*/
+  const onSelectionChange = (e: TreeSelectionEvent) => {
+    setSelectedKeys(e.value as TreeCheckboxSelectionKeys);
   };
   
   
@@ -153,12 +157,12 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
         
           value={treeData}
           selectionMode="checkbox"
-          selectionKeys={selectedKeys ? { [selectedKeys]: true } : {}}
+          selectionKeys={selectedKeys}
           onSelectionChange={onSelectionChange}
-          nodeTemplate={(node, options) => (
+          nodeTemplate={(node: any, options: any) => (
             <span>
               {node.label}
-              {node.selectable && options.checkboxElement}
+              {node.selectable}
             </span>
           )}
         />
