@@ -12,6 +12,7 @@ import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primeicons/primeicons.css";
 import { Card } from "primereact/card";
 import { Accordion, AccordionTab } from "primereact/accordion";
+import { Chart } from "primereact/chart";
 
 // Type definitions
 interface DataRecord {
@@ -220,23 +221,22 @@ export default function EngineeringMetricsInputForm(
 
   return (
     <div className="p-grid">
+      {/* Left Panel - Tree View */}
       <div className="p-col-12 p-md-4">
         <h3>Select a Category to View Corresponding Charts</h3>
         <Tree
           value={nodes}
-          selectionMode="single" // Single selection (like radio button)
+          selectionMode="single"
           onSelectionChange={onSelectionChange}
         />
       </div>
 
+      {/* Right Panel - Chart Display */}
       <div className="p-col-12 p-md-8">
         <h3>Available Charts</h3>
-        <Accordion
-          activeIndex={activeTab ? [activeTab] : []}
-          onTabChange={(e) => setActiveTab(e.index)}
-        >
+        <Accordion>
           {filteredCharts.length > 0 ? (
-            filteredCharts.map((chart, index) => (
+            filteredCharts.map((chart) => (
               <AccordionTab key={chart.id} header={chart.name}>
                 <Card>
                   <h5>Project: {chart.project}</h5>
@@ -244,7 +244,7 @@ export default function EngineeringMetricsInputForm(
                   <p>Chart Type: {chart.type}</p>
 
                   {/* Display Speedometer Chart */}
-                  <div style={{ height: "200px" }}>
+                  <div style={{ height: "250px" }}>
                     <Chart
                       type="radar" // Radar chart to simulate a speedometer
                       data={getSpeedometerChartData(75)} // Replace 75 with the desired value dynamically
