@@ -69,12 +69,17 @@ export default function EngineeringMetricsInputForm(
   // const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
   // const [nodes, setNodes] = useState<TreeNode[]>([]);
   // const [filteredCharts, setFilteredCharts] = useState<Chart[]>([]);
-  // const [dataC, setDataC] = useState<DataRecord[]>([]); // Holds external data
+  const [dataC, setDataC] = useState<DataRecord[]>([]); // Holds external data
 
   // const jsonData: DataRecord[] = data;
   // setDataC(jsonData);
 
-  // console.log("DataJSON :: ", dataC);
+  useEffect(() => {
+    const jsonData: DataRecord[] = data;
+    setDataC(jsonData);
+  }, []);
+
+  console.log("DataJSON :: ", dataC);
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
