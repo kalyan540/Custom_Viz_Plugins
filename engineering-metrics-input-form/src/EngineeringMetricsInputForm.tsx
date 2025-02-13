@@ -12,6 +12,7 @@ import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primeicons/primeicons.css";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+import { Card } from "primereact/card";
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   padding: ${({ theme }) => theme.gridUnit * 4}px;
