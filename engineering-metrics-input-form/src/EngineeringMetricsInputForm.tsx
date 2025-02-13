@@ -77,11 +77,9 @@ export default function EngineeringMetricsInputForm(
 
     data.forEach((item: any) => {
       let currentLevel = tree;
-
       keys.forEach((key, index) => {
         const value = item[key];
         let node = currentLevel.find((n) => n.label === value);
-
         if (!node) {
           node = {
             key: currentLevel.length + "-" + value,
@@ -91,7 +89,6 @@ export default function EngineeringMetricsInputForm(
           };
           currentLevel.push(node);
         }
-
         currentLevel = node.children;
       });
     });
@@ -107,32 +104,31 @@ export default function EngineeringMetricsInputForm(
 
   const updateFilteredCharts = (selectedNode: TreeNode | null) => {
     if (selectedNode) {
-      const [key, value] = selectedNode.key.split("-"); // Extract key and value from selected node
+      const path = selectedNode.key.split("-"); // Get the path of selected node
+      let filteredData: DataRecord[] = dataC;
 
-      // Ensure proper filtering by handling the data correctly
-      const filtered = data.filter(
-        (chart) =>
-          chart[key] === value &&
-          chart.Project &&
-          chart.Project.includes("Project")
-      );
+      // Traverse through each level of the selected node to filter the data dynamically
+      path.forEach((value: string, index: number) => {
+        const key = Object.keys(data[0])[index]; // Dynamically get the key for the current level
+        filteredData = filteredData.filter(
+          (item: DataRecord) => item[key] === value
+        );
+      });
 
-      if (filtered.length > 0) {
-        // Assuming filtered data has a `value` property for the speedometer chart
+      // If there is matching data, create chart data and update
+      if (filteredData.length > 0) {
         const chartData = {
-          //label: `${filtered[0].Business Unit} - ${filtered[0].Project}`,
-          label: `${filtered[0].bussinessUnit} - ${filtered[0].project}`,
+          label: `${filteredData[0]["Business Unit"]} - ${filteredData[0]["Project"]}`,
           value: Math.random() * 100, // Example random value for the speedometer (ensure this is numeric)
           min: 0,
           max: 100,
         };
-
         setFilteredCharts([chartData]); // Set the filtered chart data
       } else {
-        setFilteredCharts([]); // Clear the filtered charts if no matching data
+        setFilteredCharts([]); // Clear if no data found
       }
     } else {
-      setFilteredCharts([]); // Clear the filtered charts if no node is selected
+      setFilteredCharts([]); // Clear the chart when no node is selected
     }
   };
 
