@@ -64,6 +64,8 @@ export default function EngineeringMetricsInputForm(
   const jsonData: DataRecord[] = data;
   setDataC(jsonData);
 
+  console.log("DataJSON :: ", dataC);
+
   // Sample chart data (for demonstration)
   const allCharts: Chart[] = [
     {
@@ -106,12 +108,14 @@ export default function EngineeringMetricsInputForm(
 
   // Dynamically build the tree structure from the data
   const buildTree = (data: DataRecord[]) => {
+    console.log("Inside Build Tree", data);
     const keys = Object.keys(data[0]); // Get all unique keys dynamically
     const rootNodes: TreeNode[] = [];
 
     // Loop through each key and dynamically create the tree nodes
     keys.forEach((key) => {
       const uniqueValues = Array.from(new Set(data.map((item) => item[key]))); // Get unique values for each key
+      console.log("Unique Values :", uniqueValues);
       const children: TreeNode[] = uniqueValues.map((value) => ({
         key: `${key}-${value}`,
         label: value,
