@@ -215,7 +215,7 @@ export default function EngineeringMetricsInputForm(
         />
       </div>
 
-      <div className="p-col-12 p-md-8">
+      {/* <div className="p-col-12 p-md-8">
         <h3>Available Charts</h3>
         {filteredCharts.length > 0 ? (
           <DataTable value={filteredCharts} responsiveLayout="scroll">
@@ -229,7 +229,7 @@ export default function EngineeringMetricsInputForm(
             <h5>No charts available for the selected category.</h5>
           </Card>
         )}
-      </div>
+      </div> */}
     </Styles>
 
     // <div className="p-grid">
