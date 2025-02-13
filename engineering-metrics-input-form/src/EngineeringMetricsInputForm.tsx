@@ -206,25 +206,13 @@ export default function EngineeringMetricsInputForm(
   }, [dataC]);
 
   return (
-    <Styles
-      ref={rootElem}
-      boldText={props.boldText}
-      headerFontSize={props.headerFontSize}
-      height={height}
-      width={width}
-    >
-      <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
+    <div className="p-grid">
+      <div className="p-col-12 p-md-4">
+        <h3>Select a Category to View Corresponding Charts</h3>
         <Tree
           value={nodes}
-          selectionMode="single"
-          // selectionKeys={selectedKeys}
+          selectionMode="single" // Single selection (like radio button)
           onSelectionChange={onSelectionChange}
-          nodeTemplate={(node: any, options: any) => (
-            <span>
-              {node.label}
-              {node.selectable}
-            </span>
-          )}
         />
       </div>
 
@@ -243,7 +231,7 @@ export default function EngineeringMetricsInputForm(
           </Card>
         )}
       </div>
-    </Styles>
+    </div>
   );
 }
 
