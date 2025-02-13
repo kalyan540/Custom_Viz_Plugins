@@ -142,6 +142,7 @@ export default function EngineeringMetricsInputForm(
     }
   };*/
   const onSelectionChange = (e: TreeSelectionEvent) => {
+    console.log("Selected Nodes:", e.value);
     setSelectedKeys(e.value as TreeCheckboxSelectionKeys);
   };
 
