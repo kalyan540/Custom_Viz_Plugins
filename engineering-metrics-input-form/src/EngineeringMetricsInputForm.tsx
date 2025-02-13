@@ -67,7 +67,7 @@ export default function EngineeringMetricsInputForm(
   }, []);
 
   useEffect(() => {
-    const tree = buildDynamicTree(data);
+    const tree = buildDynamicTree(dataC);
     setNodes(tree);
   }, []);
 
