@@ -97,15 +97,9 @@ export default function EngineeringMetricsInputForm(
   };
 
   const handleNodeSelect = (e: { value: TreeNode }) => {
-    console.log("calling");
+    console.log("Node selected:", e.value);
     const selectedNode = e.value;
     setSelectedNode(selectedNode);
-    console.log(
-      "Selected handle Node",
-      selectedNode,
-      "::::  ",
-      selectedNode.key
-    );
     updateFilteredCharts(selectedNode);
   };
 
