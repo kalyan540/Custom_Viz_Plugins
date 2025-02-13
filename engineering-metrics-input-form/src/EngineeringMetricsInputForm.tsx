@@ -13,6 +13,8 @@ import "primeicons/primeicons.css";
 import { Card } from "primereact/card";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Chart } from "primereact/chart";
+import { Grid } from "primereact/grid";
+import "./em.css";
 
 // Type definitions
 interface DataRecord {
@@ -73,7 +75,6 @@ export default function EngineeringMetricsInputForm(
   const [nodes, setNodes] = useState<TreeNode[]>([]);
   const [filteredCharts, setFilteredCharts] = useState<Chart[]>([]);
   const [dataC, setDataC] = useState<DataRecord[]>([]); // Holds external data
-  const [activeTab, setActiveTab] = useState<string | null>(null); // Track active tab for accordion
 
   useEffect(() => {
     const jsonData: DataRecord[] = data;
@@ -208,7 +209,6 @@ export default function EngineeringMetricsInputForm(
       // Avoid unnecessary state update
       setSelectedNode(e.value); // Set the selected node
       updateFilteredCharts(e.value); // Update the charts based on selected node
-      setActiveTab(null);
     }
   };
 
@@ -219,6 +219,7 @@ export default function EngineeringMetricsInputForm(
     }
   }, [dataC]);
 
+  console.log("filter State :", filteredCharts.length);
   return (
     <div className="p-grid">
       {/* Left Panel - Tree View */}
