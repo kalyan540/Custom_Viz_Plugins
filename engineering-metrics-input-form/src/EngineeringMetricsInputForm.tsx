@@ -1,12 +1,15 @@
-import React, { useEffect, createRef, useState } from 'react';
-import { styled, SupersetClient } from '@superset-ui/core';
-import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
-import { Tree } from 'primereact/tree';
-import { TreeSelectionEvent, TreeCheckboxSelectionKeys } from 'primereact/tree';
-import 'primeflex/primeflex.css';
-import 'primereact/resources/primereact.css';
-import 'primereact/resources/themes/lara-light-indigo/theme.css';
-import 'primeicons/primeicons.css';
+import React, { useEffect, createRef, useState } from "react";
+import { styled, SupersetClient } from "@superset-ui/core";
+import {
+  EngineeringMetricsInputFormProps,
+  EngineeringMetricsInputFormStylesProps,
+} from "./types";
+import { Tree } from "primereact/tree";
+import { TreeSelectionEvent, TreeCheckboxSelectionKeys } from "primereact/tree";
+import "primeflex/primeflex.css";
+import "primereact/resources/primereact.css";
+import "primereact/resources/themes/lara-light-indigo/theme.css";
+import "primeicons/primeicons.css";
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   padding: ${({ theme }) => theme.gridUnit * 4}px;
@@ -19,16 +22,18 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
     padding: 2rem;
     border-radius: 10px;
     margin-bottom: 1rem;
-}
+  }
 `;
 
-export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
+export default function EngineeringMetricsInputForm(
+  props: EngineeringMetricsInputFormProps
+) {
   const { data, height, width, datasource } = props;
   const rootElem = createRef<HTMLDivElement>();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [bussinessUnit, setbussinessUnit] = useState('');
-  const [accountName, setAccountName] = useState('');
-  const [projectName, setProjectName] = useState('');
+  const [bussinessUnit, setbussinessUnit] = useState("");
+  const [accountName, setAccountName] = useState("");
+  const [projectName, setProjectName] = useState("");
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [DBName, setDBName] = useState<string | null>(null);
   const [tableName, settableName] = useState<string | null>(null);
@@ -40,18 +45,18 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
 
   const [filteredTableData, setFilteredTableData] = useState<any[]>([]);
 
-  console.log('Data:', data);
+  console.log("Data:", data);
+  console.log("testing");
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
-    console.log('Plugin element', root);
-
+    console.log("Plugin element", root);
   }, [rootElem]);
 
   useEffect(() => {
     async function fetchExploreData() {
       try {
-        const [datasource_id, datasource_type] = datasource.split('__');
+        const [datasource_id, datasource_type] = datasource.split("__");
         const response = await SupersetClient.get({
           endpoint: `/api/v1/explore/?datasource_type=${datasource_type}&datasource_id=${datasource_id}`,
         });
@@ -61,13 +66,13 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
         if (dbName) {
           setDBName(dbName);
           settableName(TableName);
-          console.log('Database Name:', dbName);
-          console.log('Table Name:', TableName);
+          console.log("Database Name:", dbName);
+          console.log("Table Name:", TableName);
         } else {
-          console.warn('Database name not found in response');
+          console.warn("Database name not found in response");
         }
       } catch (error) {
-        console.error('Error fetching explore API:', error);
+        console.error("Error fetching explore API:", error);
       }
     }
     fetchExploreData();
@@ -87,7 +92,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
 
         if (!node) {
           node = {
-            key: currentLevel.length + '-' + value,
+            key: currentLevel.length + "-" + value,
             label: value,
             children: [],
             selectable: index === keys.length - 1, // Only mark the last level as selectable
@@ -139,9 +144,6 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const onSelectionChange = (e: TreeSelectionEvent) => {
     setSelectedKeys(e.value as TreeCheckboxSelectionKeys);
   };
-  
-  
-  
 
   return (
     <Styles
@@ -151,10 +153,8 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       height={height}
       width={width}
     >
-      <div style={{ height:'100%', width :'100%', overflowY: 'auto' }}>
-
+      <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
         <Tree
-        
           value={treeData}
           selectionMode="checkbox"
           selectionKeys={selectedKeys}
@@ -171,8 +171,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   );
 }
 
-
-  /*useEffect(() => {
+/*useEffect(() => {
     if (bussinessUnit && accountName && projectName) {
       // Filter table data based on the selected filters (Business Unit, Account, Project)
       const filteredData = data.filter(
