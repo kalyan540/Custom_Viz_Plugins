@@ -71,7 +71,7 @@ export default function EngineeringMetricsInputForm(
     setNodes(tree);
   }, []);
 
-  const buildDynamicTree = (data: any[]) => {
+  const buildDynamicTree = (data: DataRecord[]) => {
     const keys = Object.keys(data[0]);
     const tree: any[] = [];
 
