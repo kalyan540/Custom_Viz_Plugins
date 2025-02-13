@@ -117,6 +117,7 @@ export default function EngineeringMetricsInputForm(
         label: value,
       }));
 
+      console.log("This is children Keys :: ", children);
       rootNodes.push({
         key: key,
         label: key, // Use key as root label
@@ -125,6 +126,7 @@ export default function EngineeringMetricsInputForm(
     });
 
     setNodes(rootNodes); // Set the dynamically created tree nodes
+    console.log("This is Node ::: ", nodes);
   };
 
   // Filter charts based on selected node
