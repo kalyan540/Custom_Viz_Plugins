@@ -96,8 +96,8 @@ export default function EngineeringMetricsInputForm(
     return tree;
   };
 
-  const handleNodeSelect = (e: any) => {
-    const selectedNode = e.value as TreeNode;
+  const handleNodeSelect = (e: { value: TreeNode }) => {
+    const selectedNode = e.value;
     setSelectedNode(selectedNode);
     updateFilteredCharts(selectedNode);
     console.log(
@@ -108,38 +108,41 @@ export default function EngineeringMetricsInputForm(
     );
   };
 
+  // Dynamically filter the data based on the selected tree node
   const updateFilteredCharts = (selectedNode: TreeNode | null) => {
-    console.log("Selected Node", selectedNode, "::::  ", selectedNode.key);
-    // if (selectedNode) {
-    //   const path = selectedNode.key.split("-"); // Get the path of selected node
-    //   let filteredData: DataRecord[] = dataC;
+    console.log(
+      "Selected handle Node",
+      selectedNode,
+      "::::  ",
+      selectedNode.key
+    );
+    if (selectedNode && selectedNode.key) {
+      const path = selectedNode.key.split("-"); // Get the path of selected node
+      let filteredData: DataRecord[] = dataC;
 
-    //   console.log("filtered Data : ", filteredData);
-    //   // Traverse through each level of the selected node to filter the data dynamically
-    //   path.forEach((value: string, index: number) => {
-    //     const key = Object.keys(data[0])[index]; // Dynamically get the key for the current level
-    //     filteredData = filteredData.filter(
-    //       (item: DataRecord) => item[key] === value
-    //     );
-    //   });
+      // Traverse through each level of the selected node to filter the data dynamically
+      path.forEach((value: string, index: number) => {
+        const key = Object.keys(data[0])[index]; // Dynamically get the key for the current level
+        filteredData = filteredData.filter(
+          (item: DataRecord) => item[key] === value
+        );
+      });
 
-    //   console.log("After Path :: ", filteredData);
-
-    //   // If there is matching data, create chart data and update
-    //   if (filteredData.length > 0) {
-    //     const chartData = {
-    //       label: `${filteredData[0]["Business Unit"]} - ${filteredData[0]["Project"]}`,
-    //       value: Math.random() * 100, // Example random value for the speedometer (ensure this is numeric)
-    //       min: 0,
-    //       max: 100,
-    //     };
-    //     setFilteredCharts([chartData]); // Set the filtered chart data
-    //   } else {
-    //     setFilteredCharts([]); // Clear if no data found
-    //   }
-    // } else {
-    //   setFilteredCharts([]); // Clear the chart when no node is selected
-    // }
+      // If there is matching data, create chart data and update
+      if (filteredData.length > 0) {
+        const chartData = {
+          label: `${filteredData[0]["Business Unit"]} - ${filteredData[0]["Project"]}`,
+          value: Math.random() * 100, // Example random value for the speedometer (ensure this is numeric)
+          min: 0,
+          max: 100,
+        };
+        setFilteredCharts([chartData]); // Set the filtered chart data
+      } else {
+        setFilteredCharts([]); // Clear if no data found
+      }
+    } else {
+      setFilteredCharts([]); // Clear the chart when no node is selected or key is missing
+    }
   };
 
   useEffect(() => {
