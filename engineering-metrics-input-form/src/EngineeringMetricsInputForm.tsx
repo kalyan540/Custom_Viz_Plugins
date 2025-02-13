@@ -46,7 +46,7 @@ export default function EngineeringMetricsInputForm(
   const [filteredTableData, setFilteredTableData] = useState<any[]>([]);
 
   console.log("Data:", data);
-  console.log("testing");
+  console.log("JSON Data : ", JSON.stringify(data));
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -157,7 +157,7 @@ export default function EngineeringMetricsInputForm(
       <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
         <Tree
           value={treeData}
-          selectionMode="checkbox"
+          selectionMode="single"
           selectionKeys={selectedKeys}
           onSelectionChange={onSelectionChange}
           nodeTemplate={(node: any, options: any) => (
