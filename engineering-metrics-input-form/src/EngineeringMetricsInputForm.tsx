@@ -75,7 +75,7 @@ export default function EngineeringMetricsInputForm(
     const keys = Object.keys(data[0]);
     const tree: any[] = [];
 
-    data.forEach((item: any) => {
+    data.forEach((item: DataRecord) => {
       let currentLevel = tree;
       keys.forEach((key, index) => {
         const value = item[key];
