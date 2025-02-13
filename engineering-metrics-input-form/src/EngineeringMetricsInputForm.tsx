@@ -10,6 +10,8 @@ import "primeflex/primeflex.css";
 import "primereact/resources/primereact.css";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primeicons/primeicons.css";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   padding: ${({ theme }) => theme.gridUnit * 4}px;
@@ -25,10 +27,29 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   }
 `;
 
+// Type definitions
+interface DataRecord {
+  [key: string]: string;
+}
+
+interface Chart {
+  id: number;
+  name: string;
+  project: string;
+  businessUnit: string;
+  type: string;
+  [key: string]: string | number; // Index signature allowing dynamic key access
+}
+
+interface TreeNode {
+  key: string;
+  label: string;
+  children?: TreeNode[];
+}
+
 export default function EngineeringMetricsInputForm(
   props: EngineeringMetricsInputFormProps
 ) {
-  const { data, height, width, datasource } = props;
   const rootElem = createRef<HTMLDivElement>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bussinessUnit, setbussinessUnit] = useState("");
@@ -45,8 +66,92 @@ export default function EngineeringMetricsInputForm(
 
   const [filteredTableData, setFilteredTableData] = useState<any[]>([]);
 
-  console.log("Data:", data);
-  console.log("JSON Data : ", JSON.stringify(data));
+  const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
+  const [nodes, setNodes] = useState<TreeNode[]>([]);
+  const [filteredCharts, setFilteredCharts] = useState<Chart[]>([]);
+  const [dataC, setDataC] = useState<DataRecord[]>([]); // Holds external data
+  const { data, height, width, datasource } = props;
+  const jsonData: DataRecord[] = data;
+  setDataC(jsonData);
+
+  // Sample chart data (for demonstration)
+  const allCharts: Chart[] = [
+    {
+      id: 1,
+      name: "Sales Chart",
+      project: "Project1",
+      businessUnit: "West",
+      type: "Line",
+    },
+    {
+      id: 2,
+      name: "Revenue Chart",
+      project: "Project2",
+      businessUnit: "Central",
+      type: "Bar",
+    },
+    {
+      id: 3,
+      name: "Growth Chart",
+      project: "Project3",
+      businessUnit: "West",
+      type: "Pie",
+    },
+    {
+      id: 4,
+      name: "Profit Chart",
+      project: "Project4",
+      businessUnit: "Central",
+      type: "Line",
+    },
+    {
+      id: 5,
+      name: "Test Chart",
+      project: "TestingProject",
+      businessUnit: "West",
+      type: "Bar",
+    },
+    // Add more chart data as needed...
+  ];
+
+  // Dynamically build the tree structure from the data
+  const buildTree = (data: DataRecord[]) => {
+    const keys = Object.keys(data[0]); // Get all unique keys dynamically
+    const rootNodes: TreeNode[] = [];
+
+    // Loop through each key and dynamically create the tree nodes
+    keys.forEach((key) => {
+      const uniqueValues = Array.from(new Set(data.map((item) => item[key]))); // Get unique values for each key
+      const children: TreeNode[] = uniqueValues.map((value) => ({
+        key: `${key}-${value}`,
+        label: value,
+      }));
+
+      rootNodes.push({
+        key: key,
+        label: key, // Use key as root label
+        children,
+      });
+    });
+
+    setNodes(rootNodes); // Set the dynamically created tree nodes
+  };
+
+  // Filter charts based on selected node
+  const updateFilteredCharts = (selectedNode: TreeNode | null) => {
+    if (selectedNode) {
+      const [key, value] = selectedNode.key.split("-");
+      const filtered = allCharts.filter(
+        (chart) => chart[key.toLowerCase()] === value
+      );
+      setFilteredCharts(filtered);
+    } else {
+      setFilteredCharts([]); // Clear charts if no selection
+    }
+  };
+
+  //console.log("Data:", data);
+  //console.log("JSON Data : ", JSON.stringify(data));
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -107,6 +212,12 @@ export default function EngineeringMetricsInputForm(
     return tree;
   };
 
+  // Handle selection change in the tree
+  const onSelectionChange = (e: { value: TreeNode }) => {
+    setSelectedNode(e.value); // Set the selected node
+    updateFilteredCharts(e.value); // Update the charts based on selected node
+  };
+
   // Build the tree structure dynamically
   const treeData = buildDynamicTree(data);
 
@@ -141,34 +252,79 @@ export default function EngineeringMetricsInputForm(
       setSelectedKeys({});
     }
   };*/
-  const onSelectionChange = (e: TreeSelectionEvent) => {
-    console.log("Selected Nodes:", e.value);
-    setSelectedKeys(e.value as TreeCheckboxSelectionKeys);
-  };
+  // const onSelectionChange = (e: TreeSelectionEvent) => {
+  //   console.log("Selected Nodes:", e.value);
+  //   setSelectedKeys(e.value as TreeCheckboxSelectionKeys);
+  // };
+
+  // Initialize the tree on component mount and whenever `data` changes
+  useEffect(() => {
+    if (data.length > 0) {
+      buildTree(data); // Build the dynamic tree structure based on the data
+    }
+  }, [data]);
 
   return (
-    <Styles
-      ref={rootElem}
-      boldText={props.boldText}
-      headerFontSize={props.headerFontSize}
-      height={height}
-      width={width}
-    >
-      <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
+    // <Styles
+    //   ref={rootElem}
+    //   boldText={props.boldText}
+    //   headerFontSize={props.headerFontSize}
+    //   height={height}
+    //   width={width}
+    // >
+    //   <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
+    //     <Tree
+    //       value={treeData}
+    //       selectionMode="single"
+    //       selectionKeys={selectedKeys}
+    //       onSelectionChange={onSelectionChange}
+    //       nodeTemplate={(node: any, options: any) => (
+    //         <span>
+    //           {node.label}
+    //           {node.selectable}
+    //         </span>
+    //       )}
+    //     />
+
+    //     <h3>Available Charts</h3>
+    //     {filteredCharts.length > 0 ? (
+    //       <DataTable value={filteredCharts} responsiveLayout="scroll">
+    //         <Column field="name" header="Chart Name" />
+    //         <Column field="project" header="Project" />
+    //         <Column field="businessUnit" header="Business Unit" />
+    //         <Column field="type" header="Chart Type" />
+    //       </DataTable>
+    //     ) : (
+    //       <p>No charts available for the selected category.</p>
+    //     )}
+    //   </div>
+    // </Styles>
+    <div className="p-grid">
+      <div className="p-col-12 p-md-4">
+        <h3>Select a Category to View Corresponding Charts</h3>
         <Tree
-          value={treeData}
-          selectionMode="single"
-          selectionKeys={selectedKeys}
+          value={nodes}
+          selectionMode="single" // Single selection (like radio button)
           onSelectionChange={onSelectionChange}
-          nodeTemplate={(node: any, options: any) => (
-            <span>
-              {node.label}
-              {node.selectable}
-            </span>
-          )}
         />
       </div>
-    </Styles>
+
+      <div className="p-col-12 p-md-8">
+        <h3>Available Charts</h3>
+        {filteredCharts.length > 0 ? (
+          <DataTable value={filteredCharts} responsiveLayout="scroll">
+            <Column field="name" header="Chart Name" />
+            <Column field="project" header="Project" />
+            <Column field="businessUnit" header="Business Unit" />
+            <Column field="type" header="Chart Type" />
+          </DataTable>
+        ) : (
+          <Card>
+            <h5>No charts available for the selected category.</h5>
+          </Card>
+        )}
+      </div>
+    </div>
   );
 }
 
