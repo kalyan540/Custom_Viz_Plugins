@@ -184,6 +184,7 @@ export default function EngineeringMetricsInputForm(
           value={nodes}
           selectionMode="single"
           onSelectionChange={handleNodeSelect}
+          selectedKeys={selectedNode ? [selectedNode.key] : []} // Maintain selected keys for synchronization
         />
       </div>
 
