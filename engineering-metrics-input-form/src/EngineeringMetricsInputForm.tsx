@@ -10,9 +10,8 @@ import "primeflex/primeflex.css";
 import "primereact/resources/primereact.css";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primeicons/primeicons.css";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
 import { Card } from "primereact/card";
+import { Accordion, AccordionTab } from "primereact/accordion";
 
 // Type definitions
 interface DataRecord {
@@ -73,6 +72,7 @@ export default function EngineeringMetricsInputForm(
   const [nodes, setNodes] = useState<TreeNode[]>([]);
   const [filteredCharts, setFilteredCharts] = useState<Chart[]>([]);
   const [dataC, setDataC] = useState<DataRecord[]>([]); // Holds external data
+  const [activeTab, setActiveTab] = useState<string | null>(null); // Track active tab for accordion
 
   useEffect(() => {
     const jsonData: DataRecord[] = data;
@@ -189,12 +189,25 @@ export default function EngineeringMetricsInputForm(
     }
   };
 
+  // Speedometer chart options
+  const getSpeedometerChartData = (value: number) => ({
+    labels: ["Low", "Medium", "High"],
+    datasets: [
+      {
+        data: [value, 100 - value],
+        backgroundColor: ["#4caf50", "#e0e0e0"],
+        borderWidth: 0,
+      },
+    ],
+  });
+
   // Handle selection change in the tree
   const onSelectionChange = (e: { value: TreeNode }) => {
     if (selectedNode?.key !== e.value.key) {
       // Avoid unnecessary state update
       setSelectedNode(e.value); // Set the selected node
       updateFilteredCharts(e.value); // Update the charts based on selected node
+      setActiveTab(null);
     }
   };
 
@@ -218,18 +231,45 @@ export default function EngineeringMetricsInputForm(
 
       <div className="p-col-12 p-md-8">
         <h3>Available Charts</h3>
-        {filteredCharts.length > 0 ? (
-          <DataTable value={filteredCharts} responsiveLayout="scroll">
-            <Column field="name" header="Chart Name" />
-            <Column field="project" header="Project" />
-            <Column field="businessUnit" header="Business Unit" />
-            <Column field="type" header="Chart Type" />
-          </DataTable>
-        ) : (
-          <Card>
-            <h5>No charts available for the selected category.</h5>
-          </Card>
-        )}
+        <Accordion
+          activeIndex={activeTab ? [activeTab] : []}
+          onTabChange={(e) => setActiveTab(e.index)}
+        >
+          {filteredCharts.length > 0 ? (
+            filteredCharts.map((chart, index) => (
+              <AccordionTab key={chart.id} header={chart.name}>
+                <Card>
+                  <h5>Project: {chart.project}</h5>
+                  <p>Business Unit: {chart.businessUnit}</p>
+                  <p>Chart Type: {chart.type}</p>
+
+                  {/* Display Speedometer Chart */}
+                  <div style={{ height: "200px" }}>
+                    <Chart
+                      type="radar" // Radar chart to simulate a speedometer
+                      data={getSpeedometerChartData(75)} // Replace 75 with the desired value dynamically
+                      options={{
+                        responsive: true,
+                        scale: {
+                          ticks: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 100,
+                            stepSize: 20,
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                </Card>
+              </AccordionTab>
+            ))
+          ) : (
+            <Card>
+              <h5>No charts available for the selected category.</h5>
+            </Card>
+          )}
+        </Accordion>
       </div>
     </div>
   );
