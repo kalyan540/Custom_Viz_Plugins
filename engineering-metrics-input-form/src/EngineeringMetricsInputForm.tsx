@@ -99,13 +99,13 @@ export default function EngineeringMetricsInputForm(
   const handleNodeSelect = (e: { value: TreeNode }) => {
     const selectedNode = e.value;
     setSelectedNode(selectedNode);
-    updateFilteredCharts(selectedNode);
     console.log(
       "Selected handle Node",
       selectedNode,
       "::::  ",
       selectedNode.key
     );
+    updateFilteredCharts(selectedNode);
   };
 
   // Dynamically filter the data based on the selected tree node
