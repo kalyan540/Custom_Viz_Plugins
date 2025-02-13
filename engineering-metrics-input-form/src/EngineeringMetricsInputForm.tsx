@@ -18,7 +18,7 @@ import SpeedometerChart from "./SpeedometerChart";
 
 // Type definitions
 interface DataRecord {
-  [key: string]: string | number;
+  [key: string]: string;
 }
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
@@ -71,16 +71,12 @@ export default function EngineeringMetricsInputForm(
     setNodes(tree);
   }, []);
 
-  const buildDynamicTree = (data: DataRecord[]) => {
-    // Ensure data is not empty
-    if (!data || data.length === 0) {
-      console.error("Data is empty or undefined");
-      return []; // Return empty tree if no data
-    }
+  const buildDynamicTree = (data: any[]) => {
+    console.log("Daataaaaa:: ", data);
     const keys = Object.keys(data[0]);
     const tree: any[] = [];
 
-    data.forEach((item: DataRecord) => {
+    data.forEach((item: any) => {
       let currentLevel = tree;
       keys.forEach((key, index) => {
         const value = item[key];
