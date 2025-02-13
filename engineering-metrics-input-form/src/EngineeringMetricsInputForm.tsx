@@ -103,10 +103,12 @@ export default function EngineeringMetricsInputForm(
   };
 
   const updateFilteredCharts = (selectedNode: TreeNode | null) => {
+    console.log("Selected Node", selectedNode);
     if (selectedNode) {
       const path = selectedNode.key.split("-"); // Get the path of selected node
       let filteredData: DataRecord[] = dataC;
 
+      console.log("filtered Data : ", filteredData);
       // Traverse through each level of the selected node to filter the data dynamically
       path.forEach((value: string, index: number) => {
         const key = Object.keys(data[0])[index]; // Dynamically get the key for the current level
@@ -114,6 +116,8 @@ export default function EngineeringMetricsInputForm(
           (item: DataRecord) => item[key] === value
         );
       });
+
+      console.log("After Path :: ", filteredData);
 
       // If there is matching data, create chart data and update
       if (filteredData.length > 0) {
