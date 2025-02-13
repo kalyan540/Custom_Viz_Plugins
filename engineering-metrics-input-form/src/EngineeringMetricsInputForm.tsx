@@ -184,7 +184,7 @@ export default function EngineeringMetricsInputForm(
     if (dataC.length > 0) {
       buildTree(dataC); // Build the dynamic tree structure based on the data
     }
-  }, [dataC]);
+  }, []);
 
   return (
     <div className="p-grid">
