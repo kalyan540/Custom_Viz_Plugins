@@ -193,13 +193,25 @@ export default function EngineeringMetricsInputForm(
   }, []);
 
   return (
-    <div className="p-grid">
-      <div className="p-col-12 p-md-4">
-        <h3>Select a Category to View Corresponding Charts</h3>
+    <Styles
+      ref={rootElem}
+      boldText={props.boldText}
+      headerFontSize={props.headerFontSize}
+      height={height}
+      width={width}
+    >
+      <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
         <Tree
           value={nodes}
-          selectionMode="single" // Single selection (like radio button)
+          selectionMode="checkbox"
+          // selectionKeys={selectedKeys}
           onSelectionChange={onSelectionChange}
+          nodeTemplate={(node: any, options: any) => (
+            <span>
+              {node.label}
+              {node.selectable}
+            </span>
+          )}
         />
       </div>
 
@@ -218,6 +230,33 @@ export default function EngineeringMetricsInputForm(
           </Card>
         )}
       </div>
-    </div>
+    </Styles>
+
+    // <div className="p-grid">
+    //   <div className="p-col-12 p-md-4">
+    //     <h3>Select a Category to View Corresponding Charts</h3>
+    //     <Tree
+    //       value={nodes}
+    //       selectionMode="single" // Single selection (like radio button)
+    //       onSelectionChange={onSelectionChange}
+    //     />
+    //   </div>
+
+    //   <div className="p-col-12 p-md-8">
+    //     <h3>Available Charts</h3>
+    //     {filteredCharts.length > 0 ? (
+    //       <DataTable value={filteredCharts} responsiveLayout="scroll">
+    //         <Column field="name" header="Chart Name" />
+    //         <Column field="project" header="Project" />
+    //         <Column field="businessUnit" header="Business Unit" />
+    //         <Column field="type" header="Chart Type" />
+    //       </DataTable>
+    //     ) : (
+    //       <Card>
+    //         <h5>No charts available for the selected category.</h5>
+    //       </Card>
+    //     )}
+    //   </div>
+    // </div>
   );
 }
