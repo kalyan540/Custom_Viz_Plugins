@@ -10,6 +10,9 @@ import "primeflex/primeflex.css";
 import "primereact/resources/primereact.css";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primeicons/primeicons.css";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { Card } from "primereact/card";
 
 // Type definitions
 interface DataRecord {
@@ -66,20 +69,15 @@ export default function EngineeringMetricsInputForm(
 
   const [filteredTableData, setFilteredTableData] = useState<any[]>([]);
 
-  // const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
-  // const [nodes, setNodes] = useState<TreeNode[]>([]);
-  // const [filteredCharts, setFilteredCharts] = useState<Chart[]>([]);
+  const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
+  const [nodes, setNodes] = useState<TreeNode[]>([]);
+  const [filteredCharts, setFilteredCharts] = useState<Chart[]>([]);
   const [dataC, setDataC] = useState<DataRecord[]>([]); // Holds external data
-
-  // const jsonData: DataRecord[] = data;
-  // setDataC(jsonData);
 
   useEffect(() => {
     const jsonData: DataRecord[] = data;
     setDataC(jsonData);
   }, []);
-
-  console.log("DataJSON :: ", dataC);
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -111,73 +109,101 @@ export default function EngineeringMetricsInputForm(
     fetchExploreData();
   }, [datasource, triggerFetch]);
 
-  // Helper function to build a tree dynamically based on keys in the data
-  const buildDynamicTree = (data: any[]) => {
-    const keys = Object.keys(data[0]); // Dynamically get keys from the first data entry
-    const tree: any[] = [];
+  // Sample chart data (for demonstration)
+  const allCharts: Chart[] = [
+    {
+      id: 1,
+      name: "Sales Chart",
+      project: "Project1",
+      businessUnit: "West",
+      type: "Line",
+    },
+    {
+      id: 2,
+      name: "Revenue Chart",
+      project: "Project2",
+      businessUnit: "Central",
+      type: "Bar",
+    },
+    {
+      id: 3,
+      name: "Growth Chart",
+      project: "Project3",
+      businessUnit: "West",
+      type: "Pie",
+    },
+    {
+      id: 4,
+      name: "Profit Chart",
+      project: "Project4",
+      businessUnit: "Central",
+      type: "Line",
+    },
+    {
+      id: 5,
+      name: "Test Chart",
+      project: "TestingProject",
+      businessUnit: "West",
+      type: "Bar",
+    },
+    // Add more chart data as needed...
+  ];
 
-    data.forEach((item: any) => {
-      let currentLevel = tree;
+  // Dynamically build the tree structure from the data
+  const buildTree = (data: DataRecord[]) => {
+    console.log("Inside Build Tree", data);
+    const keys = Object.keys(data[0]); // Get all unique keys dynamically
+    const rootNodes: TreeNode[] = [];
 
-      keys.forEach((key, index) => {
-        const value = item[key];
-        let node = currentLevel.find((n) => n.label === value);
+    // Loop through each key and dynamically create the tree nodes
+    keys.forEach((key) => {
+      const uniqueValues = Array.from(new Set(data.map((item) => item[key]))); // Get unique values for each key
+      console.log("Unique Values :", uniqueValues);
+      const children: TreeNode[] = uniqueValues.map((value) => ({
+        key: `${key}-${value}`,
+        label: value,
+      }));
 
-        if (!node) {
-          node = {
-            key: currentLevel.length + "-" + value,
-            label: value,
-            children: [],
-            selectable: index === keys.length - 1, // Only mark the last level as selectable
-          };
-          currentLevel.push(node);
-        }
-
-        currentLevel = node.children;
+      console.log("This is children Keys :: ", children);
+      rootNodes.push({
+        key: key,
+        label: key, // Use key as root label
+        children,
       });
     });
 
-    return tree;
+    setNodes(rootNodes); // Set the dynamically created tree nodes
+    console.log("This is Node ::: ", nodes);
   };
 
-  // Build the tree structure dynamically
-  const treeData = buildDynamicTree(data);
-
-  // Helper function to find a node by its key
-  const findNodeByKey = (nodes: any[], key: string): any => {
-    for (const node of nodes) {
-      if (node.key === key) {
-        return node;
-      }
-      if (node.children) {
-        const found = findNodeByKey(node.children, key);
-        if (found) return found;
-      }
-    }
-    return null;
-  };
-
-  /*const onSelectionChange = (e: { value: string }) => {
-    const selectedKey = e.value;
-  
-    // Check if the selected node is a leaf (nth-level child)
-    const isLeafNode = (key: string) => {
-      const node = findNodeByKey(treeData, key); // Helper function to find node
-      return node && (!node.children || node.children.length === 0); // No children = leaf
-    };
-  
-    if (isLeafNode(selectedKey)) {
-      // Allow only one nth-level child selection
-      setSelectedKeys({ [selectedKey]: true });
+  // Filter charts based on selected node
+  const updateFilteredCharts = (selectedNode: TreeNode | null) => {
+    if (selectedNode) {
+      const [key, value] = selectedNode.key.split("-");
+      const filtered = allCharts.filter(
+        (chart) => chart[key.toLowerCase()] === value
+      );
+      setFilteredCharts(filtered);
     } else {
-      // Clear selection if it's not a leaf node
-      setSelectedKeys({});
+      setFilteredCharts([]); // Clear charts if no selection
     }
-  };*/
-  const onSelectionChange = (e: TreeSelectionEvent) => {
-    console.log("Selected Nodes:", e.value);
-    setSelectedKeys(e.value as TreeCheckboxSelectionKeys);
   };
+
+  // Handle selection change in the tree
+  const onSelectionChange = (e: { value: TreeNode }) => {
+    if (selectedNode?.key !== e.value.key) {
+      // Avoid unnecessary state update
+      setSelectedNode(e.value); // Set the selected node
+      updateFilteredCharts(e.value); // Update the charts based on selected node
+    }
+  };
+
+  // Initialize the tree on component mount and whenever `data` changes
+  useEffect(() => {
+    if (dataC.length > 0) {
+      buildTree(dataC); // Build the dynamic tree structure based on the data
+    }
+  }, [dataC]);
 
   return (
     <Styles
@@ -189,9 +215,9 @@ export default function EngineeringMetricsInputForm(
     >
       <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
         <Tree
-          value={treeData}
-          selectionMode="checkbox"
-          selectionKeys={selectedKeys}
+          value={nodes}
+          selectionMode="single"
+          // selectionKeys={selectedKeys}
           onSelectionChange={onSelectionChange}
           nodeTemplate={(node: any, options: any) => (
             <span>
@@ -200,6 +226,22 @@ export default function EngineeringMetricsInputForm(
             </span>
           )}
         />
+      </div>
+
+      <div className="p-col-12 p-md-8">
+        <h3>Available Charts</h3>
+        {filteredCharts.length > 0 ? (
+          <DataTable value={filteredCharts} responsiveLayout="scroll">
+            <Column field="name" header="Chart Name" />
+            <Column field="project" header="Project" />
+            <Column field="businessUnit" header="Business Unit" />
+            <Column field="type" header="Chart Type" />
+          </DataTable>
+        ) : (
+          <Card>
+            <h5>No charts available for the selected category.</h5>
+          </Card>
+        )}
       </div>
     </Styles>
   );
