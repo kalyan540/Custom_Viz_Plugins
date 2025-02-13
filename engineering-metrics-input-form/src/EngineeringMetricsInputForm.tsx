@@ -236,39 +236,35 @@ export default function EngineeringMetricsInputForm(
         />
       </div>
 
-      {/* Right Panel - Chart Display */}
+      {/* Right Panel - Speedometer Chart */}
       <div className="p-col-12 p-md-8" style={{ padding: "20px" }}>
         <h3>Available Charts</h3>
         {filteredCharts.length > 0 ? (
-          filteredCharts.map((chart) => (
-            <Accordion key={chart.id}>
-              <AccordionTab header={chart.name}>
-                <Card>
-                  <h5>Project: {chart.project}</h5>
-                  <p>Business Unit: {chart.businessUnit}</p>
-                  <p>Chart Type: {chart.type}</p>
+          filteredCharts.map((chart, index) => (
+            <Card key={index} className="p-mb-3">
+              <h5>{chart.name}</h5>
+              <p>Project: {chart.project}</p>
+              <p>Business Unit: {chart.businessUnit}</p>
 
-                  {/* Display Speedometer Chart */}
-                  <div style={{ height: "250px" }}>
-                    <Chart
-                      type="radar" // Radar chart to simulate a speedometer
-                      data={getSpeedometerChartData(75)} // Replace 75 with the desired value dynamically
-                      options={{
-                        responsive: true,
-                        scale: {
-                          ticks: {
-                            beginAtZero: true,
-                            min: 0,
-                            max: 100,
-                            stepSize: 20,
-                          },
-                        },
-                      }}
-                    />
-                  </div>
-                </Card>
-              </AccordionTab>
-            </Accordion>
+              {/* Display Speedometer Chart */}
+              <div style={{ height: "250px" }}>
+                <Chart
+                  type="radar" // You can replace this with a gauge chart if needed
+                  data={getSpeedometerChartData(chart.value)} // Dynamically set chart value
+                  options={{
+                    responsive: true,
+                    scale: {
+                      ticks: {
+                        beginAtZero: true,
+                        min: 0,
+                        max: 100,
+                        stepSize: 20,
+                      },
+                    },
+                  }}
+                />
+              </div>
+            </Card>
           ))
         ) : (
           <Card>
