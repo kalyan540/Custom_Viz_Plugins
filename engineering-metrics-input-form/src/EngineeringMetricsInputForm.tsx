@@ -100,10 +100,16 @@ export default function EngineeringMetricsInputForm(
     const selectedNode = e.value as TreeNode;
     setSelectedNode(selectedNode);
     updateFilteredCharts(selectedNode);
+    console.log(
+      "Selected handle Node",
+      selectedNode,
+      "::::  ",
+      selectedNode.key
+    );
   };
 
   const updateFilteredCharts = (selectedNode: TreeNode | null) => {
-    console.log("Selected Node", selectedNode);
+    console.log("Selected Node", selectedNode, "::::  ", selectedNode.key);
     if (selectedNode) {
       const path = selectedNode.key.split("-"); // Get the path of selected node
       let filteredData: DataRecord[] = dataC;
