@@ -222,22 +222,26 @@ export default function EngineeringMetricsInputForm(
   return (
     <div className="p-grid">
       {/* Left Panel - Tree View */}
-      <div className="p-col-12 p-md-4">
+      <div
+        className="p-col-12 p-md-4"
+        style={{ backgroundColor: "#f4f4f4", padding: "20px" }}
+      >
         <h3>Select a Category to View Corresponding Charts</h3>
         <Tree
           value={nodes}
           selectionMode="single"
           onSelectionChange={onSelectionChange}
+          style={{ height: "400px", overflowY: "auto" }}
         />
       </div>
 
       {/* Right Panel - Chart Display */}
-      <div className="p-col-12 p-md-8">
+      <div className="p-col-12 p-md-8" style={{ padding: "20px" }}>
         <h3>Available Charts</h3>
-        <Accordion>
-          {filteredCharts.length > 0 ? (
-            filteredCharts.map((chart) => (
-              <AccordionTab key={chart.id} header={chart.name}>
+        {filteredCharts.length > 0 ? (
+          filteredCharts.map((chart) => (
+            <Accordion key={chart.id}>
+              <AccordionTab header={chart.name}>
                 <Card>
                   <h5>Project: {chart.project}</h5>
                   <p>Business Unit: {chart.businessUnit}</p>
@@ -263,13 +267,13 @@ export default function EngineeringMetricsInputForm(
                   </div>
                 </Card>
               </AccordionTab>
-            ))
-          ) : (
-            <Card>
-              <h5>No charts available for the selected category.</h5>
-            </Card>
-          )}
-        </Accordion>
+            </Accordion>
+          ))
+        ) : (
+          <Card>
+            <h5>No charts available for the selected category.</h5>
+          </Card>
+        )}
       </div>
     </div>
   );
