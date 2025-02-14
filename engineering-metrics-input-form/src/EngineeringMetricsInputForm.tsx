@@ -175,6 +175,15 @@ export default function EngineeringMetricsInputForm(
           )}
         />
       </div>
+
+      <div style={{ flex: 2, padding: "20px" }}>
+        //{" "}
+        {selectedNode ? (
+          <p>Display Chart</p>
+        ) : (
+          <p>Select a node from the tree to see the gauge chart.</p>
+        )}
+      </div>
     </Styles>
 
     // <div style={{ display: "flex", height: "100vh" }}>
