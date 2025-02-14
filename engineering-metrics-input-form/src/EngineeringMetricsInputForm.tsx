@@ -179,7 +179,7 @@ export default function EngineeringMetricsInputForm(
       <div style={{ flex: 2, padding: "20px" }}>
         //{" "}
         {selectedNode ? (
-          <p>Display Chart</p>
+          console.log("Node Selected :: ", selectedNode)
         ) : (
           <p>Select a node from the tree to see the gauge chart.</p>
         )}
