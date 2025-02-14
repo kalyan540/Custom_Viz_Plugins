@@ -56,6 +56,7 @@ export default function EngineeringMetricsInputForm(
   const [dataC, setDataC] = useState<DataRecord[]>([]); // Store data fetched from API
 
   console.log("Data:", data);
+  console.log("props :: ", props);
 
   useEffect(() => {
     setDataC(data);
@@ -163,48 +164,10 @@ export default function EngineeringMetricsInputForm(
       setSelectedKeys({});
     }
   };*/
-  // const onSelectionChange = (e: TreeSelectionEvent) => {
-  //   console.log("Selected Nodes:", e.value);
-  //   setSelectedKeys(e.value as TreeCheckboxSelectionKeys);
-  //   // updateFilteredCharts(e.value);
-  // };
-
-  const handleNodeSelect = (e: { value: any }) => {
-    console.log("Node selected:", e.value);
-    const selectedNode = e.value;
-    setSelectedNode(selectedNode);
-    updateFilteredCharts(selectedNode);
-  };
-
-  // Dynamically filter the data based on the selected tree node
-  const updateFilteredCharts = (selectedNode: any) => {
-    if (selectedNode && selectedNode.key) {
-      const path = selectedNode.key.split("-"); // Get the path of selected node
-      let filteredData: DataRecord[] = data;
-
-      // Traverse through each level of the selected node to filter the data dynamically
-      path.forEach((value: string, index: number) => {
-        const key = Object.keys(data[0])[index]; // Dynamically get the key for the current level
-        filteredData = filteredData.filter(
-          (item: DataRecord) => item[key] === value
-        );
-      });
-
-      // If there is matching data, create chart data and update
-      if (filteredData.length > 0) {
-        const chartData = {
-          label: `${filteredData[0]["Business Unit"]} - ${filteredData[0]["Project"]}`,
-          value: Math.random() * 100, // Example random value for the speedometer (ensure this is numeric)
-          min: 0,
-          max: 100,
-        };
-        setFilteredCharts([chartData]); // Set the filtered chart data for Superset
-      } else {
-        setFilteredCharts([]); // Clear if no data found
-      }
-    } else {
-      setFilteredCharts([]); // Clear the chart when no node is selected or key is missing
-    }
+  const onSelectionChange = (e: TreeSelectionEvent) => {
+    console.log("Selected Nodes:", e.value);
+    setSelectedKeys(e.value as TreeCheckboxSelectionKeys);
+    // updateFilteredCharts(e.value);
   };
 
   return (
@@ -219,9 +182,8 @@ export default function EngineeringMetricsInputForm(
         <Tree
           value={treeData}
           selectionMode="single"
-          //selectionKeys={selectedKeys}
-          onSelectionChange={handleNodeSelect}
-          selectedKeys={selectedNode ? [selectedNode.key] : []}
+          selectionKeys={selectedKeys}
+          onSelectionChange={onSelectionChange}
           nodeTemplate={(node: any, options: any) => (
             <span>
               {node.label}
@@ -229,19 +191,6 @@ export default function EngineeringMetricsInputForm(
             </span>
           )}
         />
-      </div>
-
-      <div style={{ flex: 2, padding: "20px" }}>
-        {filteredCharts.length > 0 ? (
-          <div>
-            {/* Display Superset Gauge Chart based on filtered data */}
-            <GaugeChart
-              data={filteredCharts[0]} // Passing filtered chart data to Superset plugin
-            />
-          </div>
-        ) : (
-          <p>Select a node from the tree to see the gauge chart.</p>
-        )}
       </div>
     </Styles>
   );
