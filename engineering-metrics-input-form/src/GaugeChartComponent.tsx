@@ -49,4 +49,4 @@ const GaugeChartComponent: React.FC<GaugeChartComponentProps> = ({
   );
 };
 
-export { GaugeChartComponent };
+export default GaugeChartComponent;
