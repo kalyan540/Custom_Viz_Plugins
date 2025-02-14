@@ -219,7 +219,7 @@ export default function EngineeringMetricsInputForm(
         <Tree
           value={treeData}
           selectionMode="single"
-          selectionKeys={selectedKeys}
+          //selectionKeys={selectedKeys}
           onSelectionChange={handleNodeSelect}
           selectedKeys={selectedNode ? [selectedNode.key] : []}
           nodeTemplate={(node: any, options: any) => (
