@@ -67,16 +67,26 @@ export default function EngineeringMetricsInputForm(
   }, []);
 
   useEffect(() => {
-    const tree = buildDynamicTree(dataC);
-    setNodes(tree);
-  }, []);
+    if (dataC.length > 0) {
+      const tree = buildDynamicTree(dataC);
+      setNodes(tree);
+    }
+  }, [dataC]);
 
-  const buildDynamicTree = (data: any[]) => {
+  console.log("Result :: ", dataC);
+
+  const buildDynamicTree = (data: DataRecord[]) => {
     console.log("Daataaaaa:: ", data);
+    // Ensure data is not empty or undefined
+    if (!data || data.length === 0) {
+      console.error("Data is empty or undefined");
+      return []; // Return empty tree if no data
+    }
+
     const keys = Object.keys(data[0]);
     const tree: any[] = [];
 
-    data.forEach((item: any) => {
+    data.forEach((item: DataRecord) => {
       let currentLevel = tree;
       keys.forEach((key, index) => {
         const value = item[key];
