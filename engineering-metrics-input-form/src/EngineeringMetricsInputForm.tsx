@@ -197,7 +197,8 @@ export default function EngineeringMetricsInputForm(
       {/* Right Panel: Gauge Chart */}
       <div style={{ flex: 2, padding: "20px" }}>
         {selectedNode ? (
-          <GaugeChartComponent selectedNode={selectedNode} />
+          console.log("This is Selected Node :: ", selectedNode);
+          // <GaugeChartComponent selectedNode={selectedNode} />
         ) : (
           <p>Select a node from the tree to see the gauge chart.</p>
         )}
