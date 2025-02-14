@@ -154,15 +154,42 @@ export default function EngineeringMetricsInputForm(
   };
 
   return (
-    <Styles
-      ref={rootElem}
-      boldText={props.boldText}
-      headerFontSize={props.headerFontSize}
-      height={height}
-      width={width}
-    >
-      <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
-        <Tree
+    // <Styles
+    //   ref={rootElem}
+    //   boldText={props.boldText}
+    //   headerFontSize={props.headerFontSize}
+    //   height={height}
+    //   width={width}
+    // >
+    //   <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
+    //     <Tree
+    //       value={treeData}
+    //       selectionMode="checkbox"
+    //       selectionKeys={selectedKeys}
+    //       onSelectionChange={handleNodeSelect}
+    //       nodeTemplate={(node: any, options: any) => (
+    //         <span>
+    //           {node.label}
+    //           {node.selectable}
+    //         </span>
+    //       )}
+    //     />
+    //   </div>
+
+    //   <div style={{ flex: 2, padding: "20px" }}>
+    //     //{" "}
+    //     {selectedNode ? (
+    //       console.log("Node Selected :: ", selectedNode)
+    //     ) : (
+    //       <p>Select a node from the tree to see the gauge chart.</p>
+    //     )}
+    //   </div>
+    // </Styles>
+
+    <div style={{ display: 'flex', height: '100vh' }}>
+      {/* Left Panel: Tree View */}
+      <div style={{ flex: 1, borderRight: '1px solid #ccc', padding: '20px' }}>
+       <Tree
           value={treeData}
           selectionMode="checkbox"
           selectionKeys={selectedKeys}
@@ -176,15 +203,15 @@ export default function EngineeringMetricsInputForm(
         />
       </div>
 
-      <div style={{ flex: 2, padding: "20px" }}>
-        //{" "}
+      {/* Right Panel: Gauge Chart */}
+      <div style={{ flex: 2, padding: '20px' }}>
         {selectedNode ? (
-          console.log("Node Selected :: ", selectedNode)
+          // <GaugeChartComponent selectedNode={selectedNode} />
         ) : (
           <p>Select a node from the tree to see the gauge chart.</p>
         )}
       </div>
-    </Styles>
+    </div>
 
     // <div style={{ display: "flex", height: "100vh" }}>
     //   {/* Left Panel: Tree View */}
