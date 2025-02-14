@@ -150,39 +150,21 @@ export default function EngineeringMetricsInputForm(
   const handleNodeSelect = (e: { value: any }) => {
     const selectedNode = e.value;
     setSelectedNode(selectedNode); // Set the selected node and trigger chart update
+    console.log("Selected Node ::", selectedNode);
   };
 
   return (
-    // <Styles
-    //   ref={rootElem}
-    //   boldText={props.boldText}
-    //   headerFontSize={props.headerFontSize}
-    //   height={height}
-    //   width={width}
-    // >
-    //   <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
-    //     <Tree
-    //       value={treeData}
-    //       selectionMode="checkbox"
-    //       selectionKeys={selectedKeys}
-    //       onSelectionChange={handleNodeSelect}
-    //       nodeTemplate={(node: any, options: any) => (
-    //         <span>
-    //           {node.label}
-    //           {node.selectable}
-    //         </span>
-    //       )}
-    //     />
-    //   </div>
-    // </Styles>
-
-    <div style={{ display: "flex", height: "100vh" }}>
-      {/* Left Panel: Tree View */}
+    <Styles
+      ref={rootElem}
+      boldText={props.boldText}
+      headerFontSize={props.headerFontSize}
+      height={height}
+      width={width}
+    >
       <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
-        //{" "}
         <Tree
           value={treeData}
-          selectionMode="single"
+          selectionMode="checkbox"
           selectionKeys={selectedKeys}
           onSelectionChange={handleNodeSelect}
           nodeTemplate={(node: any, options: any) => (
@@ -193,17 +175,35 @@ export default function EngineeringMetricsInputForm(
           )}
         />
       </div>
+    </Styles>
 
-      {/* Right Panel: Gauge Chart */}
-      <div style={{ flex: 2, padding: "20px" }}>
-        {selectedNode ? (
-          <h3>{selectedNode}</h3>
-          
-        ) : (
-          <p>Select a node from the tree to see the gauge chart.</p>
-        )}
-      </div>
-    </div>``
+    // <div style={{ display: "flex", height: "100vh" }}>
+    //   {/* Left Panel: Tree View */}
+    //   <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
+    //     //{" "}
+    //     <Tree
+    //       value={treeData}
+    //       selectionMode="single"
+    //       selectionKeys={selectedKeys}
+    //       onSelectionChange={handleNodeSelect}
+    //       nodeTemplate={(node: any, options: any) => (
+    //         <span>
+    //           {node.label}
+    //           {node.selectable}
+    //         </span>
+    //       )}
+    //     />
+    //   </div>
+
+    //   {/* Right Panel: Gauge Chart */}
+    //   <div style={{ flex: 2, padding: "20px" }}>
+    //     {selectedNode ? (
+    //       <h3>{selectedNode}</h3>
+    //     ) : (
+    //       <p>Select a node from the tree to see the gauge chart.</p>
+    //     )}
+    //   </div>
+    // </div>
   );
 }
 
