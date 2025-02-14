@@ -186,10 +186,10 @@ export default function EngineeringMetricsInputForm(
     //   </div>
     // </Styles>
 
-    <div style={{ display: 'flex', height: '100vh' }}>
+    <div style={{ display: "flex", height: "100vh" }}>
       {/* Left Panel: Tree View */}
-      <div style={{ flex: 1, borderRight: '1px solid #ccc', padding: '20px' }}>
-       <Tree
+      <div style={{ flex: 1, borderRight: "1px solid #ccc", padding: "20px" }}>
+        <Tree
           value={treeData}
           selectionMode="checkbox"
           selectionKeys={selectedKeys}
@@ -204,9 +204,10 @@ export default function EngineeringMetricsInputForm(
       </div>
 
       {/* Right Panel: Gauge Chart */}
-      <div style={{ flex: 2, padding: '20px' }}>
+      <div style={{ flex: 2, padding: "20px" }}>
         {selectedNode ? (
           // <GaugeChartComponent selectedNode={selectedNode} />
+          <p>Select a node from the </p>
         ) : (
           <p>Select a node from the tree to see the gauge chart.</p>
         )}
