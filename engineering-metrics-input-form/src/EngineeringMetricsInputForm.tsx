@@ -4,22 +4,12 @@ import {
   EngineeringMetricsInputFormProps,
   EngineeringMetricsInputFormStylesProps,
 } from "./types";
-import { Tree, TreeNode } from "primereact/tree";
+import { Tree } from "primereact/tree";
 import { TreeSelectionEvent, TreeCheckboxSelectionKeys } from "primereact/tree";
 import "primeflex/primeflex.css";
 import "primereact/resources/primereact.css";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primeicons/primeicons.css";
-import { Card } from "primereact/card";
-import { Accordion, AccordionTab } from "primereact/accordion";
-import { Chart } from "primereact/chart";
-import SpeedometerChart from "./SpeedometerChart";
-//import "./em.css";
-
-// Type definitions
-type DataRecord = {
-  [key: string]: string | number;
-};
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   padding: ${({ theme }) => theme.gridUnit * 4}px;
@@ -39,7 +29,6 @@ export default function EngineeringMetricsInputForm(
   props: EngineeringMetricsInputFormProps
 ) {
   const { data, height, width, datasource } = props;
-
   const rootElem = createRef<HTMLDivElement>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bussinessUnit, setbussinessUnit] = useState("");
@@ -56,113 +45,8 @@ export default function EngineeringMetricsInputForm(
 
   const [filteredTableData, setFilteredTableData] = useState<any[]>([]);
 
-  const [nodes, setNodes] = useState<TreeNode[]>([]);
-  const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
-  const [filteredCharts, setFilteredCharts] = useState<any[]>([]);
-  const [dataC, setDataC] = useState<DataRecord[]>([]); // Holds external data
-  console.log("Data is coming :::", data);
-
-  useEffect(() => {
-    //const jsonData = data;
-    setDataC(data);
-  }, []);
-
-  console.log("Result :::", dataC);
-
-  useEffect(() => {
-    if (dataC.length > 0) {
-      const tree = buildDynamicTree(dataC);
-      setNodes(tree);
-    }
-  }, [dataC]);
-
-  console.log("Result :: ", dataC);
-
-  const buildDynamicTree = (data: DataRecord[]) => {
-    console.log("Daataaaaa:: ", data);
-    // Ensure data is not empty or undefined
-    if (!data || data.length === 0) {
-      console.error("Data is empty or undefined");
-      return []; // Return empty tree if no data
-    }
-
-    const keys = Object.keys(data[0]);
-    const tree: any[] = [];
-
-    data.forEach((item: DataRecord) => {
-      let currentLevel = tree;
-      keys.forEach((key, index) => {
-        const value = item[key];
-        let node = currentLevel.find((n) => n.label === value);
-        if (!node) {
-          node = {
-            key: currentLevel.length + "-" + value,
-            label: value,
-            children: [],
-            selectable: index === keys.length - 1, // Mark last level as selectable
-          };
-          currentLevel.push(node);
-        }
-        currentLevel = node.children;
-      });
-    });
-
-    return tree;
-  };
-
-  const handleNodeSelect = (e: { value: TreeNode }) => {
-    console.log("Node selected:", e.value);
-    const selectedNode = e.value;
-    setSelectedNode(selectedNode);
-    updateFilteredCharts(selectedNode);
-  };
-
-  // Dynamically filter the data based on the selected tree node
-  const updateFilteredCharts = (selectedNode: TreeNode | null) => {
-    console.log(
-      "Selected handle Node",
-      selectedNode,
-      "::::  ",
-      selectedNode.key
-    );
-    if (selectedNode && selectedNode.key) {
-      const path = selectedNode.key.split("-"); // Get the path of selected node
-      let filteredData: DataRecord[] = dataC;
-
-      console.log("filter Data :: ", filteredCharts);
-
-      // Traverse through each level of the selected node to filter the data dynamically
-      path.forEach((value: string, index: number) => {
-        const key = Object.keys(data[0])[index]; // Dynamically get the key for the current level
-        filteredData = filteredData.filter(
-          (item: DataRecord) => item[key] === value
-        );
-      });
-
-      console.log(
-        "After filter Data :: ",
-        filteredCharts,
-        " ",
-        filteredData.length
-      );
-
-      // If there is matching data, create chart data and update
-      if (filteredData.length > 0) {
-        const chartData = {
-          label: `${filteredData[0]["Business Unit"]} - ${filteredData[0]["Project"]}`,
-          value: Math.random() * 100, // Example random value for the speedometer (ensure this is numeric)
-          min: 0,
-          max: 100,
-        };
-        console.log("chart Data : ", chartData);
-        setFilteredCharts([chartData]); // Set the filtered chart data
-      } else {
-        setFilteredCharts([]); // Clear if no data found
-      }
-    } else {
-      setFilteredCharts([]); // Clear the chart when no node is selected or key is missing
-    }
-  };
+  console.log("Data:", data);
+  console.log("testing");
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -194,31 +78,97 @@ export default function EngineeringMetricsInputForm(
     fetchExploreData();
   }, [datasource, triggerFetch]);
 
-  console.log("filter State :", filteredCharts.length);
+  // Helper function to build a tree dynamically based on keys in the data
+  const buildDynamicTree = (data: any[]) => {
+    const keys = Object.keys(data[0]); // Dynamically get keys from the first data entry
+    const tree: any[] = [];
+
+    data.forEach((item: any) => {
+      let currentLevel = tree;
+
+      keys.forEach((key, index) => {
+        const value = item[key];
+        let node = currentLevel.find((n) => n.label === value);
+
+        if (!node) {
+          node = {
+            key: currentLevel.length + "-" + value,
+            label: value,
+            children: [],
+            selectable: index === keys.length - 1, // Only mark the last level as selectable
+          };
+          currentLevel.push(node);
+        }
+
+        currentLevel = node.children;
+      });
+    });
+
+    return tree;
+  };
+
+  // Build the tree structure dynamically
+  const treeData = buildDynamicTree(data);
+
+  // Helper function to find a node by its key
+  const findNodeByKey = (nodes: any[], key: string): any => {
+    for (const node of nodes) {
+      if (node.key === key) {
+        return node;
+      }
+      if (node.children) {
+        const found = findNodeByKey(node.children, key);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  /*const onSelectionChange = (e: { value: string }) => {
+    const selectedKey = e.value;
+  
+    // Check if the selected node is a leaf (nth-level child)
+    const isLeafNode = (key: string) => {
+      const node = findNodeByKey(treeData, key); // Helper function to find node
+      return node && (!node.children || node.children.length === 0); // No children = leaf
+    };
+  
+    if (isLeafNode(selectedKey)) {
+      // Allow only one nth-level child selection
+      setSelectedKeys({ [selectedKey]: true });
+    } else {
+      // Clear selection if it's not a leaf node
+      setSelectedKeys({});
+    }
+  };*/
+  const onSelectionChange = (e: TreeSelectionEvent) => {
+    console.log("Selected Nodes:", e.value);
+    setSelectedKeys(e.value as TreeCheckboxSelectionKeys);
+  };
+
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      {/* Left side - Tree View */}
-      <div style={{ flex: 1, borderRight: "1px solid #ccc", padding: "20px" }}>
+    <Styles
+      ref={rootElem}
+      boldText={props.boldText}
+      headerFontSize={props.headerFontSize}
+      height={height}
+      width={width}
+    >
+      <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
         <Tree
-          value={nodes}
-          selectionMode="single"
-          onSelectionChange={handleNodeSelect}
-          selectedKeys={selectedNode ? [selectedNode.key] : []} // Maintain selected keys for synchronization
+          value={treeData}
+          selectionMode="checkbox"
+          selectionKeys={selectedKeys}
+          onSelectionChange={onSelectionChange}
+          nodeTemplate={(node: any, options: any) => (
+            <span>
+              {node.label}
+              {node.selectable}
+            </span>
+          )}
         />
       </div>
-
-      {/* Right side - Speedometer Chart */}
-      <div style={{ flex: 2, padding: "20px" }}>
-        {filteredCharts.length > 0 ? (
-          <div>
-            {/* Display Speedometer Chart based on filtered data */}
-            <SpeedometerChart data={filteredCharts[0]} />
-          </div>
-        ) : (
-          <p>Select a node from the tree to see the speedometer chart.</p>
-        )}
-      </div>
-    </div>
+    </Styles>
   );
 }
 
