@@ -60,11 +60,13 @@ export default function EngineeringMetricsInputForm(
   const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
   const [filteredCharts, setFilteredCharts] = useState<any[]>([]);
   const [dataC, setDataC] = useState<DataRecord[]>([]); // Holds external data
+  console.log("Data is coming :::", data);
 
   useEffect(() => {
     //const jsonData = data;
     setDataC(data);
   }, []);
+
   console.log("Result :::", dataC);
 
   useEffect(() => {
