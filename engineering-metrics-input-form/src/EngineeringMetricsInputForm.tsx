@@ -10,6 +10,7 @@ import "primeflex/primeflex.css";
 import "primereact/resources/primereact.css";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primeicons/primeicons.css";
+import GaugeChartComponent from "./GaugeChartComponent";
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   padding: ${({ theme }) => theme.gridUnit * 4}px;
@@ -42,6 +43,7 @@ export default function EngineeringMetricsInputForm(
   const [triggerFetch, setTriggerFetch] = useState(false);
   const [tableFetch, setTableFetch] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState({});
+  const [selectedNode, setSelectedNode] = useState<any | null>(null);
 
   const [filteredTableData, setFilteredTableData] = useState<any[]>([]);
 
@@ -141,25 +143,48 @@ export default function EngineeringMetricsInputForm(
       setSelectedKeys({});
     }
   };*/
-  const onSelectionChange = (e: TreeSelectionEvent) => {
-    console.log("Selected Nodes:", e.value);
-    setSelectedKeys(e.value as TreeCheckboxSelectionKeys);
+  // const onSelectionChange = (e: TreeSelectionEvent) => {
+  //   console.log("Selected Nodes:", e.value);
+  //   setSelectedKeys(e.value as TreeCheckboxSelectionKeys);
+  // };
+  const handleNodeSelect = (e: { value: any }) => {
+    const selectedNode = e.value;
+    setSelectedNode(selectedNode); // Set the selected node and trigger chart update
   };
 
   return (
-    <Styles
-      ref={rootElem}
-      boldText={props.boldText}
-      headerFontSize={props.headerFontSize}
-      height={height}
-      width={width}
-    >
+    // <Styles
+    //   ref={rootElem}
+    //   boldText={props.boldText}
+    //   headerFontSize={props.headerFontSize}
+    //   height={height}
+    //   width={width}
+    // >
+    //   <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
+    //     <Tree
+    //       value={treeData}
+    //       selectionMode="checkbox"
+    //       selectionKeys={selectedKeys}
+    //       onSelectionChange={handleNodeSelect}
+    //       nodeTemplate={(node: any, options: any) => (
+    //         <span>
+    //           {node.label}
+    //           {node.selectable}
+    //         </span>
+    //       )}
+    //     />
+    //   </div>
+    // </Styles>
+
+    <div style={{ display: "flex", height: "100vh" }}>
+      {/* Left Panel: Tree View */}
       <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
+        //{" "}
         <Tree
           value={treeData}
-          selectionMode="checkbox"
+          selectionMode="single"
           selectionKeys={selectedKeys}
-          onSelectionChange={onSelectionChange}
+          onSelectionChange={handleNodeSelect}
           nodeTemplate={(node: any, options: any) => (
             <span>
               {node.label}
@@ -168,7 +193,16 @@ export default function EngineeringMetricsInputForm(
           )}
         />
       </div>
-    </Styles>
+
+      {/* Right Panel: Gauge Chart */}
+      <div style={{ flex: 2, padding: "20px" }}>
+        {selectedNode ? (
+          <GaugeChartComponent selectedNode={selectedNode} />
+        ) : (
+          <p>Select a node from the tree to see the gauge chart.</p>
+        )}
+      </div>
+    </div>
   );
 }
 
