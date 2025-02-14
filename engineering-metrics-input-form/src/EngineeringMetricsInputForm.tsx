@@ -10,7 +10,7 @@ import "primeflex/primeflex.css";
 import "primereact/resources/primereact.css";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primeicons/primeicons.css";
-import { GaugeChart } from "@superset-ui/legacy-plugin-chart-gauge";
+import { GaugeChartComponent } from "./GaugeChartComponent";
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   padding: ${({ theme }) => theme.gridUnit * 4}px;
@@ -26,9 +26,15 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   }
 `;
 
-type DataRecord = {
-  [key: string]: string | number;
-};
+interface DataRecord {
+  [key: string]: string;
+}
+
+interface TreeNode {
+  key: string;
+  label: string;
+  children?: TreeNode[];
+}
 
 export default function EngineeringMetricsInputForm(
   props: EngineeringMetricsInputFormProps
@@ -52,8 +58,8 @@ export default function EngineeringMetricsInputForm(
 
   const [nodes, setNodes] = useState<any[]>([]); // Tree structure
   const [selectedNode, setSelectedNode] = useState<any | null>(null); // Selected node in the tree
-  const [filteredCharts, setFilteredCharts] = useState<any[]>([]); // Store filtered chart data
   const [dataC, setDataC] = useState<DataRecord[]>([]); // Store data fetched from API
+  import { GaugeChart } from "@superset-ui/legacy-plugin-chart-gauge";
 
   console.log("Data:", data);
   console.log("props :: ", props);
@@ -131,7 +137,7 @@ export default function EngineeringMetricsInputForm(
   };
 
   // Build the tree structure dynamically
-  const treeData = buildDynamicTree(dataC);
+  //const treeData = buildDynamicTree(dataC);
 
   // Helper function to find a node by its key
   const findNodeByKey = (nodes: any[], key: string): any => {
@@ -164,35 +170,37 @@ export default function EngineeringMetricsInputForm(
       setSelectedKeys({});
     }
   };*/
-  const onSelectionChange = (e: TreeSelectionEvent) => {
-    console.log("Selected Nodes:", e.value);
-    setSelectedKeys(e.value as TreeCheckboxSelectionKeys);
-    // updateFilteredCharts(e.value);
+  // const onSelectionChange = (e: TreeSelectionEvent) => {
+  //   console.log("Selected Nodes:", e.value);
+  //   setSelectedKeys(e.value as TreeCheckboxSelectionKeys);
+  //   // updateFilteredCharts(e.value);
+  // };
+
+  const handleNodeSelect = (e: { value: any }) => {
+    const selectedNode = e.value;
+    setSelectedNode(selectedNode); // Set the selected node and trigger chart update
   };
 
   return (
-    <Styles
-      ref={rootElem}
-      boldText={props.boldText}
-      headerFontSize={props.headerFontSize}
-      height={height}
-      width={width}
-    >
-      <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
+    <div style={{ display: "flex", height: "100vh" }}>
+      {/* Left Panel: Tree View */}
+      <div style={{ flex: 1, borderRight: "1px solid #ccc", padding: "20px" }}>
         <Tree
-          value={treeData}
+          value={nodes}
           selectionMode="single"
-          selectionKeys={selectedKeys}
-          onSelectionChange={onSelectionChange}
-          nodeTemplate={(node: any, options: any) => (
-            <span>
-              {node.label}
-              {node.selectable}
-            </span>
-          )}
+          onSelectionChange={handleNodeSelect}
         />
       </div>
-    </Styles>
+
+      {/* Right Panel: Gauge Chart */}
+      <div style={{ flex: 2, padding: "20px" }}>
+        {selectedNode ? (
+          <GaugeChartComponent selectedNode={selectedNode} />
+        ) : (
+          <p>Select a node from the tree to see the gauge chart.</p>
+        )}
+      </div>
+    </div>
   );
 }
 
