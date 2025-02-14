@@ -26,7 +26,7 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   }
 `;
 
-export default function EngineeringMetricsInputForm(
+ function EngineeringMetricsInputForm(
   props: EngineeringMetricsInputFormProps
 ) {
   const { data, height, width, datasource } = props;
@@ -207,7 +207,7 @@ export default function EngineeringMetricsInputForm(
       <div style={{ flex: 2, padding: "20px" }}>
         {selectedNode ? (
            <GaugeChartComponent selectedNode={selectedNode} />
-          <p>Select a node from the </p>
+          
         ) : (
          // <p>Select a node from the tree to see the gauge chart.</p>
         )}
@@ -580,3 +580,4 @@ export default function EngineeringMetricsInputForm(
 
     </Styles>
   );*/
+  export default EngineeringMetricsInputForm;
