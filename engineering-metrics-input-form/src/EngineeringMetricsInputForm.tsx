@@ -10,6 +10,7 @@ import "primeflex/primeflex.css";
 import "primereact/resources/primereact.css";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primeicons/primeicons.css";
+import GaugeChartComponent from "./GaugeChartComponent";
 //import GaugeChartComponent from "./GaugeChartComponent";
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
@@ -206,9 +207,9 @@ export default function EngineeringMetricsInputForm(
       {/* Right Panel: Gauge Chart */}
       <div style={{ flex: 2, padding: "20px" }}>
         {selectedNode ? (
-          //  <GaugeChartComponent selectedNode={selectedNode} />
-          <p>Chart rendered</p>
+          <GaugeChartComponent selectedNode={selectedNode} />
         ) : (
+          //<p>Chart rendered</p>
           <p>Select a node from the tree to see the gauge chart.</p>
         )}
       </div>
