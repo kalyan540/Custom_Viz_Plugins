@@ -17,9 +17,9 @@ import SpeedometerChart from "./SpeedometerChart";
 //import "./em.css";
 
 // Type definitions
-interface DataRecord {
-  [key: string]: string;
-}
+type DataRecord = {
+  [key: string]: string | number;
+};
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   padding: ${({ theme }) => theme.gridUnit * 4}px;
@@ -62,9 +62,10 @@ export default function EngineeringMetricsInputForm(
   const [dataC, setDataC] = useState<DataRecord[]>([]); // Holds external data
 
   useEffect(() => {
-    const jsonData: DataRecord[] = data;
-    setDataC(jsonData);
+    //const jsonData = data;
+    setDataC(data);
   }, []);
+  console.log("Result :::", dataC);
 
   useEffect(() => {
     if (dataC.length > 0) {
