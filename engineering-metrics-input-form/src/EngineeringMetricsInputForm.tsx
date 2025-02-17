@@ -38,7 +38,7 @@ interface ChartData {
 export default function EngineeringMetricsInputForm(
   props: EngineeringMetricsInputFormProps
 ) {
-  const { data, height, width, datasource } = props;
+  const { data, height, width, datasource, setDataMask } = props;
   const rootElem = createRef<HTMLDivElement>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bussinessUnit, setbussinessUnit] = useState("");
@@ -58,7 +58,7 @@ export default function EngineeringMetricsInputForm(
   const [chartData, setChartData] = useState<ChartData | null>(null);
 
   console.log("Data:", data);
-  console.log("testing");
+  console.log("testing SetDataMask", setDataMask);
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -231,20 +231,8 @@ export default function EngineeringMetricsInputForm(
       <div style={{ flex: 2, padding: "20px" }}>
         {selectedNode ? (
           // <GaugeChartComponent selectedNode={selectedNode} />
-          <div>
-            {chartData ? (
-              <GaugeChart
-                data={{
-                  label: chartData.label,
-                  value: chartData.value,
-                  min: chartData.min,
-                  max: chartData.max,
-                }}
-              />
-            ) : (
-              <p>Loading Gauge Chart...</p>
-            )}
-          </div>
+          <p>Select a node from the tree to see the gauge ch</p>
+          <div></div>
         ) : (
           //<p>Chart rendered</p>
           <p>Select a node from the tree to see the gauge chart.</p>
