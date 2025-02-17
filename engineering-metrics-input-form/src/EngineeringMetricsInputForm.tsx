@@ -10,8 +10,9 @@ import "primeflex/primeflex.css";
 import "primereact/resources/primereact.css";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primeicons/primeicons.css";
-import GaugeChartComponent from "./GaugeChartComponent";
 //import GaugeChartComponent from "./GaugeChartComponent";
+//import GaugeChartComponent from "./GaugeChartComponent";
+import { GaugeChart } from "@superset-ui/legacy-plugin-chart-gauge";
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   padding: ${({ theme }) => theme.gridUnit * 4}px;
@@ -26,6 +27,13 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
     margin-bottom: 1rem;
   }
 `;
+
+interface ChartData {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+}
 
 export default function EngineeringMetricsInputForm(
   props: EngineeringMetricsInputFormProps
@@ -47,6 +55,7 @@ export default function EngineeringMetricsInputForm(
   const [selectedNode, setSelectedNode] = useState<any | null>(null);
 
   const [filteredTableData, setFilteredTableData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartData | null>(null);
 
   console.log("Data:", data);
   console.log("testing");
@@ -112,6 +121,20 @@ export default function EngineeringMetricsInputForm(
 
   // Build the tree structure dynamically
   const treeData = buildDynamicTree(data);
+
+  // Logic to update chart based on selected node data
+  useEffect(() => {
+    if (selectedNode) {
+      const chartData: ChartData = {
+        label: `${selectedNode.label} - Filtered Data`,
+        value: Math.random() * 100, // Simulate a dynamic value (replace with real data if needed)
+        min: 0,
+        max: 100,
+      };
+
+      setChartData(chartData);
+    }
+  }, [selectedNode]);
 
   // Helper function to find a node by its key
   const findNodeByKey = (nodes: any[], key: string): any => {
@@ -207,7 +230,21 @@ export default function EngineeringMetricsInputForm(
       {/* Right Panel: Gauge Chart */}
       <div style={{ flex: 2, padding: "20px" }}>
         {selectedNode ? (
-          <GaugeChartComponent selectedNode={selectedNode} />
+          // <GaugeChartComponent selectedNode={selectedNode} />
+          <div>
+            {chartData ? (
+              <GaugeChart
+                data={{
+                  label: chartData.label,
+                  value: chartData.value,
+                  min: chartData.min,
+                  max: chartData.max,
+                }}
+              />
+            ) : (
+              <p>Loading Gauge Chart...</p>
+            )}
+          </div>
         ) : (
           //<p>Chart rendered</p>
           <p>Select a node from the tree to see the gauge chart.</p>
