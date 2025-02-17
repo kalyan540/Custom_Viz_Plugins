@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { GaugeChart } from "@superset-ui/legacy-plugin-chart-gauge"; // Assuming you're using the Apache Superset Gauge Chart
+//import { GaugeChart } from "@superset-ui/legacy-plugin-chart-gauge"; // Assuming you're using the Apache Superset Gauge Chart
+import GaugeChart from "react-gauge-chart";
 
 interface ChartData {
   label: string;
