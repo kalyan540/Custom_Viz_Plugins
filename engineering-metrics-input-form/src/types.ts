@@ -42,6 +42,7 @@ export type EngineeringMetricsInputFormQueryFormData = QueryFormData &
 
 export interface BaseTransformedProps<F> {
   setDataMask?: SetDataMaskHook;
+  formData: F;
 }
 
 export type LegendFormData = {
