@@ -215,7 +215,8 @@ export default function EngineeringMetricsInputForm(
     if (dataMask) {
       setDataMask(dataMask);
     }
-    console.log(setDataMask);
+    console.log("Data Mask Testing :: ", dataMask);
+    console.log("After Data Mask Props :: ", props);
   };
 
   return (
