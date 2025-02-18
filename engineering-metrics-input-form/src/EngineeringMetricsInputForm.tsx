@@ -61,6 +61,39 @@ export default function EngineeringMetricsInputForm(
   console.log("testing SetDataMask", setDataMask);
   console.log("Theame Testing :: ", theme);
 
+  const getCrossFilterDataMask = (selectedNode: any) => {
+    return {
+      dataMask: {
+        extraFormData: {
+          filters: selectedNode
+            ? [
+                {
+                  col: "Bussiness Unit",
+                  op: "IN",
+                  val: "Caterpillar",
+                },
+                {
+                  col: "Account",
+                  op: "IN",
+                  val: "West",
+                },
+                {
+                  col: "Project",
+                  op: "IN",
+                  val: "Project4",
+                },
+              ]
+            : [],
+        },
+        filterState: {
+          value: [["Caterpillar"], ["West"], ["Project4"]],
+          selectedValues: ["Caterpillar", "West", "Project4"],
+        },
+      },
+      isCurrentValueSelected: true,
+    };
+  };
+
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
     console.log("Plugin element", root);
@@ -176,6 +209,13 @@ export default function EngineeringMetricsInputForm(
     const selectedNode = e.value;
     setSelectedNode(selectedNode); // Set the selected node and trigger chart update
     console.log("Selected Node ::", selectedNode);
+    getCrossFilterDataMask(selectedNode);
+
+    const dataMask = getCrossFilterDataMask(selectedNode)?.dataMask;
+    if (dataMask) {
+      setDataMask(dataMask);
+    }
+    console.log(setDataMask);
   };
 
   return (
@@ -229,7 +269,7 @@ export default function EngineeringMetricsInputForm(
       </div>
 
       {/* Right Panel: Gauge Chart */}
-      <div style={{ flex: 2, padding: "20px" }}>
+      {/* <div style={{ flex: 2, padding: "20px" }}>
         {selectedNode ? (
           // <GaugeChartComponent selectedNode={selectedNode} />
           <p>Select a node from the tree to see the gauge ch</p>
@@ -238,38 +278,38 @@ export default function EngineeringMetricsInputForm(
           //<p>Chart rendered</p>
           <p>Select a node from the tree to see the gauge chart.</p>
         )}
-      </div>
+      </div> */}
     </div>
-
-    // <div style={{ display: "flex", height: "100vh" }}>
-    //   {/* Left Panel: Tree View */}
-    //   <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
-    //     //{" "}
-    //     <Tree
-    //       value={treeData}
-    //       selectionMode="single"
-    //       selectionKeys={selectedKeys}
-    //       onSelectionChange={handleNodeSelect}
-    //       nodeTemplate={(node: any, options: any) => (
-    //         <span>
-    //           {node.label}
-    //           {node.selectable}
-    //         </span>
-    //       )}
-    //     />
-    //   </div>
-
-    //   {/* Right Panel: Gauge Chart */}
-    //   <div style={{ flex: 2, padding: "20px" }}>
-    //     {selectedNode ? (
-    //       <h3>{selectedNode}</h3>
-    //     ) : (
-    //       <p>Select a node from the tree to see the gauge chart.</p>
-    //     )}
-    //   </div>
-    // </div>
   );
 }
+
+// <div style={{ display: "flex", height: "100vh" }}>
+//   {/* Left Panel: Tree View */}
+//   <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
+//     //{" "}
+//     <Tree
+//       value={treeData}
+//       selectionMode="single"
+//       selectionKeys={selectedKeys}
+//       onSelectionChange={handleNodeSelect}
+//       nodeTemplate={(node: any, options: any) => (
+//         <span>
+//           {node.label}
+//           {node.selectable}
+//         </span>
+//       )}
+//     />
+//   </div>
+
+//   {/* Right Panel: Gauge Chart */}
+//   <div style={{ flex: 2, padding: "20px" }}>
+//     {selectedNode ? (
+//       <h3>{selectedNode}</h3>
+//     ) : (
+//       <p>Select a node from the tree to see the gauge chart.</p>
+//     )}
+//   </div>
+// </div>
 
 /*useEffect(() => {
     if (bussinessUnit && accountName && projectName) {

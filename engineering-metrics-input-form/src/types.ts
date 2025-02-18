@@ -24,9 +24,12 @@ import {
   ContributionType,
   QueryFormMetric,
   QueryFormColumn,
+  FilterState,
 } from "@superset-ui/core";
 import { DEFAULT_LEGEND_FORM_DATA } from "./constants";
 import { SupersetTheme } from "./styles";
+import { RefObject, Ref } from "react";
+import type { EChartsType } from "echarts/core";
 
 export interface EngineeringMetricsInputFormStylesProps {
   height: number;
@@ -44,9 +47,21 @@ export type EngineeringMetricsInputFormQueryFormData = QueryFormData &
   EngineeringMetricsInputFormStylesProps &
   EngineeringMetricsInputFormCustomizeProps;
 
+export type Refs = {
+  echartRef?: Ref<EchartsHandler>;
+  divRef?: RefObject<HTMLDivElement>;
+};
+
+export interface EchartsHandler {
+  getEchartInstance: () => EChartsType | undefined;
+}
+
 export interface BaseTransformedProps<F> {
   setDataMask?: SetDataMaskHook;
   formData: F;
+  emitCrossFilters?: boolean;
+  filterState?: FilterState;
+  refs: Refs;
 }
 
 export type LegendFormData = {
@@ -107,6 +122,7 @@ export type EngineeringMetricsFormData = QueryFormData & {
 };
 
 export const DEFAULT_FORM_DATA: Partial<EngineeringMetricsFormData> = {
+  ...DEFAULT_LEGEND_FORM_DATA,
   groupby: [],
   rowLimit: 10,
   minVal: null,
