@@ -38,7 +38,7 @@ interface ChartData {
 export default function EngineeringMetricsInputForm(
   props: EngineeringMetricsInputFormProps
 ) {
-  const { data, height, width, datasource, setDataMask } = props;
+  const { data, height, width, datasource, setDataMask, theme } = props;
   const rootElem = createRef<HTMLDivElement>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bussinessUnit, setbussinessUnit] = useState("");
@@ -59,6 +59,7 @@ export default function EngineeringMetricsInputForm(
 
   console.log("Data:", data);
   console.log("testing SetDataMask", setDataMask);
+  console.log("Theame Testing :: ", theme);
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;

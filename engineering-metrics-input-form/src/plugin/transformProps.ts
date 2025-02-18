@@ -17,6 +17,7 @@
  * under the License.
  */
 import { ChartProps, TimeseriesDataRecord } from "@superset-ui/core";
+import { defaultGaugeSeriesOption } from "../constants";
 
 export default function transformProps(chartProps: ChartProps) {
   /**
@@ -48,13 +49,18 @@ export default function transformProps(chartProps: ChartProps) {
    * function during development with hot reloading, changes won't
    * be seen until restarting the development server.
    */
-  const { width, height, formData, queriesData, hooks } = chartProps;
+  const { width, height, formData, queriesData, hooks, logAxis, theme } =
+    chartProps;
   const { onContextMenu, setDataMask } = hooks;
   const { boldText, headerFontSize, headerText } = formData;
   const data = queriesData[0].data as TimeseriesDataRecord[];
   const datasource = formData.datasource;
 
   console.log("formData via TransformProps.ts", formData);
+
+  const gaugeSeriesOptions = defaultGaugeSeriesOption(theme);
+
+  console.log("gaugeSeriesOptions ::: ", gaugeSeriesOptions);
 
   return {
     width,
@@ -67,5 +73,7 @@ export default function transformProps(chartProps: ChartProps) {
     headerText,
     setDataMask,
     onContextMenu,
+    logAxis,
+    theme,
   };
 }
