@@ -107,7 +107,6 @@ export type EngineeringMetricsFormData = QueryFormData & {
 };
 
 export const DEFAULT_FORM_DATA: Partial<EngineeringMetricsFormData> = {
-  ...DEFAULT_LEGEND_FORM_DATA,
   groupby: [],
   rowLimit: 10,
   minVal: null,
