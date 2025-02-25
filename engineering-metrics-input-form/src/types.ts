@@ -20,13 +20,23 @@ import {
   QueryFormData,
   supersetTheme,
   TimeseriesDataRecord,
-} from '@superset-ui/core';
+  SetDataMaskHook,
+  ContributionType,
+  QueryFormMetric,
+  QueryFormColumn,
+  FilterState,
+} from "@superset-ui/core";
+import { DEFAULT_LEGEND_FORM_DATA } from "./constants";
+import { SupersetTheme } from "./styles";
+import { RefObject, Ref } from "react";
+import type { EChartsType } from "echarts/core";
 
 export interface EngineeringMetricsInputFormStylesProps {
   height: number;
   width: number;
   headerFontSize: keyof typeof supersetTheme.typography.sizes;
   boldText: boolean;
+  theme: SupersetTheme;
 }
 
 interface EngineeringMetricsInputFormCustomizeProps {
@@ -37,9 +47,107 @@ export type EngineeringMetricsInputFormQueryFormData = QueryFormData &
   EngineeringMetricsInputFormStylesProps &
   EngineeringMetricsInputFormCustomizeProps;
 
-export type EngineeringMetricsInputFormProps = EngineeringMetricsInputFormStylesProps &
-  EngineeringMetricsInputFormCustomizeProps & {
-    data: TimeseriesDataRecord[];
-    datasource: string;
-    // add typing here for the props you pass in from transformProps.ts!
-  };
+export type Refs = {
+  echartRef?: Ref<EchartsHandler>;
+  divRef?: RefObject<HTMLDivElement>;
+};
+
+export interface EchartsHandler {
+  getEchartInstance: () => EChartsType | undefined;
+}
+
+export interface BaseTransformedProps<F> {
+  setDataMask?: SetDataMaskHook;
+  formData: F;
+  emitCrossFilters?: boolean;
+  filterState?: FilterState;
+  refs: Refs;
+}
+
+export type LegendFormData = {
+  legendMargin: number | null | string;
+  legendOrientation: LegendOrientation;
+  legendType: LegendType;
+  showLegend: boolean;
+};
+
+export enum LegendOrientation {
+  Top = "top",
+  Bottom = "bottom",
+  Left = "left",
+  Right = "right",
+}
+
+export enum LegendType {
+  Scroll = "scroll",
+  Plain = "plain",
+}
+
+export type EngineeringMetricsFormData = QueryFormData & {
+  colorScheme?: string;
+  timeShiftColor?: boolean;
+  contributionMode?: ContributionType;
+  forecastEnabled: boolean;
+  forecastPeriods: number;
+  forecastInterval: number;
+  forecastSeasonalityDaily: null;
+  forecastSeasonalityWeekly: null;
+  forecastSeasonalityYearly: null;
+  logAxis: boolean;
+  markerEnabled: boolean;
+  markerSize: number;
+  metrics: QueryFormMetric[];
+  minorSplitLine: boolean;
+  minorTicks: boolean;
+  groupby: QueryFormColumn[];
+  metric?: string;
+  rowLimit: number;
+  minVal: number | null;
+  maxVal: number | null;
+  fontSize: number;
+  numberFormat: string;
+  animation: boolean;
+  showProgress: boolean;
+  overlap: boolean;
+  roundCap: boolean;
+  showAxisTick: boolean;
+  showSplitLine: boolean;
+  splitNumber: number;
+  startAngle: number;
+  endAngle: number;
+  showPointer: boolean;
+  intervals: string;
+  intervalColorIndices: string;
+  valueFormatter: string;
+};
+
+export const DEFAULT_FORM_DATA: Partial<EngineeringMetricsFormData> = {
+  groupby: [],
+  rowLimit: 10,
+  minVal: null,
+  maxVal: null,
+  fontSize: 15,
+  numberFormat: "SMART_NUMBER",
+  animation: true,
+  showProgress: true,
+  overlap: true,
+  roundCap: false,
+  showAxisTick: false,
+  showSplitLine: false,
+  splitNumber: 10,
+  startAngle: 225,
+  endAngle: -45,
+  showPointer: true,
+  intervals: "",
+  intervalColorIndices: "",
+  valueFormatter: "{value}",
+};
+
+export type EngineeringMetricsInputFormProps =
+  BaseTransformedProps<EngineeringMetricsFormData> &
+    EngineeringMetricsInputFormStylesProps &
+    EngineeringMetricsInputFormCustomizeProps & {
+      data: TimeseriesDataRecord[];
+      datasource: string;
+      // add typing here for the props you pass in from transformProps.ts!
+    };

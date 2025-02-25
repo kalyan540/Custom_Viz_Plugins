@@ -1,12 +1,18 @@
-import React, { useEffect, createRef, useState } from 'react';
-import { styled, SupersetClient } from '@superset-ui/core';
-import { EngineeringMetricsInputFormProps, EngineeringMetricsInputFormStylesProps } from './types';
-import { Tree } from 'primereact/tree';
-import { TreeSelectionEvent, TreeCheckboxSelectionKeys } from 'primereact/tree';
-import 'primeflex/primeflex.css';
-import 'primereact/resources/primereact.css';
-import 'primereact/resources/themes/lara-light-indigo/theme.css';
-import 'primeicons/primeicons.css';
+import React, { useEffect, createRef, useState } from "react";
+import { styled, SupersetClient } from "@superset-ui/core";
+import {
+  EngineeringMetricsInputFormProps,
+  EngineeringMetricsInputFormStylesProps,
+} from "./types";
+import { Tree } from "primereact/tree";
+import { TreeSelectionEvent, TreeCheckboxSelectionKeys } from "primereact/tree";
+import "primeflex/primeflex.css";
+import "primereact/resources/primereact.css";
+import "primereact/resources/themes/lara-light-indigo/theme.css";
+import "primeicons/primeicons.css";
+//import GaugeChartComponent from "./GaugeChartComponent";
+//import GaugeChartComponent from "./GaugeChartComponent";
+import { GaugeChart } from "@superset-ui/legacy-plugin-chart-gauge";
 
 const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
   padding: ${({ theme }) => theme.gridUnit * 4}px;
@@ -19,16 +25,25 @@ const Styles = styled.div<EngineeringMetricsInputFormStylesProps>`
     padding: 2rem;
     border-radius: 10px;
     margin-bottom: 1rem;
-}
+  }
 `;
 
-export default function EngineeringMetricsInputForm(props: EngineeringMetricsInputFormProps) {
-  const { data, height, width, datasource } = props;
+interface ChartData {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+}
+
+export default function EngineeringMetricsInputForm(
+  props: EngineeringMetricsInputFormProps
+) {
+  const { data, height, width, datasource, setDataMask, theme } = props;
   const rootElem = createRef<HTMLDivElement>();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [bussinessUnit, setbussinessUnit] = useState('');
-  const [accountName, setAccountName] = useState('');
-  const [projectName, setProjectName] = useState('');
+  const [bussinessUnit, setbussinessUnit] = useState("");
+  const [accountName, setAccountName] = useState("");
+  const [projectName, setProjectName] = useState("");
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [DBName, setDBName] = useState<string | null>(null);
   const [tableName, settableName] = useState<string | null>(null);
@@ -37,21 +52,57 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
   const [triggerFetch, setTriggerFetch] = useState(false);
   const [tableFetch, setTableFetch] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState({});
+  const [selectedNode, setSelectedNode] = useState<any | null>(null);
 
   const [filteredTableData, setFilteredTableData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartData | null>(null);
 
-  console.log('Data:', data);
+  console.log("Data:", data);
+  console.log("testing SetDataMask", setDataMask);
+  console.log("Theame Testing :: ", theme);
+
+  const getCrossFilterDataMask = (selectedNode: any) => {
+    return {
+      dataMask: {
+        extraFormData: {
+          filters: selectedNode
+            ? [
+                {
+                  col: "Bussiness Unit",
+                  op: "IN",
+                  val: "Caterpillar",
+                },
+                {
+                  col: "Account",
+                  op: "IN",
+                  val: "West",
+                },
+                {
+                  col: "Project",
+                  op: "IN",
+                  val: "Project4",
+                },
+              ]
+            : [],
+        },
+        filterState: {
+          value: [["Caterpillar"], ["West"], ["Project4"]],
+          selectedValues: ["Caterpillar", "West", "Project4"],
+        },
+      },
+      isCurrentValueSelected: true,
+    };
+  };
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
-    console.log('Plugin element', root);
-
+    console.log("Plugin element", root);
   }, [rootElem]);
 
   useEffect(() => {
     async function fetchExploreData() {
       try {
-        const [datasource_id, datasource_type] = datasource.split('__');
+        const [datasource_id, datasource_type] = datasource.split("__");
         const response = await SupersetClient.get({
           endpoint: `/api/v1/explore/?datasource_type=${datasource_type}&datasource_id=${datasource_id}`,
         });
@@ -61,13 +112,13 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
         if (dbName) {
           setDBName(dbName);
           settableName(TableName);
-          console.log('Database Name:', dbName);
-          console.log('Table Name:', TableName);
+          console.log("Database Name:", dbName);
+          console.log("Table Name:", TableName);
         } else {
-          console.warn('Database name not found in response');
+          console.warn("Database name not found in response");
         }
       } catch (error) {
-        console.error('Error fetching explore API:', error);
+        console.error("Error fetching explore API:", error);
       }
     }
     fetchExploreData();
@@ -87,7 +138,7 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
 
         if (!node) {
           node = {
-            key: currentLevel.length + '-' + value,
+            key: currentLevel.length + "-" + value,
             label: value,
             children: [],
             selectable: index === keys.length - 1, // Only mark the last level as selectable
@@ -104,6 +155,20 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
 
   // Build the tree structure dynamically
   const treeData = buildDynamicTree(data);
+
+  // Logic to update chart based on selected node data
+  useEffect(() => {
+    if (selectedNode) {
+      const chartData: ChartData = {
+        label: `${selectedNode.label} - Filtered Data`,
+        value: Math.random() * 100, // Simulate a dynamic value (replace with real data if needed)
+        min: 0,
+        max: 100,
+      };
+
+      setChartData(chartData);
+    }
+  }, [selectedNode]);
 
   // Helper function to find a node by its key
   const findNodeByKey = (nodes: any[], key: string): any => {
@@ -136,29 +201,65 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
       setSelectedKeys({});
     }
   };*/
-  const onSelectionChange = (e: TreeSelectionEvent) => {
-    setSelectedKeys(e.value as TreeCheckboxSelectionKeys);
+  // const onSelectionChange = (e: TreeSelectionEvent) => {
+  //   console.log("Selected Nodes:", e.value);
+  //   setSelectedKeys(e.value as TreeCheckboxSelectionKeys);
+  // };
+  const handleNodeSelect = (e: { value: any }) => {
+    const selectedNode = e.value;
+    setSelectedNode(selectedNode); // Set the selected node and trigger chart update
+    console.log("Selected Node ::", selectedNode);
+    getCrossFilterDataMask(selectedNode);
+
+    const dataMask = getCrossFilterDataMask(selectedNode)?.dataMask;
+    if (dataMask) {
+      setDataMask(dataMask);
+    }
+    console.log("Data Mask Testing :: ", dataMask);
+    console.log("After Data Mask Props :: ", props);
   };
-  
-  
-  
 
   return (
-    <Styles
-      ref={rootElem}
-      boldText={props.boldText}
-      headerFontSize={props.headerFontSize}
-      height={height}
-      width={width}
-    >
-      <div style={{ height:'100%', width :'100%', overflowY: 'auto' }}>
+    // <Styles
+    //   ref={rootElem}
+    //   boldText={props.boldText}
+    //   headerFontSize={props.headerFontSize}
+    //   height={height}
+    //   width={width}
+    // >
+    //   <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
+    //     <Tree
+    //       value={treeData}
+    //       selectionMode="checkbox"
+    //       selectionKeys={selectedKeys}
+    //       onSelectionChange={handleNodeSelect}
+    //       nodeTemplate={(node: any, options: any) => (
+    //         <span>
+    //           {node.label}
+    //           {node.selectable}
+    //         </span>
+    //       )}
+    //     />
+    //   </div>
 
+    //   <div style={{ flex: 2, padding: "20px" }}>
+    //     //{" "}
+    //     {selectedNode ? (
+    //       console.log("Node Selected :: ", selectedNode)
+    //     ) : (
+    //       <p>Select a node from the tree to see the gauge chart.</p>
+    //     )}
+    //   </div>
+    // </Styles>
+
+    <div style={{ display: "flex", height: "100vh" }}>
+      {/* Left Panel: Tree View */}
+      <div style={{ flex: 1, borderRight: "1px solid #ccc", padding: "20px" }}>
         <Tree
-        
           value={treeData}
           selectionMode="checkbox"
           selectionKeys={selectedKeys}
-          onSelectionChange={onSelectionChange}
+          onSelectionChange={handleNodeSelect}
           nodeTemplate={(node: any, options: any) => (
             <span>
               {node.label}
@@ -167,12 +268,51 @@ export default function EngineeringMetricsInputForm(props: EngineeringMetricsInp
           )}
         />
       </div>
-    </Styles>
+
+      {/* Right Panel: Gauge Chart */}
+      {/* <div style={{ flex: 2, padding: "20px" }}>
+        {selectedNode ? (
+          // <GaugeChartComponent selectedNode={selectedNode} />
+          <p>Select a node from the tree to see the gauge ch</p>
+          <div></div>
+        ) : (
+          //<p>Chart rendered</p>
+          <p>Select a node from the tree to see the gauge chart.</p>
+        )}
+      </div> */}
+    </div>
   );
 }
 
+// <div style={{ display: "flex", height: "100vh" }}>
+//   {/* Left Panel: Tree View */}
+//   <div style={{ height: "100%", width: "100%", overflowY: "auto" }}>
+//     //{" "}
+//     <Tree
+//       value={treeData}
+//       selectionMode="single"
+//       selectionKeys={selectedKeys}
+//       onSelectionChange={handleNodeSelect}
+//       nodeTemplate={(node: any, options: any) => (
+//         <span>
+//           {node.label}
+//           {node.selectable}
+//         </span>
+//       )}
+//     />
+//   </div>
 
-  /*useEffect(() => {
+//   {/* Right Panel: Gauge Chart */}
+//   <div style={{ flex: 2, padding: "20px" }}>
+//     {selectedNode ? (
+//       <h3>{selectedNode}</h3>
+//     ) : (
+//       <p>Select a node from the tree to see the gauge chart.</p>
+//     )}
+//   </div>
+// </div>
+
+/*useEffect(() => {
     if (bussinessUnit && accountName && projectName) {
       // Filter table data based on the selected filters (Business Unit, Account, Project)
       const filteredData = data.filter(
