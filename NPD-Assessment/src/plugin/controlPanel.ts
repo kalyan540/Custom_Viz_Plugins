@@ -124,6 +124,26 @@ const config: ControlPanelConfig = {
       ],
     },
     {
+      label: t('InputForm Options'),
+      expanded: true,
+      controlSetRows: [
+        [
+          {
+            name: 'title',
+            config: {
+              type: 'TextControl',
+              label: t('Title'),
+              renderTrigger: true,
+              default: 'Input Form',
+              description: t('Title of the input form'),
+              validators: [validateNonEmpty],
+            },
+          },
+        ],
+        ['json_editor']
+      ]
+    },
+    {
       label: t('Modal Card Inputs'),
       expanded: true,
       controlSetRows: [
