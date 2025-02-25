@@ -140,7 +140,20 @@ const config: ControlPanelConfig = {
             },
           },
         ],
-        ['json_editor']
+        [
+          {
+            name: 'json',
+            config: {
+              type: 'JsonEditorControl',
+              label: t('Json'),
+              renderTrigger: true,
+              default: 'Input Form',
+              description: t('editor of the input form'),
+              validators: [validateNonEmpty],
+            },
+          },
+        ],
+        
       ]
     },
     {
