@@ -19,6 +19,7 @@
 import { t, validateNonEmpty } from '@superset-ui/core';
 import {
   ControlPanelConfig,
+  ControlPanelsContainerProps,
   sharedControls,
 } from '@superset-ui/chart-controls';
 
@@ -99,7 +100,7 @@ const config: ControlPanelConfig = {
 
   // For control input types, see: superset-frontend/src/explore/components/controls/index.js
   controlPanelSections: [
-    
+
     {
       label: t('Query'),
       expanded: true,
@@ -129,31 +130,52 @@ const config: ControlPanelConfig = {
       controlSetRows: [
         [
           {
-            name: 'title',
+            name: 'selection_trigger',
             config: {
-              type: 'TextControl',
-              label: t('Title'),
+              type: 'CheckboxControl',
+              label: t('Add Selection above the Inputform'),
               renderTrigger: true,
-              default: 'Input Form',
-              description: t('Title of the input form'),
-              validators: [validateNonEmpty],
+              default: false,
+              description: t('Whether to display a legend for the chart'),
             },
           },
-        ],
-        [
           {
-            name: 'json',
+            name: 'metadata_select',
             config: {
               type: 'JsonEditorControl',
-              label: t('Json'),
+              label: t('Metadata Select'),
               renderTrigger: true,
               default: 'Input Form',
               description: t('editor of the input form'),
               validators: [validateNonEmpty],
+              visibility: ({ controls }: ControlPanelsContainerProps) =>
+                Boolean(controls?.selection_trigger?.value),
             },
           },
+          {
+            name: 'metadata_select',
+            config: {
+              type: 'SelectControl',
+              label: t('Metadata Select'),
+              choices: [
+                // [value, label]
+                ['xxs', 'xx-small'],
+                ['xs', 'x-small'],
+                ['s', 'small'],
+                ['m', 'medium'],
+                ['l', 'large'],
+                ['xl', 'x-large'],
+                ['xxl', 'xx-large'],
+              ],
+              renderTrigger: true,
+              description: t('The size of your header font'),
+              visibility: ({ controls }: ControlPanelsContainerProps) =>
+                !Boolean(controls?.selection_trigger?.value),
+            },
+          }
         ],
-        
+        ['datasourceControl'],
+
       ]
     },
     {
