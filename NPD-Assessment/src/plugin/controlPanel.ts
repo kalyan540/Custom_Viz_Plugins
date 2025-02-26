@@ -153,7 +153,7 @@ const config: ControlPanelConfig = {
             },
           },
           {
-            name: 'metadata_select',
+            name: 'metadata_json',
             config: {
               type: 'SelectControl',
               label: t('Metadata Select'),
