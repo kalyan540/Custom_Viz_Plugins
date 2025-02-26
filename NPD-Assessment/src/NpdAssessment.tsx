@@ -240,7 +240,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
     </React.Fragment>
   );
 
-  const renderFormField = (field) => {
+  const renderFormField = (field: any) => {
     switch (field.type) {
       case 'text':
         return (
@@ -404,8 +404,8 @@ const Styles = styled.div<NpdAssessmentStylesProps>`
 
   .dialog-footer-buttons {
     display: flex;
-    gap: 1rem; /* Adds spacing between buttons */
-    justify-content: flex-end; /* Aligns buttons to the right */
+    gap: 1rem; /* Adds spacing between buttons *//*
+    justify-content: flex-end; /* Aligns buttons to the right *//*
   }
 
 
@@ -418,7 +418,7 @@ const Styles = styled.div<NpdAssessmentStylesProps>`
  *  * A DOM element
  *  * FormData (your controls!) provided as props by transformProps.ts
  */
-
+/*
 export default function NpdAssessment(props: NpdAssessmentProps) {
   // height and width are the height and width of the DOM element as it exists in the dashboard.
   // There is also a `data` prop, which is, of course, your DATA 🎉
@@ -597,7 +597,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   const onCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log(e.value);
   };*/
-
+/*
   const onInputNumberChange = (e: any, name: string) => {
     console.log(e.value, name);
   };
@@ -740,7 +740,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
               required
               placeholder="Select Maturity"
             />
-            {/* You can replace this with a dropdown or select component */}
+            {/* You can replace this with a dropdown or select component *//*}
           </div>
           <div className="field">
             <label htmlFor="assessmentDate" className="font-bold">Assessment Date</label>
