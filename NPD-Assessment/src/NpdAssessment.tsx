@@ -16,7 +16,352 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import React, { useEffect, useState, createRef, useCallback } from 'react';
+import { styled, SupersetClient } from '@superset-ui/core';
+import { NpdAssessmentProps, NpdAssessmentStylesProps } from './types';
+import { classNames } from 'primereact/utils';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { Button } from 'primereact/button';
+import { InputTextarea } from 'primereact/inputtextarea';
+import { IconField } from 'primereact/iconfield';
+import { InputIcon } from 'primereact/inputicon';
+import { RadioButton } from 'primereact/radiobutton';
+import { InputNumber } from 'primereact/inputnumber';
+import { Dialog } from 'primereact/dialog';
+import { InputText } from 'primereact/inputtext';
+import "primereact/resources/themes/lara-light-cyan/theme.css";
+import "primereact/resources/primereact.min.css";
+import 'primeicons/primeicons.css';
+import "primeflex/primeflex.css";
+
+const Styles = styled.div<NpdAssessmentStylesProps>`
+  height: ${({ height }) => height}px;
+  width: ${({ width }) => width}px;
+
+  .card {
+    background: var(--surface-card);
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .dialog-footer-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+  }
+`;
+
+const formFieldsConfig = [
+  { id: 'storyPointsCompleted', label: 'Story points completed in the sprint', type: 'number', required: true },
+  { id: 'plannedStoryPoints', label: 'Estimated or Planned Story Points', type: 'number', required: true },
+  { id: 'expectedReleaseVelocity', label: 'Expected release velocity', type: 'number', required: true },
+  { id: 'removedModifiedStoryPoints', label: 'Removed OR modified story points during the sprint', type: 'number', required: true },
+  { id: 'codeCoverage', label: 'Code Coverage', type: 'percentage', required: true },
+  { id: 'defectsFoundInTesting', label: 'Number of defects found in testing (SIT, System testing, Regr, unit, etc.)', type: 'number', required: true },
+  { id: 'defectsFoundInUAT', label: 'Number of defects found in UAT', type: 'number', required: true },
+  { id: 'defectsFoundInProdTesting', label: 'Number of defects found during Prod testing', type: 'number', required: true },
+  { id: 'defectsFixedBeforeRelease', label: 'Defects fixed / closed before release (SIT + UAT + PreProd)', type: 'number', required: true },
+  { id: 'reopenDefectsByCustomer', label: 'No of Reopen defects by External stakeholder (customer) in UAT + Prod', type: 'number', required: true },
+  { id: 'criticalDefectsReported', label: 'Critical / Severity of defects reported (UAT + PreProd + Prod)', type: 'number', required: true },
+  { id: 'automatedTestCasesInSprint', label: 'Number of automated test cases within a sprint OR (N-1)', type: 'number', required: true },
+  { id: 'totalTestCasesInSprint', label: 'Total number of test cases within a sprint (candidate for automation - functional)', type: 'number', required: true },
+  { id: 'regressionTestCasesAutomated', label: 'Total # of regression Test cases automated', type: 'number', required: true },
+  { id: 'regressionTestCasesInSuite', label: 'Total # of regression Test cases in Regression suite (candidate for automation)', type: 'number', required: true },
+  { id: 'productionRollbacks', label: 'Number of production rollbacks', type: 'number', required: true },
+  { id: 'totalProductionReleases', label: 'Total number of Production releases', type: 'number', required: true },
+  { id: 'csat', label: 'CSAT', type: 'percentage', required: true },
+  { id: 'backlogStoryPoints', label: '(Backlog) Total number of story points which are prioritised and ready state', type: 'number', required: true },
+  { id: 'totalBuildFailures', label: 'Total number of build failures', type: 'number', required: true },
+  { id: 'totalBuilds', label: 'Total number of builds', type: 'number', required: true },
+  { id: 'featuresCompleted', label: 'Number of features completed', type: 'number', required: true },
+  { id: 'featuresCommittedInReleaseTrain', label: 'Number of features committed in the release train', type: 'number', required: true },
+];
+
+export default function NpdAssessment(props: NpdAssessmentProps) {
+  const { data, height, width, datasource } = props;
+  const rootElem = createRef<HTMLDivElement>();
+  const [DBName, setDBName] = useState<string | null>(null);
+  const [tableName, settableName] = useState<string | null>(null);
+  const [formData, setFormData] = useState(() => {
+    const initialFormData = {};
+    formFieldsConfig.forEach((field) => {
+      initialFormData[field.id] = '';
+    });
+    return initialFormData;
+  });
+  const [deleteProductDialog, setDeleteProductDialog] = useState(false);
+  const [globalFilter, setGlobalFilter] = useState(null);
+  const [productDialog, setProductDialog] = useState(false);
+  const [row, setselectedrow] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchExploreData() {
+      try {
+        const [datasource_id, datasource_type] = datasource.split('__');
+        const response = await SupersetClient.get({
+          endpoint: `/api/v1/explore/?datasource_type=${datasource_type}&datasource_id=${datasource_id}`,
+        });
+
+        const dbName = response.json?.result?.dataset?.database?.name;
+        const TableName = response.json?.result?.dataset?.datasource_name;
+        if (dbName) {
+          setDBName(dbName);
+          settableName(TableName);
+        } else {
+          console.warn('Database name not found in response');
+        }
+      } catch (error) {
+        console.error('Error fetching explore API:', error);
+      }
+    }
+    fetchExploreData();
+  }, [datasource]);
+
+  const columns = Object.keys(data?.[0] || {});
+
+  const handleInputChange = useCallback((field: string, value: string) => {
+    setFormData((prevData) => ({ ...prevData, [field]: value }));
+  }, []);
+
+  const openNew = () => {
+    setFormData(() => {
+      const initialFormData = {};
+      formFieldsConfig.forEach((field) => {
+        initialFormData[field.id] = '';
+      });
+      return initialFormData;
+    });
+    setProductDialog(true);
+  };
+
+  const leftToolbarTemplate = () => {
+    return (
+      <div className="flex flex-wrap gap-2">
+        <Button
+          label="Create Assessment"
+          icon="pi pi-plus"
+          severity="success"
+          onClick={openNew}
+          style={{ color: 'white' }}
+        />
+      </div>
+    );
+  };
+
+  const header = (
+    <div className="flex flex-wrap justify-content-between align-items-center">
+      {leftToolbarTemplate()}
+      <IconField iconPosition="left">
+        <InputIcon className="pi pi-search" />
+        <InputText
+          type="search"
+          onInput={(e: any) => setGlobalFilter(e.target.value)}
+          placeholder="Search..."
+          style={{ width: '200px' }}
+        />
+      </IconField>
+    </div>
+  );
+
+  const editProduct = (data: any) => {
+    setFormData({ ...data });
+    setProductDialog(true);
+  };
+
+  const confirmDeleteProduct = (data: any) => {
+    setselectedrow(data.assessmentID);
+    setDeleteProductDialog(true);
+  };
+
+  const hideDialog = () => {
+    setProductDialog(false);
+  };
+
+  const saveProduct = async () => {
+    console.log("Form Data Submitted:", formData);
+    try {
+      const responser = await SupersetClient.post({
+        endpoint: '/api/dataset/update',
+        jsonPayload: { formData: [formData], database: DBName, table_name: tableName },
+      });
+      console.log(responser.json.message);
+      setProductDialog(false);
+    } catch (error) {
+      console.error('Error Submitting form data: ', error);
+    }
+  };
+
+  const productDialogFooter = (
+    <React.Fragment>
+      <div className="card flex flex-wrap justify-content-end gap-3">
+        <Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
+        <Button label="Save" icon="pi pi-check" onClick={saveProduct} style={{ color: 'white' }} />
+      </div>
+    </React.Fragment>
+  );
+
+  const actionBodyTemplate = (rowData: any) => {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+        <Button
+          icon="pi pi-pencil"
+          className="p-button-rounded p-button-outlined"
+          style={{ padding: '4px', width: '30px', height: '30px' }}
+          onClick={() => editProduct(rowData)}
+        />
+        <Button
+          icon="pi pi-trash"
+          className="p-button-rounded p-button-outlined p-button-danger"
+          style={{ padding: '4px', width: '30px', height: '30px' }}
+          onClick={() => confirmDeleteProduct(rowData)}
+        />
+      </div>
+    );
+  };
+
+  const hideDeleteProductDialog = () => {
+    setDeleteProductDialog(false);
+  };
+
+  const deleteProduct = () => {
+    setselectedrow(null);
+    setDeleteProductDialog(false);
+  };
+
+  const deleteProductDialogFooter = (
+    <React.Fragment>
+      <div className="card flex flex-wrap justify-content-end gap-3">
+        <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteProductDialog} />
+        <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteProduct} style={{ color: 'white' }} />
+      </div>
+    </React.Fragment>
+  );
+
+  const renderFormField = (field) => {
+    switch (field.type) {
+      case 'text':
+        return (
+          <div className="field" key={field.id}>
+            <label htmlFor={field.id} className="font-bold">{field.label}</label>
+            <InputText
+              id={field.id}
+              value={formData[field.id]}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange(field.id, e.target.value)}
+              required={field.required}
+              placeholder={field.placeholder || ''}
+            />
+          </div>
+        );
+      case 'number':
+        return (
+          <div className="field" key={field.id}>
+            <label htmlFor={field.id} className="font-bold">{field.label}</label>
+            <InputNumber
+              id={field.id}
+              value={formData[field.id]}
+              onValueChange={(e: any) => handleInputChange(field.id, e.value)}
+              required={field.required}
+              placeholder={field.placeholder || ''}
+            />
+          </div>
+        );
+      case 'percentage':
+        return (
+          <div className="field" key={field.id}>
+            <label htmlFor={field.id} className="font-bold">{field.label}</label>
+            <InputNumber
+              id={field.id}
+              value={formData[field.id]}
+              onValueChange={(e: any) => handleInputChange(field.id, e.value)}
+              required={field.required}
+              placeholder={field.placeholder || ''}
+              suffix="%"
+            />
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Styles
+      ref={rootElem}
+      boldText={props.boldText}
+      headerFontSize={props.headerFontSize}
+      height={height}
+      width={width}
+      datasource={datasource}
+    >
+      <div className="card">
+        <DataTable
+          value={data}
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 25]}
+          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} assessments"
+          globalFilter={globalFilter}
+          header={header}
+          scrollable
+          scrollHeight={height - 175 + "px"}
+        >
+          {columns.map((col) => (
+            <Column
+              key={col}
+              field={col}
+              header={col}
+              style={{ minWidth: '12rem' }}
+            />
+          ))}
+          <Column
+            body={actionBodyTemplate}
+            bodyStyle={{ textAlign: 'center', padding: '8px' }}
+            exportable={false}
+            frozen
+            alignFrozen="right"
+            style={{ minWidth: '12rem' }}
+          />
+        </DataTable>
+      </div>
+
+      <Dialog
+        visible={productDialog}
+        style={{ width: '32rem' }}
+        breakpoints={{ '960px': '75vw', '641px': '90vw' }}
+        header="Create NPD Assessment"
+        modal
+        className="p-fluid"
+        footer={productDialogFooter}
+        onHide={hideDialog}
+      >
+        <div>
+          {formFieldsConfig.map((field) => renderFormField(field))}
+        </div>
+      </Dialog>
+
+      <Dialog
+        visible={deleteProductDialog}
+        style={{ width: '32rem' }}
+        breakpoints={{ '960px': '75vw', '641px': '90vw' }}
+        header="Confirm"
+        modal
+        footer={deleteProductDialogFooter}
+        onHide={hideDeleteProductDialog}
+      >
+        <div className="confirmation-content">
+          <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+          {data && <span>Are you sure you want to delete <b>{row}</b>?</span>}
+        </div>
+      </Dialog>
+    </Styles>
+  );
+}
+
+/*import React, { useEffect, useState, createRef, useCallback } from 'react';
 import { styled, SupersetClient } from '@superset-ui/core';
 import { NpdAssessmentProps, NpdAssessmentStylesProps } from './types';
 import { classNames } from 'primereact/utils';
@@ -488,255 +833,4 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
 
   );
 
-}
-
-/*return (
-  <Styles
-    ref={rootElem}
-    boldText={props.boldText}
-    headerFontSize={props.headerFontSize}
-    height={height}
-    width={width}
-  >
-    <div className="header">
-      <button
-        style={{
-          padding: '10px 20px',
-          fontSize: '14px',
-          backgroundColor: '#007bff',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-        }}
-        onClick={() => setIsModalOpen(true)}
-      >
-        Create Assessment
-      </button>
-    </div>
-
-     {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <span
-              className="modal-close"
-              onClick={() => setIsModalOpen(false)}
-            >
-              &times;
-            </span>
-            <div className="modal-header">Create NPD Assessment</div>
-            <form
-              className="modal-form"
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const isAllFilled = Object.values(formData).every((value) => value !== '');
-                if (!isAllFilled) {
-                  alert("Please fill out all fields!");
-                  return;
-                }
-                console.log("Form Data Submitted:", formData);
-                try {
-                  const responser = await SupersetClient.post({
-                    endpoint: '/api/dataset/update',
-                    jsonPayload: { formData: [formData], database: DBName, table_name: tableName },
-                  });
-                  console.log(responser.json.message);
-                } catch (error) {
-                  console.error('Error Submitting form data: ', error);
-                }
-
-                setFormData({
-                  functionName: '',
-                  group: '',
-                  business: '',
-                  assessmentLead: '',
-                  assessmentID: '',
-                  maturity: '',
-                  assessmentDate: '',
-                  status: '',
-                  actions: '',
-                  assessmentType: '',
-                });
-
-                setIsModalOpen(false);
-              }}
-            >
-              <input
-                type="text"
-                placeholder="Function Name"
-                value={formData.functionName}
-                onChange={(e) => handleInputChange('functionName', e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Group"
-                value={formData.group}
-                onChange={(e) => handleInputChange('group', e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Business"
-                value={formData.business}
-                onChange={(e) => handleInputChange('business', e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Assessment Lead"
-                value={formData.assessmentLead}
-                onChange={(e) => handleInputChange('assessmentLead', e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Assessment ID"
-                value={formData.assessmentID}
-                onChange={(e) => handleInputChange('assessmentID', e.target.value)}
-                required
-              />
-              <select
-                style={{
-                  height: '40px',
-                  padding: '8px',
-                  width: '100%',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  marginBottom: '10px',
-                  fontSize: '14px',
-                }}
-                value={formData.maturity}
-                onChange={(e) => handleInputChange('maturity', e.target.value)}
-                required
-              >
-                <option value="" disabled>
-                  Maturity
-                </option>
-                <option value="Test">Test</option>
-                <option value="Launch">Launch</option>
-                <option value="Idea Screening">Idea Screening</option>
-                <option value="Prototype Development">Prototype Development</option>
-              </select>
-
-              <input
-                type="date"
-                placeholder="Assessment Date"
-                value={formData.assessmentDate}
-                onChange={(e) => handleInputChange('assessmentDate', e.target.value)}
-                required
-              />
-              <div>
-                <label>Status:</label>
-                <div>
-                  <label>
-                    <input
-                      type="radio"
-                      name="status"
-                      value="Published"
-                      checked={formData.status === 'Published'}
-                      onChange={(e) => handleInputChange('status', e.target.value)}
-                      required
-                    />
-                    Published
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="status"
-                      value="In Progress"
-                      checked={formData.status === 'In Progress'}
-                      onChange={(e) => handleInputChange('status', e.target.value)}
-                      required
-                    />
-                    In Progress
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="status"
-                      value="Pending"
-                      checked={formData.status === 'Pending'}
-                      onChange={(e) => handleInputChange('status', e.target.value)}
-                      required
-                    />
-                    Pending
-                  </label>
-                </div>
-              </div>
-              <input
-                type="text"
-                placeholder="Actions"
-                value={formData.actions}
-                onChange={(e) => handleInputChange('actions', e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Assessment Type"
-                value={formData.assessmentType}
-                onChange={(e) => handleInputChange('assessmentType', e.target.value)}
-                required
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <button type="button" onClick={() => setIsModalOpen(false)}>
-                    Cancel
-                  </button>
-                  <button type="submit">Submit</button>
-                </div>
-            </form>
-          </div>
-        </div>
-    )}
-    <div className="filters">
-      {columns.map((col) => (
-        <div key={col} style={{ flex: 1 }}>
-          <select
-            style={{
-              width: '100%',
-              padding: '8px',
-              borderRadius: '4px',
-              border: '1px solid #ccc',
-              backgroundColor: '#f9f9f9',
-            }}
-            value={filters[col] || ''}
-            onChange={(e) => handleFilterChange(col, e.target.value)}
-          >
-            <option value="" disabled>
-              {col}
-            </option>
-            {[...new Set(data.map((row) => row[col]))]
-              .filter((val): val is string | number => typeof val === 'string' || typeof val === 'nmber')
-
-              .map((val) => (
-                <option key={val} value={val}>
-                  {val}
-                </option>
-              ))}
-          </select>
-        </div>
-      ))}
-    </div>
-    <div style={{ overflowX: 'auto', maxHeight: '100%', width: '100%' }}>
-      <table>
-        <thead>
-          <tr>
-            {columns.map((col) => (
-              <th key={col}>{col}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {filteredData.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              {columns.map((col) => (
-                <td key={col}>{row[col]}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-
-  </Styles>
-);*/
+}*/
