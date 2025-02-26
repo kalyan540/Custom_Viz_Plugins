@@ -174,7 +174,7 @@ const config: ControlPanelConfig = {
             },
           }
         ],
-        ['datasourceControl'],
+        ['datasource'],
 
       ]
     },
