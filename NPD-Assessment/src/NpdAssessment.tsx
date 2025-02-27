@@ -565,7 +565,7 @@ const Styles = styled.div<NpdAssessmentStylesProps>`
   .dialog-footer-buttons {
     display: flex;
     gap: 1rem; /* Adds spacing between buttons */
-    justify-content: flex-end; /* Aligns buttons to the right */ /*
+    /* Aligns buttons to the right */ /*
   }
 
 
