@@ -237,16 +237,9 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
 
   const columns = Object.keys(data?.[0] || {});
 
-  // const handleInputChange = useCallback((field: string, value: string) => {
-  //   setFormData((prevData) => ({ ...prevData, [field]: value }));
-  // }, []);
-
-  const handleInputChange = (fieldId: string, value: string) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [fieldId]: value,
-    }));
-  };
+  const handleInputChange = useCallback((field: string, value: string) => {
+    setFormData((prevData) => ({ ...prevData, [field]: value }));
+  }, []);
 
   const openNew = () => {
     setFormData(() => {
@@ -565,7 +558,7 @@ const Styles = styled.div<NpdAssessmentStylesProps>`
   .dialog-footer-buttons {
     display: flex;
     gap: 1rem; /* Adds spacing between buttons */
-    /* Aligns buttons to the right */ /*
+    justify-content: flex-end; /* Aligns buttons to the right */ /*
   }
 
 
