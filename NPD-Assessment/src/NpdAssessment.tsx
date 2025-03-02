@@ -17,23 +17,23 @@
  * under the License.
  */
 
-import React, { useEffect, useState, createRef, useCallback } from "react";
-import { styled, SupersetClient } from "@superset-ui/core";
-import { NpdAssessmentProps, NpdAssessmentStylesProps } from "./types";
-import { classNames } from "primereact/utils";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Button } from "primereact/button";
-import { InputTextarea } from "primereact/inputtextarea";
-import { IconField } from "primereact/iconfield";
-import { InputIcon } from "primereact/inputicon";
-import { RadioButton } from "primereact/radiobutton";
-import { InputNumber } from "primereact/inputnumber";
-import { Dialog } from "primereact/dialog";
-import { InputText } from "primereact/inputtext";
+import React, { useEffect, useState, createRef, useCallback } from 'react';
+import { styled, SupersetClient } from '@superset-ui/core';
+import { NpdAssessmentProps, NpdAssessmentStylesProps } from './types';
+import { classNames } from 'primereact/utils';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { Button } from 'primereact/button';
+import { InputTextarea } from 'primereact/inputtextarea';
+import { IconField } from 'primereact/iconfield';
+import { InputIcon } from 'primereact/inputicon';
+import { RadioButton } from 'primereact/radiobutton';
+import { InputNumber } from 'primereact/inputnumber';
+import { Dialog } from 'primereact/dialog';
+import { InputText } from 'primereact/inputtext';
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import "primereact/resources/primereact.min.css";
-import "primeicons/primeicons.css";
+import 'primeicons/primeicons.css';
 import "primeflex/primeflex.css";
 
 const Styles = styled.div<NpdAssessmentStylesProps>`
@@ -55,144 +55,29 @@ const Styles = styled.div<NpdAssessmentStylesProps>`
 `;
 
 const formFieldsConfig = [
-  {
-    id: "storyPointsCompleted",
-    label: "Story points completed in the sprint",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "plannedStoryPoints",
-    label: "Estimated or Planned Story Points",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "expectedReleaseVelocity",
-    label: "Expected release velocity",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "removedModifiedStoryPoints",
-    label: "Removed OR modified story points during the sprint",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "codeCoverage",
-    label: "Code Coverage",
-    type: "percentage",
-    required: true,
-  },
-  {
-    id: "defectsFoundInTesting",
-    label:
-      "Number of defects found in testing (SIT, System testing, Regr, unit, etc.)",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "defectsFoundInUAT",
-    label: "Number of defects found in UAT",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "defectsFoundInProdTesting",
-    label: "Number of defects found during Prod testing",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "defectsFixedBeforeRelease",
-    label: "Defects fixed / closed before release (SIT + UAT + PreProd)",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "reopenDefectsByCustomer",
-    label:
-      "No of Reopen defects by External stakeholder (customer) in UAT + Prod",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "criticalDefectsReported",
-    label: "Critical / Severity of defects reported (UAT + PreProd + Prod)",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "automatedTestCasesInSprint",
-    label: "Number of automated test cases within a sprint OR (N-1)",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "totalTestCasesInSprint",
-    label:
-      "Total number of test cases within a sprint (candidate for automation - functional)",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "regressionTestCasesAutomated",
-    label: "Total # of regression Test cases automated",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "regressionTestCasesInSuite",
-    label:
-      "Total # of regression Test cases in Regression suite (candidate for automation)",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "productionRollbacks",
-    label: "Number of production rollbacks",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "totalProductionReleases",
-    label: "Total number of Production releases",
-    type: "number",
-    required: true,
-  },
-  { id: "csat", label: "CSAT", type: "percentage", required: true },
-  {
-    id: "backlogStoryPoints",
-    label:
-      "(Backlog) Total number of story points which are prioritised and ready state",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "totalBuildFailures",
-    label: "Total number of build failures",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "totalBuilds",
-    label: "Total number of builds",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "featuresCompleted",
-    label: "Number of features completed",
-    type: "number",
-    required: true,
-  },
-  {
-    id: "featuresCommittedInReleaseTrain",
-    label: "Number of features committed in the release train",
-    type: "number",
-    required: true,
-  },
+  { id: 'storyPointsCompleted', label: 'Story points completed in the sprint', type: 'number', required: true },
+  { id: 'plannedStoryPoints', label: 'Estimated or Planned Story Points', type: 'number', required: true },
+  { id: 'expectedReleaseVelocity', label: 'Expected release velocity', type: 'number', required: true },
+  { id: 'removedModifiedStoryPoints', label: 'Removed OR modified story points during the sprint', type: 'number', required: true },
+  { id: 'codeCoverage', label: 'Code Coverage', type: 'percentage', required: true },
+  { id: 'defectsFoundInTesting', label: 'Number of defects found in testing (SIT, System testing, Regr, unit, etc.)', type: 'number', required: true },
+  { id: 'defectsFoundInUAT', label: 'Number of defects found in UAT', type: 'number', required: true },
+  { id: 'defectsFoundInProdTesting', label: 'Number of defects found during Prod testing', type: 'number', required: true },
+  { id: 'defectsFixedBeforeRelease', label: 'Defects fixed / closed before release (SIT + UAT + PreProd)', type: 'number', required: true },
+  { id: 'reopenDefectsByCustomer', label: 'No of Reopen defects by External stakeholder (customer) in UAT + Prod', type: 'number', required: true },
+  { id: 'criticalDefectsReported', label: 'Critical / Severity of defects reported (UAT + PreProd + Prod)', type: 'number', required: true },
+  { id: 'automatedTestCasesInSprint', label: 'Number of automated test cases within a sprint OR (N-1)', type: 'number', required: true },
+  { id: 'totalTestCasesInSprint', label: 'Total number of test cases within a sprint (candidate for automation - functional)', type: 'number', required: true },
+  { id: 'regressionTestCasesAutomated', label: 'Total # of regression Test cases automated', type: 'number', required: true },
+  { id: 'regressionTestCasesInSuite', label: 'Total # of regression Test cases in Regression suite (candidate for automation)', type: 'number', required: true },
+  { id: 'productionRollbacks', label: 'Number of production rollbacks', type: 'number', required: true },
+  { id: 'totalProductionReleases', label: 'Total number of Production releases', type: 'number', required: true },
+  { id: 'csat', label: 'CSAT', type: 'percentage', required: true },
+  { id: 'backlogStoryPoints', label: '(Backlog) Total number of story points which are prioritised and ready state', type: 'number', required: true },
+  { id: 'totalBuildFailures', label: 'Total number of build failures', type: 'number', required: true },
+  { id: 'totalBuilds', label: 'Total number of builds', type: 'number', required: true },
+  { id: 'featuresCompleted', label: 'Number of features completed', type: 'number', required: true },
+  { id: 'featuresCommittedInReleaseTrain', label: 'Number of features committed in the release train', type: 'number', required: true },
 ];
 
 export default function NpdAssessment(props: NpdAssessmentProps) {
@@ -203,7 +88,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   const [formData, setFormData] = useState(() => {
     const initialFormData = {};
     formFieldsConfig.forEach((field) => {
-      initialFormData[field.id] = "";
+      initialFormData[field.id] = '';
     });
     return initialFormData;
   });
@@ -215,7 +100,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   useEffect(() => {
     async function fetchExploreData() {
       try {
-        const [datasource_id, datasource_type] = datasource.split("__");
+        const [datasource_id, datasource_type] = datasource.split('__');
         const response = await SupersetClient.get({
           endpoint: `/api/v1/explore/?datasource_type=${datasource_type}&datasource_id=${datasource_id}`,
         });
@@ -226,10 +111,10 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           setDBName(dbName);
           settableName(TableName);
         } else {
-          console.warn("Database name not found in response");
+          console.warn('Database name not found in response');
         }
       } catch (error) {
-        console.error("Error fetching explore API:", error);
+        console.error('Error fetching explore API:', error);
       }
     }
     fetchExploreData();
@@ -245,7 +130,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
     setFormData(() => {
       const initialFormData = {};
       formFieldsConfig.forEach((field) => {
-        initialFormData[field.id] = "";
+        initialFormData[field.id] = '';
       });
       return initialFormData;
     });
@@ -260,7 +145,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           icon="pi pi-plus"
           severity="success"
           onClick={openNew}
-          style={{ color: "white" }}
+          style={{ color: 'white' }}
         />
       </div>
     );
@@ -275,7 +160,7 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
           type="search"
           onInput={(e: any) => setGlobalFilter(e.target.value)}
           placeholder="Search..."
-          style={{ width: "200px" }}
+          style={{ width: '200px' }}
         />
       </IconField>
     </div>
@@ -299,52 +184,38 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
     console.log("Form Data Submitted:", formData);
     try {
       const responser = await SupersetClient.post({
-        endpoint: "/api/dataset/update",
-        jsonPayload: {
-          formData: [formData],
-          database: DBName,
-          table_name: tableName,
-        },
+        endpoint: '/api/dataset/update',
+        jsonPayload: { formData: [formData], database: DBName, table_name: tableName },
       });
       console.log(responser.json.message);
       setProductDialog(false);
     } catch (error) {
-      console.error("Error Submitting form data: ", error);
+      console.error('Error Submitting form data: ', error);
     }
   };
 
   const productDialogFooter = (
     <React.Fragment>
       <div className="card flex flex-wrap justify-content-end gap-3">
-        <Button
-          label="Cancel"
-          icon="pi pi-times"
-          outlined
-          onClick={hideDialog}
-        />
-        <Button
-          label="Save"
-          icon="pi pi-check"
-          onClick={saveProduct}
-          style={{ color: "white" }}
-        />
+        <Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
+        <Button label="Save" icon="pi pi-check" onClick={saveProduct} style={{ color: 'white' }} />
       </div>
     </React.Fragment>
   );
 
   const actionBodyTemplate = (rowData: any) => {
     return (
-      <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
         <Button
           icon="pi pi-pencil"
           className="p-button-rounded p-button-outlined"
-          style={{ padding: "4px", width: "30px", height: "30px" }}
+          style={{ padding: '4px', width: '30px', height: '30px' }}
           onClick={() => editProduct(rowData)}
         />
         <Button
           icon="pi pi-trash"
           className="p-button-rounded p-button-outlined p-button-danger"
-          style={{ padding: "4px", width: "30px", height: "30px" }}
+          style={{ padding: '4px', width: '30px', height: '30px' }}
           onClick={() => confirmDeleteProduct(rowData)}
         />
       </div>
@@ -363,69 +234,50 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
   const deleteProductDialogFooter = (
     <React.Fragment>
       <div className="card flex flex-wrap justify-content-end gap-3">
-        <Button
-          label="No"
-          icon="pi pi-times"
-          outlined
-          onClick={hideDeleteProductDialog}
-        />
-        <Button
-          label="Yes"
-          icon="pi pi-check"
-          severity="danger"
-          onClick={deleteProduct}
-          style={{ color: "white" }}
-        />
+        <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteProductDialog} />
+        <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteProduct} style={{ color: 'white' }} />
       </div>
     </React.Fragment>
   );
 
   const renderFormField = (field: any) => {
     switch (field.type) {
-      case "text":
+      case 'text':
         return (
           <div className="field" key={field.id}>
-            <label htmlFor={field.id} className="font-bold">
-              {field.label}
-            </label>
+            <label htmlFor={field.id} className="font-bold">{field.label}</label>
             <InputText
               id={field.id}
               value={formData[field.id]}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleInputChange(field.id, e.target.value)
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange(field.id, e.target.value)}
               required={field.required}
-              placeholder={field.placeholder || ""}
+              placeholder={field.placeholder || ''}
             />
           </div>
         );
-      case "number":
+      case 'number':
         return (
           <div className="field" key={field.id}>
-            <label htmlFor={field.id} className="font-bold">
-              {field.label}
-            </label>
+            <label htmlFor={field.id} className="font-bold">{field.label}</label>
             <InputNumber
               id={field.id}
               value={formData[field.id]}
               onValueChange={(e: any) => handleInputChange(field.id, e.value)}
               required={field.required}
-              placeholder={field.placeholder || ""}
+              placeholder={field.placeholder || ''}
             />
           </div>
         );
-      case "percentage":
+      case 'percentage':
         return (
           <div className="field" key={field.id}>
-            <label htmlFor={field.id} className="font-bold">
-              {field.label}
-            </label>
+            <label htmlFor={field.id} className="font-bold">{field.label}</label>
             <InputNumber
               id={field.id}
               value={formData[field.id]}
               onValueChange={(e: any) => handleInputChange(field.id, e.value)}
               required={field.required}
-              placeholder={field.placeholder || ""}
+              placeholder={field.placeholder || ''}
               suffix="%"
             />
           </div>
@@ -462,57 +314,54 @@ export default function NpdAssessment(props: NpdAssessmentProps) {
               key={col}
               field={col}
               header={col}
-              style={{ minWidth: "12rem" }}
+              style={{ minWidth: '12rem' }}
             />
           ))}
           <Column
             body={actionBodyTemplate}
-            bodyStyle={{ textAlign: "center", padding: "8px" }}
+            bodyStyle={{ textAlign: 'center', padding: '8px' }}
             exportable={false}
             frozen
             alignFrozen="right"
-            style={{ minWidth: "12rem" }}
+            style={{ minWidth: '12rem' }}
           />
         </DataTable>
       </div>
 
       <Dialog
         visible={productDialog}
-        style={{ width: "32rem" }}
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+        style={{ width: '32rem' }}
+        breakpoints={{ '960px': '75vw', '641px': '90vw' }}
         header="Create NPD Assessment"
         modal
         className="p-fluid"
         footer={productDialogFooter}
         onHide={hideDialog}
       >
-        <div>{formFieldsConfig.map((field) => renderFormField(field))}</div>
+        <div>
+          {formFieldsConfig.map((field) => renderFormField(field))}
+        </div>
       </Dialog>
 
       <Dialog
         visible={deleteProductDialog}
-        style={{ width: "32rem" }}
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+        style={{ width: '32rem' }}
+        breakpoints={{ '960px': '75vw', '641px': '90vw' }}
         header="Confirm"
         modal
         footer={deleteProductDialogFooter}
         onHide={hideDeleteProductDialog}
       >
         <div className="confirmation-content">
-          <i
-            className="pi pi-exclamation-triangle mr-3"
-            style={{ fontSize: "2rem" }}
-          />
-          {data && (
-            <span>
-              Are you sure you want to delete <b>{row}</b>?
-            </span>
-          )}
+          <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+          {data && <span>Are you sure you want to delete <b>{row}</b>?</span>}
         </div>
       </Dialog>
     </Styles>
   );
-} /*
+}
+
+/*
 
 // /*import React, { useEffect, useState, createRef, useCallback } from 'react';
 // import { styled, SupersetClient } from '@superset-ui/core';
