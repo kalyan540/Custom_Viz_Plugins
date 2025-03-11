@@ -44,6 +44,11 @@ const Styles = styled.div<FlowBuilderStylesProps>`
 
   .manager-list {
     margin-top: ${({ theme }) => theme.gridUnit * 3}px;
+    max-height: 150px; /* Set a max height for the scrollable area */
+    overflow-y: auto; /* Enable vertical scrolling */
+    border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
+    border-radius: ${({ theme }) => theme.gridUnit}px;
+    padding: ${({ theme }) => theme.gridUnit * 2}px;
   }
 
   .manager-item {
@@ -145,17 +150,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         />
       </div>
       <div className="form-group">
-        <label>Manager/Approver</label>
-        <Popover
-          content={managerPopoverContent}
-          trigger="click"
-          visible={popoverVisible}
-          onVisibleChange={(visible) => setPopoverVisible(visible)}
-        >
-          <button>Add Manager/Approver</button>
-        </Popover>
-      </div>
-      <div className="form-group">
         <label>Current User Email</label>
         <input type="text" value={currentUserEmail} disabled />
       </div>
@@ -174,6 +168,16 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             </button>
           </div>
         ))}
+      </div>
+      <div className="form-group">
+        <Popover
+          content={managerPopoverContent}
+          trigger="click"
+          visible={popoverVisible}
+          onVisibleChange={(visible) => setPopoverVisible(visible)}
+        >
+          <button>Add Manager/Approver</button>
+        </Popover>
       </div>
       <button onClick={handleSubmit}>Submit</button>
     </Styles>
