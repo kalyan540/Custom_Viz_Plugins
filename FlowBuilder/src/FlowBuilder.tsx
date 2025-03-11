@@ -199,7 +199,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       wires: [],
     });
 
-    // Reject notification email node
+    //Reject notification email node
     workflow.push({
       id: "reject_notification",
       type: "e-mail",
