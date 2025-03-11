@@ -203,21 +203,22 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       });
     });
 
-    // PostgreSQL node to update status
+    // PostgreSQL node to insert status
     workflow.push({
-      id: "postgres_update",
-      type: "postgresql",
-      z: tabId, // Ensure this matches the tab ID
-      name: "Update Approval Status",
-      query: `UPDATE approval_requests SET status = '{{payload.approval}}', current_level = current_level + 1 WHERE id = 1;`, // Replace with dynamic ID if needed
-      postgreSQLConfig: "7b9ec91590d534cc",
-      split: false,
-      rowsPerMsg: 1,
-      outputs: 1,
-      x: 700,
-      y: 180,
-      wires: [["set_completed_status"]], // Connect to set completed status node
-    });
+        id: "postgres_update",
+        type: "postgresql",
+        z: tabId, // Ensure this matches the tab ID
+        name: "Insert Approval Status",
+        query: `INSERT INTO approval_requests (user_id, request_data, status, current_level, total_levels) 
+                VALUES (1, '${JSON.stringify({ workflowName, managers })}', '{{payload.approval}}', ${managers.length}, ${managers.length});`,
+        postgreSQLConfig: "7b9ec91590d534cc",
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 700,
+        y: 180,
+        wires: [["set_completed_status"]], // Connect to set completed status node
+      });
 
     // Set completed status node
     workflow.push({
