@@ -121,7 +121,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   ) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
-  
+
     // Start node
     workflow.push({
       id: "inject_start",
@@ -133,9 +133,57 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       payloadType: "json",
       x: 110,
       y: 120,
-      wires: [[`manager_0`]],
+      wires: [["postgres_insert", "email_start_notification"]], // Connect to PostgreSQL and email nodes
     });
-  
+
+    // PostgreSQL node to insert data into the approval_requests table
+    workflow.push({
+      id: "postgres_insert",
+      type: "postgresql",
+      z: tabId,
+      name: "Insert Approval Request",
+      query: `INSERT INTO approval_requests (user_id, request_data, status, total_levels) 
+              VALUES (1, '${JSON.stringify({ workflowName, managers })}', 'Pending', ${managers.length});`,
+      postgreSQLConfig: "postgres_config", // Reference to PostgreSQL config node
+      split: false,
+      rowsPerMsg: 1,
+      outputs: 1,
+      x: 320,
+      y: 120,
+      wires: [["manager_0"]], // Connect to the first manager approval node
+    });
+
+    // PostgreSQL configuration node
+    workflow.push({
+      id: "postgres_config",
+      type: "postgreSQLConfig",
+      name: "PostgreSQL Config",
+      host: "http://ec2-52-91-38-126.compute-1.amazonaws.com",
+      port: 9000,
+      database: "postgres",
+      user: "examples",
+      password: "examples",
+      ssl: false,
+      x: 320,
+      y: 60,
+    });
+
+    // Email node for start notification
+    workflow.push({
+      id: "email_start_notification",
+      type: "e-mail",
+      z: tabId,
+      name: "Send Start Notification",
+      server: "sandbox.smtp.mailtrap.io",
+      port: "2525",
+      to: `${userEmail}, ${managers.map((m) => m.email).join(",")}`, // Send to user and all managers
+      subject: "Workflow Started",
+      body: `Your workflow "${workflowName}" has started. Managers will review your request.`,
+      x: 320,
+      y: 180,
+      wires: [],
+    });
+
     // Manager approval nodes
     managers.forEach((manager, index) => {
       workflow.push({
@@ -149,7 +197,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         y: 120 + index * 80,
         wires: [[`decision_${index}`]],
       });
-      
       workflow.push({
         id: `decision_${index}`,
         type: "switch",
@@ -166,11 +213,11 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         y: 160 + index * 80,
         wires: [
           [index === managers.length - 1 ? "set_completed_status" : `manager_${index + 1}`],
-          ["reject_notification"],
+          ["reject_notification"], // Connect rejected output to the reject_notification node
         ],
       });
     });
-  
+
     // Set completed status node
     workflow.push({
       id: "set_completed_status",
@@ -181,9 +228,25 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       outputs: 1,
       x: 550,
       y: 180,
-      wires: [["approval_email"]],
+      wires: [["approval_email", "postgres_update_status"]], // Connect to email and PostgreSQL update nodes
     });
-  
+
+    // PostgreSQL node to update status
+    workflow.push({
+      id: "postgres_update_status",
+      type: "postgresql",
+      z: tabId,
+      name: "Update Approval Status",
+      query: `UPDATE approval_requests SET status = 'Completed' WHERE id = 1;`, // Replace with dynamic ID if needed
+      postgreSQLConfig: "postgres_config",
+      split: false,
+      rowsPerMsg: 1,
+      outputs: 1,
+      x: 770,
+      y: 220,
+      wires: [],
+    });
+
     // Approval email node
     workflow.push({
       id: "approval_email",
@@ -200,7 +263,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       wires: [],
     });
 
-    //Reject notification email node
+    // Reject notification email node
     workflow.push({
       id: "reject_notification",
       type: "e-mail",
@@ -215,7 +278,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 300,
       wires: [],
     });
-  
+
     return workflow; // Return a plain JavaScript object
   };
 
