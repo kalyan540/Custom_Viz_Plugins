@@ -238,10 +238,12 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       id: "approval_email",
       type: "e-mail",
       z: tabId, // Ensure this matches the tab ID
-      name: "Send Approval Email",
+      name: "Approval Mail",
       server: "sandbox.smtp.mailtrap.io",
       port: "2525",
-      to: userEmail,
+      username: "62753aa9883bbc", // Add your SMTP username
+      password: "a249d24a02ce4f", // Add your SMTP password
+      to: "dihiwo5319@easipro.com", // Recipient email
       subject: "Workflow Completed",
       body: "{{payload.html}}",
       x: 1100,
@@ -257,7 +259,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       name: "Send Rejection Email",
       server: "sandbox.smtp.mailtrap.io",
       port: "2525",
-      to: userEmail,
+      username: "62753aa9883bbc", // Add your SMTP username
+      password: "a249d24a02ce4f", // Add your SMTP password
+      to: "dihiwo5319@easipro.com", // Recipient email
       subject: "Workflow Rejected",
       body: "Your workflow request has been rejected by {{payload.manager}}.",
       x: 700,
