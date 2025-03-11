@@ -142,7 +142,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       type: "postgreSQLConfig",
       z: tabId, // Ensure this matches the tab ID
       name: "postgres",
-      host: "http://ec2-52-91-38-126.compute-1.amazonaws.com",
+      host: "ec2-52-91-38-126.compute-1.amazonaws.com",
       hostFieldType: "str",
       port: 9000,
       portFieldType: "num",
