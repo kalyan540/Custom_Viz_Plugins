@@ -40,5 +40,6 @@ export type FlowBuilderQueryFormData = QueryFormData &
 export type FlowBuilderProps = FlowBuilderStylesProps &
   FlowBuilderCustomizeProps & {
     data: TimeseriesDataRecord[];
+    apiEndpoint: string;
     // add typing here for the props you pass in from transformProps.ts!
   };

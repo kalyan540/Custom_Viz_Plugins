@@ -63,7 +63,7 @@ const Styles = styled.div<FlowBuilderStylesProps>`
 `;
 
 export default function FlowBuilder(props: FlowBuilderProps) {
-  const { height, width } = props;
+  const { height, width, apiEndpoint } = props;
   const rootElem = createRef<HTMLDivElement>();
 
   // State for form inputs
@@ -81,9 +81,30 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const [popoverVisible, setPopoverVisible] = useState(false);
 
   // Handle form submission
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail);
     console.log('Workflow JSON:', workflowJson);
+
+    try {
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(workflowJson),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('API Response:', result);
+      alert('Workflow created successfully!');
+    } catch (error) {
+      console.error('Error submitting workflow:', error);
+      alert('Failed to create workflow. Please try again.');
+    }
   };
 
   // Add a manager to the list
