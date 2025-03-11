@@ -121,7 +121,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   ) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
-
+  
     // Start node
     workflow.push({
       id: "inject_start",
@@ -133,59 +133,41 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       payloadType: "json",
       x: 110,
       y: 120,
-      wires: [["postgres_insert", "email_start_notification"]], // Connect to PostgreSQL and email nodes
-    });
-
-    // PostgreSQL node to insert data into the approval_requests table
-    workflow.push({
-      id: "postgres_insert",
-      type: "postgresql",
-      z: tabId,
-      name: "Insert Approval Request",
-      query: `INSERT INTO approval_requests (user_id, request_data, status, total_levels) 
-              VALUES (1, '${JSON.stringify({ workflowName, managers })}', 'Pending', ${managers.length});`,
-      postgreSQLConfig: "postgres_config", // Reference to PostgreSQL config node
-      split: false,
-      rowsPerMsg: 1,
-      outputs: 1,
-      x: 320,
-      y: 120,
       wires: [["manager_0"]], // Connect to the first manager approval node
     });
-
+  
     // PostgreSQL configuration node
     workflow.push({
-      id: "postgres_config",
+      id: "7b9ec91590d534cc",
       type: "postgreSQLConfig",
-      name: "PostgreSQL Config",
+      name: "postgres",
       host: "http://ec2-52-91-38-126.compute-1.amazonaws.com",
+      hostFieldType: "str",
       port: 9000,
+      portFieldType: "num",
       database: "postgres",
+      databaseFieldType: "str",
+      ssl: "false",
+      sslFieldType: "bool",
+      applicationName: "",
+      applicationNameType: "str",
+      max: 10,
+      maxFieldType: "num",
+      idle: 1000,
+      idleFieldType: "num",
+      connectionTimeout: 10000,
+      connectionTimeoutFieldType: "num",
       user: "examples",
+      userFieldType: "str",
       password: "examples",
-      ssl: false,
+      passwordFieldType: "str",
       x: 320,
       y: 60,
     });
-
-    // Email node for start notification
-    workflow.push({
-      id: "email_start_notification",
-      type: "e-mail",
-      z: tabId,
-      name: "Send Start Notification",
-      server: "sandbox.smtp.mailtrap.io",
-      port: "2525",
-      to: `${userEmail}, ${managers.map((m) => m.email).join(",")}`, // Send to user and all managers
-      subject: "Workflow Started",
-      body: `Your workflow "${workflowName}" has started. Managers will review your request.`,
-      x: 320,
-      y: 180,
-      wires: [],
-    });
-
+  
     // Manager approval nodes
     managers.forEach((manager, index) => {
+      // Manager approval node
       workflow.push({
         id: `manager_${index}`,
         type: "function",
@@ -195,8 +177,10 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         outputs: 1,
         x: 300,
         y: 120 + index * 80,
-        wires: [[`decision_${index}`]],
+        wires: [[`decision_${index}`]], // Connect to decision node
       });
+  
+      // Decision node
       workflow.push({
         id: `decision_${index}`,
         type: "switch",
@@ -209,60 +193,76 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           { t: "eq", v: "Rejected", vt: "str" },
         ],
         outputs: 2,
-        x: 220,
-        y: 160 + index * 80,
+        x: 500,
+        y: 120 + index * 80,
         wires: [
-          [index === managers.length - 1 ? "set_completed_status" : `manager_${index + 1}`],
-          ["reject_notification"], // Connect rejected output to the reject_notification node
+          [`postgres_success_${index}`], // Success output → PostgreSQL node
+          ["reject_notification", "postgres_reject"], // Rejected output → Email + PostgreSQL
         ],
       });
+  
+      // PostgreSQL node for success (Approved)
+      workflow.push({
+        id: `postgres_success_${index}`,
+        type: "postgresql",
+        z: tabId,
+        name: `Store ${manager.name} Approval`,
+        query: `UPDATE approval_requests SET status = 'Approved', current_level = ${index + 1} WHERE id = 1;`, // Replace with dynamic ID if needed
+        postgreSQLConfig: "7b9ec91590d534cc",
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 700,
+        y: 120 + index * 80,
+        wires: [["set_completed_status"]], // Connect to set completed status node
+      });
+  
+      // Set completed status node
+      workflow.push({
+        id: "set_completed_status",
+        type: "function",
+        z: tabId,
+        name: "Set status to completed",
+        func: `msg.payload.status = \"Completed\";\nmsg.payload.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = \`Workflow \${msg.payload.request_id}\`;\nmsg.payload.html = \`<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\"><h2 style=\"color: #2c3e50;\">Workflow Request Update</h2><p style=\"font-size: 16px;\">Your request has been processed.</p><table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\"><tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td><td style=\"padding: 10px; border: 1px solid #ddd;\">\${msg.payload.request_id}</td></tr><tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td><td style=\"padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};\"><strong>\${msg.payload.status}</strong></td></tr></table><p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p></div>\`;\nreturn msg;`,
+        outputs: 1,
+        x: 900,
+        y: 120 + index * 80,
+        wires: [["approval_email"]], // Connect to approval email node
+      });
+  
+      // Approval email node
+      workflow.push({
+        id: "approval_email",
+        type: "e-mail",
+        z: tabId,
+        name: "Send Approval Email",
+        server: "sandbox.smtp.mailtrap.io",
+        port: "2525",
+        to: userEmail,
+        subject: "Workflow Completed",
+        body: "{{payload.html}}",
+        x: 1100,
+        y: 120 + index * 80,
+        wires: [],
+      });
     });
-
-    // Set completed status node
+  
+    // PostgreSQL node for rejection
     workflow.push({
-      id: "set_completed_status",
-      type: "function",
-      z: tabId,
-      name: "Set status to completed",
-      func: `msg.payload.status = \"Completed\";\nmsg.payload.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = \`Workflow \${msg.payload.request_id}\`;\nmsg.payload.html = \`<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\"><h2 style=\"color: #2c3e50;\">Workflow Request Update</h2><p style=\"font-size: 16px;\">Your request has been processed.</p><table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\"><tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td><td style=\"padding: 10px; border: 1px solid #ddd;\">\${msg.payload.request_id}</td></tr><tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td><td style=\"padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};\"><strong>\${msg.payload.status}</strong></td></tr></table><p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p></div>\`;\nreturn msg;`,
-      outputs: 1,
-      x: 550,
-      y: 180,
-      wires: [["approval_email", "postgres_update_status"]], // Connect to email and PostgreSQL update nodes
-    });
-
-    // PostgreSQL node to update status
-    workflow.push({
-      id: "postgres_update_status",
+      id: "postgres_reject",
       type: "postgresql",
       z: tabId,
-      name: "Update Approval Status",
-      query: `UPDATE approval_requests SET status = 'Completed' WHERE id = 1;`, // Replace with dynamic ID if needed
-      postgreSQLConfig: "postgres_config",
+      name: "Store Rejection",
+      query: `UPDATE approval_requests SET status = 'Rejected' WHERE id = 1;`, // Replace with dynamic ID if needed
+      postgreSQLConfig: "7b9ec91590d534cc",
       split: false,
       rowsPerMsg: 1,
       outputs: 1,
-      x: 770,
-      y: 220,
+      x: 700,
+      y: 300,
       wires: [],
     });
-
-    // Approval email node
-    workflow.push({
-      id: "approval_email",
-      type: "e-mail",
-      z: tabId,
-      name: "Send Approval Email",
-      server: "sandbox.smtp.mailtrap.io",
-      port: "2525",
-      to: userEmail,
-      subject: "Workflow Completed",
-      body: "{{payload.html}}",
-      x: 770,
-      y: 150,
-      wires: [],
-    });
-
+  
     // Reject notification email node
     workflow.push({
       id: "reject_notification",
@@ -274,103 +274,11 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       to: userEmail,
       subject: "Workflow Rejected",
       body: "Your workflow request has been rejected by {{payload.manager}}.",
-      x: 770,
+      x: 900,
       y: 300,
       wires: [],
     });
-
+  
     return workflow; // Return a plain JavaScript object
   };
-
-  // Popover content for selecting a manager
-  const managerPopoverContent = (
-    <div>
-      <input
-        type="text"
-        placeholder="Search manager..."
-        style={{ marginBottom: '8px' }}
-      />
-      <div>
-        <div
-          style={{ padding: '8px', cursor: 'pointer' }}
-          onClick={() => {
-            addManager({ name: 'John Doe', email: 'john.doe@example.com' });
-            setPopoverVisible(false);
-          }}
-        >
-          John Doe (john.doe@example.com)
-        </div>
-        <div
-          style={{ padding: '8px', cursor: 'pointer' }}
-          onClick={() => {
-            addManager({ name: 'Jane Smith', email: 'jane.smith@example.com' });
-            setPopoverVisible(false);
-          }}
-        >
-          Jane Smith (jane.smith@example.com)
-        </div>
-      </div>
-    </div>
-  );
-
-  useEffect(() => {
-    const root = rootElem.current as HTMLElement;
-    console.log('Plugin element', root);
-  }, []);
-
-  return (
-    <Styles
-      ref={rootElem}
-      boldText={props.boldText}
-      headerFontSize={props.headerFontSize}
-      height={height}
-      width={width}
-    >
-      <div className="form-group">
-        <label>Workflow Name</label>
-        <input
-          type="text"
-          value={workflowName}
-          onChange={(e) => setWorkflowName(e.target.value)}
-          placeholder="Enter workflow name"
-        />
-      </div>
-      <div className="form-group">
-        <label>Current User Email</label>
-        <input
-          type="text"
-          value={currentUserEmail}
-          onChange={(e) => setCurrentUserEmail(e.target.value)}
-          placeholder="Enter your email"
-        />
-      </div>
-      <div className="manager-list">
-        {managers.map((manager, index) => (
-          <div key={index} className="manager-item">
-            <span>
-              {manager.name} ({manager.email})
-            </span>
-            <button
-              onClick={() =>
-                setManagers(managers.filter((_, i) => i !== index))
-              }
-            >
-              Remove
-            </button>
-          </div>
-        ))}
-      </div>
-      <div className="form-group">
-        <Popover
-          content={managerPopoverContent}
-          trigger="click"
-          visible={popoverVisible}
-          onVisibleChange={(visible) => setPopoverVisible(visible)}
-        >
-          <button>Add Manager/Approver</button>
-        </Popover>
-      </div>
-      <button onClick={handleSubmit}>Submit</button>
-    </Styles>
-  );
 }
