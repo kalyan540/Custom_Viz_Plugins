@@ -235,20 +235,20 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
     // Approval email node
     workflow.push({
-      id: "approval_email",
-      type: "e-mail",
-      z: tabId, // Ensure this matches the tab ID
-      name: "Approval Mail",
-      server: "sandbox.smtp.mailtrap.io",
-      port: "2525",
-      username: "62753aa9883bbc", // Add your SMTP username
-      password: "a249d24a02ce4f", // Add your SMTP password
-      to: "dihiwo5319@easipro.com", // Recipient email
-      subject: "Workflow Completed",
-      body: "{{payload.html}}",
-      x: 1100,
-      y: 180,
-      wires: [],
+        id: "approval_notification",
+        type: "e-mail",
+        z: tabId, // Ensure this matches the tab ID
+        name: "dihiwo5319@easipro.com",
+        server: "sandbox.smtp.mailtrap.io",
+        port: "2525",
+        username: "62753aa9883bbc", // Add your SMTP username
+        password: "a249d24a02ce4f", // Add your SMTP password
+        to: "dihiwo5319@easipro.com", // Recipient email
+        subject: "Workflow completed",
+        body: "Your workflow request has been approved by {{payload.manager}}.",
+        x: 700,
+        y: 300,
+        wires: [],
     });
 
     // Reject notification email node
@@ -256,7 +256,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       id: "reject_notification",
       type: "e-mail",
       z: tabId, // Ensure this matches the tab ID
-      name: "Send Rejection Email",
+      name: "dihiwo5319@easipro.com",
       server: "sandbox.smtp.mailtrap.io",
       port: "2525",
       username: "62753aa9883bbc", // Add your SMTP username
