@@ -141,7 +141,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       id: "7b9ec91590d534cc",
       type: "postgreSQLConfig",
       name: "postgres",
-      host: "http://ec2-52-91-38-126.compute-1.amazonaws.com:9000",
+      host: "http://ec2-52-91-38-126.compute-1.amazonaws.com",
       hostFieldType: "str",
       port: 9000,
       portFieldType: "num",
