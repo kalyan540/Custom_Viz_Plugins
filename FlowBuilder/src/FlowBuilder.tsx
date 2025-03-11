@@ -120,7 +120,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   ) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
-
+  
     // Start node
     workflow.push({
       id: "inject_start",
@@ -134,7 +134,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 120,
       wires: [[`manager_0`]],
     });
-
+  
     // Manager approval nodes
     managers.forEach((manager, index) => {
       workflow.push({
@@ -168,7 +168,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         ],
       });
     });
-
+  
     // Set completed status node
     workflow.push({
       id: "set_completed_status",
@@ -181,7 +181,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 180,
       wires: [["approval_email"]],
     });
-
+  
     // Approval email node
     workflow.push({
       id: "approval_email",
@@ -197,8 +197,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 150,
       wires: [],
     });
-
-    return JSON.stringify(workflow, null, 4);
+  
+    return workflow; // Return a plain JavaScript object
   };
 
   // Popover content for selecting a manager
