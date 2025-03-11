@@ -140,6 +140,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     workflow.push({
       id: "7b9ec91590d534cc",
       type: "postgreSQLConfig",
+      z: tabId, // Ensure this matches the tab ID
       name: "postgres",
       host: "http://ec2-52-91-38-126.compute-1.amazonaws.com",
       hostFieldType: "str",
@@ -171,7 +172,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       workflow.push({
         id: `manager_${index}`,
         type: "function",
-        z: tabId,
+        z: tabId, // Ensure this matches the tab ID
         name: `${manager.name} Approval`,
         func: `msg.payload = {}; msg.payload.approval = Math.random() > 0.5 ? \"Approved\" : \"Rejected\";\nmsg.payload.manager = \"${manager.name}\";\nreturn msg;`,
         outputs: 1,
@@ -184,7 +185,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       workflow.push({
         id: `decision_${index}`,
         type: "switch",
-        z: tabId,
+        z: tabId, // Ensure this matches the tab ID
         name: `Check ${manager.name} Decision`,
         property: "payload.approval",
         propertyType: "msg",
@@ -206,7 +207,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     workflow.push({
       id: "postgres_update",
       type: "postgresql",
-      z: tabId,
+      z: tabId, // Ensure this matches the tab ID
       name: "Update Approval Status",
       query: `UPDATE approval_requests SET status = '{{payload.approval}}', current_level = current_level + 1 WHERE id = 1;`, // Replace with dynamic ID if needed
       postgreSQLConfig: "7b9ec91590d534cc",
@@ -222,7 +223,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     workflow.push({
       id: "set_completed_status",
       type: "function",
-      z: tabId,
+      z: tabId, // Ensure this matches the tab ID
       name: "Set status to completed",
       func: `msg.payload.status = \"Completed\";\nmsg.payload.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = \`Workflow \${msg.payload.request_id}\`;\nmsg.payload.html = \`<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\"><h2 style=\"color: #2c3e50;\">Workflow Request Update</h2><p style=\"font-size: 16px;\">Your request has been processed.</p><table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\"><tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td><td style=\"padding: 10px; border: 1px solid #ddd;\">\${msg.payload.request_id}</td></tr><tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td><td style=\"padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};\"><strong>\${msg.payload.status}</strong></td></tr></table><p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p></div>\`;\nreturn msg;`,
       outputs: 1,
@@ -235,7 +236,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     workflow.push({
       id: "approval_email",
       type: "e-mail",
-      z: tabId,
+      z: tabId, // Ensure this matches the tab ID
       name: "Send Approval Email",
       server: "sandbox.smtp.mailtrap.io",
       port: "2525",
@@ -251,7 +252,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     workflow.push({
       id: "reject_notification",
       type: "e-mail",
-      z: tabId,
+      z: tabId, // Ensure this matches the tab ID
       name: "Send Rejection Email",
       server: "sandbox.smtp.mailtrap.io",
       port: "2525",
