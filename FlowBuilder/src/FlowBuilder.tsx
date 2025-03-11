@@ -198,6 +198,22 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 150,
       wires: [],
     });
+
+    // Reject notification email node
+    workflow.push({
+      id: "reject_notification",
+      type: "e-mail",
+      z: tabId,
+      name: "Send Rejection Email",
+      server: "sandbox.smtp.mailtrap.io",
+      port: "2525",
+      to: userEmail,
+      subject: "Workflow Rejected",
+      body: "Your workflow request has been rejected by {{payload.manager}}.",
+      x: 770,
+      y: 300,
+      wires: [],
+    });
   
     return workflow; // Return a plain JavaScript object
   };
