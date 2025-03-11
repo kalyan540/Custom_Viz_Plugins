@@ -44,7 +44,7 @@ const Styles = styled.div<FlowBuilderStylesProps>`
 
   .manager-list {
     margin-top: ${({ theme }) => theme.gridUnit * 3}px;
-    max-height: 150px; /* Set a max height for the scrollable area */
+    max-height: 20px; /* Set a max height for the scrollable area */
     overflow-y: auto; /* Enable vertical scrolling */
     border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
     border-radius: ${({ theme }) => theme.gridUnit}px;
@@ -82,18 +82,102 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
   // Handle form submission
   const handleSubmit = () => {
-    const formData = {
-      workflowName,
-      managers,
-      currentUserEmail,
-    };
-    console.log('Form Data:', formData);
-    // Add your submission logic here
+    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail);
+    console.log('Workflow JSON:', workflowJson);
   };
 
   // Add a manager to the list
   const addManager = (manager: { name: string; email: string }) => {
     setManagers([...managers, manager]);
+  };
+
+  // Generate JSON for Node-Red
+  const generateWorkflowJson = (
+    workflowName: string,
+    managers: { name: string; email: string }[],
+    userEmail: string,
+  ) => {
+    const workflow = [];
+    const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
+
+    // Start node
+    workflow.push({
+      id: "inject_start",
+      type: "inject",
+      z: tabId,
+      name: "Start Request",
+      props: [{ p: "payload" }],
+      payload: JSON.stringify({ requestId: 123, status: "Pending", userEmail }),
+      payloadType: "json",
+      x: 110,
+      y: 120,
+      wires: [[`manager_0`]],
+    });
+
+    // Manager approval nodes
+    managers.forEach((manager, index) => {
+      workflow.push({
+        id: `manager_${index}`,
+        type: "function",
+        z: tabId,
+        name: `${manager.name} Approval`,
+        func: `msg.payload = {}; msg.payload.approval = Math.random() > 0.5 ? \"Approved\" : \"Rejected\";\nmsg.payload.manager = \"${manager.name}\";\nreturn msg;`,
+        outputs: 1,
+        x: 300,
+        y: 120 + index * 80,
+        wires: [[`decision_${index}`]],
+      });
+      workflow.push({
+        id: `decision_${index}`,
+        type: "switch",
+        z: tabId,
+        name: `Check ${manager.name} Decision`,
+        property: "payload.approval",
+        propertyType: "msg",
+        rules: [
+          { t: "eq", v: "Approved", vt: "str" },
+          { t: "eq", v: "Rejected", vt: "str" },
+        ],
+        outputs: 2,
+        x: 220,
+        y: 160 + index * 80,
+        wires: [
+          [index === managers.length - 1 ? "set_completed_status" : `manager_${index + 1}`],
+          ["reject_notification"],
+        ],
+      });
+    });
+
+    // Set completed status node
+    workflow.push({
+      id: "set_completed_status",
+      type: "function",
+      z: tabId,
+      name: "Set status to completed",
+      func: `msg.payload.status = \"Completed\";\nmsg.payload.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = \`Workflow \${msg.payload.request_id}\`;\nmsg.payload.html = \`<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\"><h2 style=\"color: #2c3e50;\">Workflow Request Update</h2><p style=\"font-size: 16px;\">Your request has been processed.</p><table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\"><tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td><td style=\"padding: 10px; border: 1px solid #ddd;\">\${msg.payload.request_id}</td></tr><tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td><td style=\"padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};\"><strong>\${msg.payload.status}</strong></td></tr></table><p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p></div>\`;\nreturn msg;`,
+      outputs: 1,
+      x: 550,
+      y: 180,
+      wires: [["approval_email"]],
+    });
+
+    // Approval email node
+    workflow.push({
+      id: "approval_email",
+      type: "e-mail",
+      z: tabId,
+      name: "Send Approval Email",
+      server: "sandbox.smtp.mailtrap.io",
+      port: "2525",
+      to: userEmail,
+      subject: "Workflow Completed",
+      body: "{{payload.html}}",
+      x: 770,
+      y: 150,
+      wires: [],
+    });
+
+    return JSON.stringify(workflow, null, 4);
   };
 
   // Popover content for selecting a manager
@@ -151,7 +235,12 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       </div>
       <div className="form-group">
         <label>Current User Email</label>
-        <input type="text" value={currentUserEmail} disabled />
+        <input
+          type="text"
+          value={currentUserEmail}
+          onChange={(e) => setCurrentUserEmail(e.target.value)}
+          placeholder="Enter your email"
+        />
       </div>
       <div className="manager-list">
         {managers.map((manager, index) => (
