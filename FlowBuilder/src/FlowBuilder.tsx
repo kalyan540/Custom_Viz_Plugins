@@ -121,7 +121,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   ) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
-  
+
     // Start node
     workflow.push({
       id: "inject_start",
@@ -135,13 +135,13 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 120,
       wires: [["manager_0"]], // Connect to the first manager approval node
     });
-  
+
     // PostgreSQL configuration node
     workflow.push({
       id: "7b9ec91590d534cc",
       type: "postgreSQLConfig",
       name: "postgres",
-      host: "http://ec2-52-91-38-126.compute-1.amazonaws.com",
+      host: "http://ec2-52-91-38-126.compute-1.amazonaws.com:9000",
       hostFieldType: "str",
       port: 9000,
       portFieldType: "num",
@@ -164,7 +164,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       x: 320,
       y: 60,
     });
-  
+
     // Manager approval nodes
     managers.forEach((manager, index) => {
       // Manager approval node
@@ -179,7 +179,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         y: 120 + index * 80,
         wires: [[`decision_${index}`]], // Connect to decision node
       });
-  
+
       // Decision node
       workflow.push({
         id: `decision_${index}`,
@@ -201,7 +201,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         ],
       });
     });
-  
+
     // PostgreSQL node to update status
     workflow.push({
       id: "postgres_update",
@@ -217,7 +217,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 180,
       wires: [["set_completed_status"]], // Connect to set completed status node
     });
-  
+
     // Set completed status node
     workflow.push({
       id: "set_completed_status",
@@ -230,7 +230,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 180,
       wires: [["approval_email"]], // Connect to approval email node
     });
-  
+
     // Approval email node
     workflow.push({
       id: "approval_email",
@@ -246,7 +246,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 180,
       wires: [],
     });
-  
+
     // Reject notification email node
     workflow.push({
       id: "reject_notification",
@@ -262,7 +262,99 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 300,
       wires: [],
     });
-  
+
     return workflow; // Return a plain JavaScript object
   };
+
+  // Popover content for selecting a manager
+  const managerPopoverContent = (
+    <div>
+      <input
+        type="text"
+        placeholder="Search manager..."
+        style={{ marginBottom: '8px' }}
+      />
+      <div>
+        <div
+          style={{ padding: '8px', cursor: 'pointer' }}
+          onClick={() => {
+            addManager({ name: 'John Doe', email: 'john.doe@example.com' });
+            setPopoverVisible(false);
+          }}
+        >
+          John Doe (john.doe@example.com)
+        </div>
+        <div
+          style={{ padding: '8px', cursor: 'pointer' }}
+          onClick={() => {
+            addManager({ name: 'Jane Smith', email: 'jane.smith@example.com' });
+            setPopoverVisible(false);
+          }}
+        >
+          Jane Smith (jane.smith@example.com)
+        </div>
+      </div>
+    </div>
+  );
+
+  useEffect(() => {
+    const root = rootElem.current as HTMLElement;
+    console.log('Plugin element', root);
+  }, []);
+
+  return (
+    <Styles
+      ref={rootElem}
+      boldText={props.boldText}
+      headerFontSize={props.headerFontSize}
+      height={height}
+      width={width}
+    >
+      <div className="form-group">
+        <label>Workflow Name</label>
+        <input
+          type="text"
+          value={workflowName}
+          onChange={(e) => setWorkflowName(e.target.value)}
+          placeholder="Enter workflow name"
+        />
+      </div>
+      <div className="form-group">
+        <label>Current User Email</label>
+        <input
+          type="text"
+          value={currentUserEmail}
+          onChange={(e) => setCurrentUserEmail(e.target.value)}
+          placeholder="Enter your email"
+        />
+      </div>
+      <div className="manager-list">
+        {managers.map((manager, index) => (
+          <div key={index} className="manager-item">
+            <span>
+              {manager.name} ({manager.email})
+            </span>
+            <button
+              onClick={() =>
+                setManagers(managers.filter((_, i) => i !== index))
+              }
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+      </div>
+      <div className="form-group">
+        <Popover
+          content={managerPopoverContent}
+          trigger="click"
+          visible={popoverVisible}
+          onVisibleChange={(visible) => setPopoverVisible(visible)}
+        >
+          <button>Add Manager/Approver</button>
+        </Popover>
+      </div>
+      <button onClick={handleSubmit}>Submit</button>
+    </Styles>
+  );
 }
