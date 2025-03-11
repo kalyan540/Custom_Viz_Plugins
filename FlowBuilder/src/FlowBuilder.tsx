@@ -94,13 +94,14 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         body: JSON.stringify(workflowJson),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      if (response.status === 204) {
+        console.log('Workflow created successfully!');
+        alert('Workflow created successfully!');
+      } else {
+        const result = await response.json(); // Handle other success responses (if any)
+        console.log('API Response:', result);
+        alert('Workflow created successfully!');
       }
-
-      const result = await response.json();
-      console.log('API Response:', result);
-      alert('Workflow created successfully!');
     } catch (error) {
       console.error('Error submitting workflow:', error);
       alert('Failed to create workflow. Please try again.');
