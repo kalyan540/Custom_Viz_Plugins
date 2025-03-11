@@ -149,6 +149,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         y: 120 + index * 80,
         wires: [[`decision_${index}`]],
       });
+      
       workflow.push({
         id: `decision_${index}`,
         type: "switch",
