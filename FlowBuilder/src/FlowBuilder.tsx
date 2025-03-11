@@ -44,7 +44,7 @@ const Styles = styled.div<FlowBuilderStylesProps>`
 
   .manager-list {
     margin-top: ${({ theme }) => theme.gridUnit * 3}px;
-    max-height: 20px; /* Set a max height for the scrollable area */
+    max-height: 75px; /* Set a max height for the scrollable area */
     overflow-y: auto; /* Enable vertical scrolling */
     border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
     border-radius: ${({ theme }) => theme.gridUnit}px;
