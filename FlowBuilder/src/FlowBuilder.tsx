@@ -189,7 +189,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         id: "approval_email",
         type: "e-mail",
         z: tabId,
-        name: "Send Approval Email",
+        name: "dihiwo5319@easipro.com",
         server: "sandbox.smtp.mailtrap.io",
         port: "2525",
         username: "62753aa9883bbc",
