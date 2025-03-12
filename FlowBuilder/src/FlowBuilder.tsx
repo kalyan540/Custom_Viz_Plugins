@@ -133,59 +133,27 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       payloadType: "json",
       x: 110,
       y: 120,
-      wires: [["manager_0"]], // Connect to the first manager approval node
-    });
-  
-    // PostgreSQL configuration node
-    workflow.push({
-      id: "7b9ec91590d534cc",
-      type: "postgreSQLConfig",
-      z: tabId, // Ensure this matches the tab ID
-      name: "postgres",
-      host: "172.31.20.244",
-      hostFieldType: "str",
-      port: 5432,
-      portFieldType: "num",
-      database: "examples",
-      databaseFieldType: "str",
-      ssl: "false",
-      sslFieldType: "bool",
-      applicationName: "",
-      applicationNameType: "str",
-      max: 10,
-      maxFieldType: "num",
-      idle: 1000,
-      idleFieldType: "num",
-      connectionTimeout: 10000,
-      connectionTimeoutFieldType: "num",
-      user: "examples",
-      userFieldType: "str",
-      password: "examples",
-      passwordFieldType: "str",
-      x: 320,
-      y: 60,
+      wires: [[`manager_0`]],
     });
   
     // Manager approval nodes
     managers.forEach((manager, index) => {
-      // Manager approval node
       workflow.push({
         id: `manager_${index}`,
         type: "function",
-        z: tabId, // Ensure this matches the tab ID
+        z: tabId,
         name: `${manager.name} Approval`,
         func: `msg.payload = {}; msg.payload.approval = Math.random() > 0.5 ? \"Approved\" : \"Rejected\";\nmsg.payload.manager = \"${manager.name}\";\nreturn msg;`,
         outputs: 1,
         x: 300,
         y: 120 + index * 80,
-        wires: [[`decision_${index}`]], // Connect to decision node
+        wires: [[`decision_${index}`]],
       });
-  
-      // Decision node
+      
       workflow.push({
         id: `decision_${index}`,
         type: "switch",
-        z: tabId, // Ensure this matches the tab ID
+        z: tabId,
         name: `Check ${manager.name} Decision`,
         property: "payload.approval",
         propertyType: "msg",
@@ -194,61 +162,58 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           { t: "eq", v: "Rejected", vt: "str" },
         ],
         outputs: 2,
-        x: 500,
-        y: 120 + index * 80,
+        x: 220,
+        y: 160 + index * 80,
         wires: [
-          ["postgres_update", "approval_notification"], // Approved → PostgreSQL + Email
-          ["postgres_update"], // Rejected → Only PostgreSQL
+          [index === managers.length - 1 ? "set_completed_status" : `manager_${index + 1}`],
+          ["reject_notification"],
         ],
       });
-    });
-  
-    // PostgreSQL node to insert status
-    workflow.push({
-      id: "postgres_update",
-      type: "postgresql",
-      z: tabId, // Ensure this matches the tab ID
-      name: "Insert Approval Status",
-      query: `INSERT INTO approval_requests (user_id, request_data, status, current_level, total_levels) 
-              VALUES (1, '${JSON.stringify({ workflowName, managers })}', '{{payload.approval}}', ${managers.length}, ${managers.length});`,
-      postgreSQLConfig: "7b9ec91590d534cc",
-      split: false,
-      rowsPerMsg: 1,
-      outputs: 1,
-      x: 700,
-      y: 180,
-      wires: [["set_completed_status"]], // Connect to set completed status node
     });
   
     // Set completed status node
     workflow.push({
       id: "set_completed_status",
       type: "function",
-      z: tabId, // Ensure this matches the tab ID
+      z: tabId,
       name: "Set status to completed",
       func: `msg.payload.status = \"Completed\";\nmsg.payload.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = \`Workflow \${msg.payload.request_id}\`;\nmsg.payload.html = \`<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\"><h2 style=\"color: #2c3e50;\">Workflow Request Update</h2><p style=\"font-size: 16px;\">Your request has been processed.</p><table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\"><tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td><td style=\"padding: 10px; border: 1px solid #ddd;\">\${msg.payload.request_id}</td></tr><tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td><td style=\"padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};\"><strong>\${msg.payload.status}</strong></td></tr></table><p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p></div>\`;\nreturn msg;`,
       outputs: 1,
-      x: 900,
+      x: 550,
       y: 180,
-      wires: [], // No further action needed after setting status
+      wires: [["approval_email"]],
     });
   
     // Approval email node
     workflow.push({
-      id: "approval_notification",
+      id: "approval_email",
       type: "e-mail",
-      z: tabId, // Ensure this matches the tab ID
+      z: tabId,
       name: "Send Approval Email",
       server: "sandbox.smtp.mailtrap.io",
       port: "2525",
-      username: "62753aa9883bbc", // Add your SMTP username
-      password: "a249d24a02ce4f", // Add your SMTP password
-      to: "dihiwo5319@easipro.com", // Recipient email
-      subject: "Workflow Approved",
-      body: "Your workflow request has been approved by {{payload.manager}}.",
-      x: 700,
+      to: userEmail,
+      subject: "Workflow Completed",
+      body: "{{payload.html}}",
+      x: 770,
+      y: 150,
+      wires: [],
+    });
+
+    //Reject notification email node
+    workflow.push({
+      id: "reject_notification",
+      type: "e-mail",
+      z: tabId,
+      name: "Send Rejection Email",
+      server: "sandbox.smtp.mailtrap.io",
+      port: "2525",
+      to: userEmail,
+      subject: "Workflow Rejected",
+      body: "Your workflow request has been rejected by {{payload.manager}}.",
+      x: 770,
       y: 300,
-      wires: [], // No further action needed after sending email
+      wires: [],
     });
   
     return workflow; // Return a plain JavaScript object
