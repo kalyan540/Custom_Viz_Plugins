@@ -121,7 +121,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   ) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
-
+  
     // Start node
     workflow.push({
       id: "inject_start",
@@ -135,7 +135,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 120,
       wires: [["manager_0"]], // Connect to the first manager approval node
     });
-
+  
     // PostgreSQL configuration node
     workflow.push({
       id: "7b9ec91590d534cc",
@@ -165,7 +165,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       x: 320,
       y: 60,
     });
-
+  
     // Manager approval nodes
     managers.forEach((manager, index) => {
       // Manager approval node
@@ -180,7 +180,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         y: 120 + index * 80,
         wires: [[`decision_${index}`]], // Connect to decision node
       });
-
+  
       // Decision node
       workflow.push({
         id: `decision_${index}`,
@@ -197,29 +197,29 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         x: 500,
         y: 120 + index * 80,
         wires: [
-          ["postgres_update"], // Success output → PostgreSQL node
-          ["reject_notification", "postgres_update"], // Rejected output → Email + PostgreSQL
+          ["postgres_update", "approval_notification"], // Approved → PostgreSQL + Email
+          ["postgres_update"], // Rejected → Only PostgreSQL
         ],
       });
     });
-
+  
     // PostgreSQL node to insert status
     workflow.push({
-        id: "postgres_update",
-        type: "postgresql",
-        z: tabId, // Ensure this matches the tab ID
-        name: "Insert Approval Status",
-        query: `INSERT INTO approval_requests (user_id, request_data, status, current_level, total_levels) 
-                VALUES (1, '${JSON.stringify({ workflowName, managers })}', '{{payload.approval}}', ${managers.length}, ${managers.length});`,
-        postgreSQLConfig: "7b9ec91590d534cc",
-        split: false,
-        rowsPerMsg: 1,
-        outputs: 1,
-        x: 700,
-        y: 180,
-        wires: [["set_completed_status"]], // Connect to set completed status node
-      });
-
+      id: "postgres_update",
+      type: "postgresql",
+      z: tabId, // Ensure this matches the tab ID
+      name: "Insert Approval Status",
+      query: `INSERT INTO approval_requests (user_id, request_data, status, current_level, total_levels) 
+              VALUES (1, '${JSON.stringify({ workflowName, managers })}', '{{payload.approval}}', ${managers.length}, ${managers.length});`,
+      postgreSQLConfig: "7b9ec91590d534cc",
+      split: false,
+      rowsPerMsg: 1,
+      outputs: 1,
+      x: 700,
+      y: 180,
+      wires: [["set_completed_status"]], // Connect to set completed status node
+    });
+  
     // Set completed status node
     workflow.push({
       id: "set_completed_status",
@@ -230,45 +230,27 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       outputs: 1,
       x: 900,
       y: 180,
-      wires: [["approval_email"]], // Connect to approval email node
+      wires: [], // No further action needed after setting status
     });
-
+  
     // Approval email node
-    // workflow.push({
-    //     id: "reject_notification",
-    //     type: "e-mail",
-    //     z: tabId, // Ensure this matches the tab ID
-    //     name: "dihiwo5319@easipro.com",
-    //     server: "sandbox.smtp.mailtrap.io",
-    //     port: "2525",
-    //     username: "62753aa9883bbc", // Add your SMTP username
-    //     password: "a249d24a02ce4f", // Add your SMTP password
-    //     to: "dihiwo5319@easipro.com", // Recipient email
-    //     subject: "Workflow Rejected",
-    //     body: "Your workflow request has been rejected by {{payload.manager}}.",
-    //     x: 700,
-    //     y: 300,
-    //     wires: [],
-    //   });
-
-    // Reject notification email node
     workflow.push({
       id: "approval_notification",
       type: "e-mail",
       z: tabId, // Ensure this matches the tab ID
-      name: "dihiwo5319@easipro.com",
+      name: "Send Approval Email",
       server: "sandbox.smtp.mailtrap.io",
       port: "2525",
       username: "62753aa9883bbc", // Add your SMTP username
       password: "a249d24a02ce4f", // Add your SMTP password
       to: "dihiwo5319@easipro.com", // Recipient email
-      subject: "Workflow Rejected",
+      subject: "Workflow Approved",
       body: "Your workflow request has been approved by {{payload.manager}}.",
       x: 700,
       y: 300,
-      wires: [],
+      wires: [], // No further action needed after sending email
     });
-
+  
     return workflow; // Return a plain JavaScript object
   };
 
