@@ -234,26 +234,26 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     });
 
     // Approval email node
-    workflow.push({
-        id: "approval_notification",
-        type: "e-mail",
-        z: tabId, // Ensure this matches the tab ID
-        name: "dihiwo5319@easipro.com",
-        server: "sandbox.smtp.mailtrap.io",
-        port: "2525",
-        username: "62753aa9883bbc", // Add your SMTP username
-        password: "a249d24a02ce4f", // Add your SMTP password
-        to: "dihiwo5319@easipro.com", // Recipient email
-        subject: "Workflow completed",
-        body: "Your workflow request has been approved by {{payload.manager}}.",
-        x: 700,
-        y: 300,
-        wires: [],
-    });
+    // workflow.push({
+    //     id: "reject_notification",
+    //     type: "e-mail",
+    //     z: tabId, // Ensure this matches the tab ID
+    //     name: "dihiwo5319@easipro.com",
+    //     server: "sandbox.smtp.mailtrap.io",
+    //     port: "2525",
+    //     username: "62753aa9883bbc", // Add your SMTP username
+    //     password: "a249d24a02ce4f", // Add your SMTP password
+    //     to: "dihiwo5319@easipro.com", // Recipient email
+    //     subject: "Workflow Rejected",
+    //     body: "Your workflow request has been rejected by {{payload.manager}}.",
+    //     x: 700,
+    //     y: 300,
+    //     wires: [],
+    //   });
 
     // Reject notification email node
     workflow.push({
-      id: "reject_notification",
+      id: "approval_notification",
       type: "e-mail",
       z: tabId, // Ensure this matches the tab ID
       name: "dihiwo5319@easipro.com",
@@ -263,7 +263,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       password: "a249d24a02ce4f", // Add your SMTP password
       to: "dihiwo5319@easipro.com", // Recipient email
       subject: "Workflow Rejected",
-      body: "Your workflow request has been rejected by {{payload.manager}}.",
+      body: "Your workflow request has been approved by {{payload.manager}}.",
       x: 700,
       y: 300,
       wires: [],
