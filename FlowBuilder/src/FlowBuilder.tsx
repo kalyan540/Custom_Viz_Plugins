@@ -186,41 +186,42 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
     // PostgreSQL Config Node
     workflow.push({
-      id: "7b9ec91590d534cc",
-      type: "postgreSQLConfig",
-      z: tabId,
-      name: "postgres",
-      host: "52.91.38.126", // Replace with your PostgreSQL host
-      hostFieldType: "str",
-      port: 5433, // Replace with your PostgreSQL port
-      portFieldType: "num",
-      database: "nodered_db", // Replace with your database name
-      databaseFieldType: "str",
-      ssl: "false",
-      sslFieldType: "bool",
-      applicationName: "",
-      applicationNameType: "str",
-      max: 10,
-      maxFieldType: "num",
-      idle: 1000,
-      idleFieldType: "num",
-      connectionTimeout: 10000,
-      connectionTimeoutFieldType: "num",
-      user: "nodered_user", // Replace with your PostgreSQL username
-      userFieldType: "str",
-      password: "nodered_password", // Replace with your PostgreSQL password
-      passwordFieldType: "str",
-      x: 320,
-      y: 60,
-    });
+        id: "7b9ec91590d534cc",
+        type: "postgreSQLConfig",
+        z: tabId,
+        name: "postgres",
+        host: "localhost", // Replace with your PostgreSQL host
+        hostFieldType: "str",
+        port: 5433, // Replace with your PostgreSQL port
+        portFieldType: "num",
+        database: "nodered_db", // Replace with your database name
+        databaseFieldType: "str",
+        ssl: "false",
+        sslFieldType: "bool",
+        applicationName: "",
+        applicationNameType: "str",
+        max: 10,
+        maxFieldType: "num",
+        idle: 1000,
+        idleFieldType: "num",
+        connectionTimeout: 10000,
+        connectionTimeoutFieldType: "num",
+        user: "nodered_user", // Replace with your PostgreSQL username
+        userFieldType: "str",
+        password: "nodered_password", // Replace with your PostgreSQL password
+        passwordFieldType: "str",
+        x: 320,
+        y: 60,
+      });
 
     // PostgreSQL Insert Node
     workflow.push({
       id: "postgres_insert",
       type: "postgresql",
       z: tabId,
-      name: "Insert into approvals",
-      query: "INSERT INTO public.approvals(id, request_id, manager, status, created_at) VALUES (6, 6, 'Dil6', 'Completed', now());",
+      name: "Insert into approval_request",
+      query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+      params: "[1, {\"workflowName\": \"" + workflowName + "\", \"managers\": " + JSON.stringify(managers) + "}, \"{{payload.approval}}\", 1, " + managers.length + "]",
       postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
