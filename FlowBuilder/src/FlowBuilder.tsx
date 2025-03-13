@@ -220,9 +220,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       id: "postgres_insert",
       type: "postgresql",
       z: tabId,
-      name: "Insert into approval_request",
+      name: "Insert into approval_requests",
       query: "INSERT INTO approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      params: "[1, {\"workflowName\": \"" + workflowName + "\", \"managers\": " + JSON.stringify(managers) + "}, \"{{payload.approval}}\", 1, " + managers.length + "]",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"managers\": " + JSON.stringify(managers) + "}, \"{{payload.approval}}\", 1, " + managers.length + "]",
       postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
