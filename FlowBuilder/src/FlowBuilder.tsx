@@ -190,7 +190,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         type: "postgreSQLConfig",
         z: tabId,
         name: "postgres",
-        host: "52.91.38.126", // Replace with your PostgreSQL host
+        host: "127.0.0.1", // Replace with your PostgreSQL host
         hostFieldType: "str",
         port: 5433, // Replace with your PostgreSQL port
         portFieldType: "num",
