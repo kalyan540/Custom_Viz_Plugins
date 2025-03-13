@@ -190,11 +190,11 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       type: "postgreSQLConfig",
       z: tabId,
       name: "postgres",
-      host: "52.91.38.126",  // 🔹 Use Public IP
+      host: "52.91.38.126", // Replace with your PostgreSQL host
       hostFieldType: "str",
-      port: 5433,  // 🔹 Use 5433 for intermediate PostgreSQL
+      port: 5433, // Replace with your PostgreSQL port
       portFieldType: "num",
-      database: "nodered_db", // 🔹 Use the intermediate PostgreSQL database
+      database: "nodered_db", // Replace with your database name
       databaseFieldType: "str",
       ssl: "false",
       sslFieldType: "bool",
@@ -206,27 +206,47 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       idleFieldType: "num",
       connectionTimeout: 10000,
       connectionTimeoutFieldType: "num",
-      user: "nodered_user",
+      user: "nodered_user", // Replace with your PostgreSQL username
       userFieldType: "str",
-      password: "nodered_password",
+      password: "nodered_password", // Replace with your PostgreSQL password
       passwordFieldType: "str",
       x: 320,
       y: 60,
     });
 
-    
     // PostgreSQL Insert Node
     workflow.push({
-        id: "postgres_insert",
-        type: "postgres",
-        z: tabId,
-        name: "Insert into approval_request",
-        postgresConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-        query: "INSERT INTO approval_requests (user_id, request_data, status, current_level, total_levels) VALUES ($1, $2, $3, $4, $5)",
-        params: "[1, {\"workflowName\": \"" + workflowName + "\", \"managers\": " + JSON.stringify(managers) + "}, \"{{payload.approval}}\", 1, " + managers.length + "]",
-        x: 770,
-        y: 180,
-        wires: [],
+      id: "postgres_insert",
+      type: "postgresql",
+      z: tabId,
+      name: "Insert into approvals",
+      query: "INSERT INTO public.approvals(id, request_id, manager, status, created_at) VALUES (6, 6, 'Dil6', 'Completed', now());",
+      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+      split: false,
+      rowsPerMsg: 1,
+      outputs: 1,
+      x: 770,
+      y: 180,
+      wires: [["debug_output"]],
+    });
+
+    // Debug node
+    workflow.push({
+      id: "debug_output",
+      type: "debug",
+      z: tabId,
+      name: "Debug Output",
+      active: true,
+      tosidebar: true,
+      console: false,
+      tostatus: false,
+      complete: "payload",
+      targetType: "msg",
+      statusVal: "",
+      statusType: "auto",
+      x: 950,
+      y: 180,
+      wires: [],
     });
 
     return workflow; // Return a plain JavaScript object
