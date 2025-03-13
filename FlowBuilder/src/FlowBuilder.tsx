@@ -157,8 +157,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       type: "postgresql",
       z: tabId,
       name: "Insert Data",
-      query: `INSERT INTO approval_requests (user_id, request_data, status) 
-              VALUES (1, '${JSON.stringify({ workflowName, userEmail })}', 'Pending');`,
+      query: `INSERT INTO approval_requests (user_id, request_data, status, current_level, total_levels) 
+        VALUES (1, '${JSON.stringify({ workflowName, managers })}', '${payload.approval}', ${managers.length}, ${managers.length});`,
+
       postgreSQLConfig: "postgres_config",
       split: false,
       rowsPerMsg: 1,
