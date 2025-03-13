@@ -113,16 +113,12 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     setManagers([...managers, manager]);
   };
 
-  const generateWorkflowJson = (
-    workflowName,
-    managers,
-    userEmail
-  ) => {
+  const generateWorkflowJson = (workflowName, userEmail) => {
     const workflow = [];
-    const tabId = "e0ba68613f04424c"; // Change to dynamic if needed
+    const tabId = "e0ba68613f04424c"; // Change if needed
     const requestId = new Date().getTime(); // Unique request ID
   
-    // Start node
+    // Start Node (Inject)
     workflow.push({
       id: "inject_start",
       type: "inject",
@@ -133,12 +129,12 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       payloadType: "json",
       x: 110,
       y: 120,
-      wires: [["manager_0"]],
+      wires: [["postgres_insert"]],
     });
   
     // PostgreSQL Configuration Node
     workflow.push({
-      id: "7b9ec91590d534cc",
+      id: "postgres_config",
       type: "postgreSQLConfig",
       z: tabId,
       name: "Postgres Config",
@@ -155,100 +151,34 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 60,
     });
   
-    // Manager approval nodes
-    managers.forEach((manager, index) => {
-      workflow.push({
-        id: manager_${index},
-        type: "function",
-        z: tabId,
-        name: ${manager.name} Approval,
-        func: msg.payload = {}; msg.payload.approval = Math.random() > 0.5 ? "Approved" : "Rejected"; msg.payload.manager = "${manager.name}"; return msg;,
-        outputs: 1,
-        x: 300,
-        y: 120 + index * 80,
-        wires: [[decision_${index}]],
-      });
-  
-      workflow.push({
-        id: decision_${index},
-        type: "switch",
-        z: tabId,
-        name: Check ${manager.name} Decision,
-        property: "payload.approval",
-        rules: [
-          { t: "eq", v: "Approved", vt: "str" },
-          { t: "eq", v: "Rejected", vt: "str" },
-        ],
-        outputs: 2,
-        x: 500,
-        y: 120 + index * 80,
-        wires: [
-          ["postgres_update"],
-          ["reject_notification", "postgres_update"],
-        ],
-      });
-    });
-  
-    // PostgreSQL Update Node
+    // PostgreSQL Insert Node
     workflow.push({
-        id: "postgres_update",
-        type: "postgresql",
-        z: tabId,
-        name: "Insert Approval Status",
-        query: `INSERT INTO approval_requests (user_id, request_data, status, current_level, total_levels) 
-                VALUES (1, '${JSON.stringify({ workflowName, managers })}', '{{payload.approval}}', ${managers.length}, ${managers.length});`,
-        postgreSQLConfig: "7b9ec91590d534cc",
-        split: false,
-        rowsPerMsg: 1,
-        outputs: 1,
-        x: 700,
-        y: 180,
-        wires: [["set_completed_status"]],
-      });
-      
-  
-    // Status Function Node
-    workflow.push({
-      id: "set_completed_status",
-      type: "function",
+      id: "postgres_insert",
+      type: "postgresql",
       z: tabId,
-      name: "Set status to completed",
-      func: msg.payload.status = "Completed"; msg.payload.request_id = msg.payload?.requestId || "UnknownID"; msg.topic = \Workflow \${msg.payload.request_id}\; return msg;,
+      name: "Insert Data",
+      query: `INSERT INTO approval_requests (user_id, request_data, status) 
+              VALUES (1, '${JSON.stringify({ workflowName, userEmail })}', 'Pending');`,
+      postgreSQLConfig: "postgres_config",
+      split: false,
+      rowsPerMsg: 1,
       outputs: 1,
-      x: 900,
-      y: 180,
-      wires: [["approval_email"]],
+      x: 500,
+      y: 120,
+      wires: [["debug_output"]],
     });
   
-    // Approval Email
+    // Debug Node
     workflow.push({
-      id: "approval_email",
-      type: "e-mail",
+      id: "debug_output",
+      type: "debug",
       z: tabId,
-      name: "Send Approval Email",
-      server: "sandbox.smtp.mailtrap.io",
-      port: "2525",
-      to: userEmail,
-      subject: "Workflow Completed",
-      body: "Your workflow has been approved.",
-      x: 1100,
-      y: 180,
-      wires: [],
-    });
-  
-    // Rejection Email
-    workflow.push({
-      id: "reject_notification",
-      type: "e-mail",
-      z: tabId,
-      name: "Send Rejection Email",
-      server: "sandbox.smtp.mailtrap.io",
-      port: "2525",
-      to: userEmail,
-      subject: "Workflow Rejected",
-      body: "Your workflow request has been rejected by {{payload.manager}}.",
+      name: "Debug Output",
+      active: true,
+      console: "true",
+      toStatus: "true",
       x: 700,
-      y: 300,
+      y: 120,
       wires: [],
     });
   
