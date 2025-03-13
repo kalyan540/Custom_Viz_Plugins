@@ -214,6 +214,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         y: 60,
       });
 
+      
     // PostgreSQL Insert Node
     workflow.push({
       id: "postgres_insert",
