@@ -1,4 +1,84 @@
-const generateWorkflowJson = (workflowName, candidateEmail, managerEmail, hrbpEmail) => {
+import React, { useEffect, createRef, useState } from 'react';
+import { styled } from '@superset-ui/core';
+import { FlowBuilderProps, FlowBuilderStylesProps } from './types';
+import { Popover } from 'antd';
+
+const Styles = styled.div<FlowBuilderStylesProps>`
+  background-color: ${({ theme }) => theme.colors.secondary.light2};
+  padding: ${({ theme }) => theme.gridUnit * 4}px;
+  border-radius: ${({ theme }) => theme.gridUnit * 2}px;
+  height: ${({ height }) => height}px;
+  width: ${({ width }) => width}px;
+
+  .form-group {
+    margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: ${({ theme }) => theme.gridUnit}px;
+    font-weight: bold;
+  }
+
+  input {
+    width: 100%;
+    padding: ${({ theme }) => theme.gridUnit * 2}px;
+    border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
+    border-radius: ${({ theme }) => theme.gridUnit}px;
+  }
+
+  button {
+    padding: ${({ theme }) => theme.gridUnit * 2}px ${({ theme }) => theme.gridUnit * 4}px;
+    background-color: ${({ theme }) => theme.colors.primary.base};
+    color: white;
+    border: none;
+    border-radius: ${({ theme }) => theme.gridUnit}px;
+    cursor: pointer;
+    margin-right: ${({ theme }) => theme.gridUnit * 2}px;
+  }
+
+  button:hover {
+    background-color: ${({ theme }) => theme.colors.primary.dark1};
+  }
+`;
+
+export default function FlowBuilder(props: FlowBuilderProps) {
+  const { height, width, apiEndpoint } = props;
+  const rootElem = createRef<HTMLDivElement>();
+
+  const [workflowName, setWorkflowName] = useState(`Workflow-${Math.floor(Math.random() * 1000)}`);
+  const [candidateEmail, setCandidateEmail] = useState('');
+  const [managerEmail, setManagerEmail] = useState('');
+  const [hrbpEmail, setHrbpEmail] = useState('');
+
+  const handleSubmit = async () => {
+    const workflowJson = generateWorkflowJson(workflowName, candidateEmail, managerEmail, hrbpEmail);
+    console.log('Workflow JSON:', workflowJson);
+
+    try {
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(workflowJson),
+      });
+
+      if (response.status === 204) {
+        console.log('Workflow created successfully!');
+        alert('Workflow created successfully!');
+      } else {
+        const result = await response.json();
+        console.log('API Response:', result);
+        alert('Workflow created successfully!');
+      }
+    } catch (error) {
+      console.error('Error submitting workflow:', error);
+      alert('Failed to create workflow. Please try again.');
+    }
+  };
+
+  const generateWorkflowJson = (workflowName, candidateEmail, managerEmail, hrbpEmail) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c";
   
@@ -172,3 +252,56 @@ const generateWorkflowJson = (workflowName, candidateEmail, managerEmail, hrbpEm
   
     return workflow;
   };
+  useEffect(() => {
+    const root = rootElem.current as HTMLElement;
+    console.log('Plugin element', root);
+  }, []);
+
+  return (
+    <Styles
+      ref={rootElem}
+      boldText={props.boldText}
+      headerFontSize={props.headerFontSize}
+      height={height}
+      width={width}
+    >
+      <div className="form-group">
+        <label>Workflow Name</label>
+        <input
+          type="text"
+          value={workflowName}
+          onChange={(e) => setWorkflowName(e.target.value)}
+          placeholder="Enter workflow name"
+        />
+      </div>
+      <div className="form-group">
+        <label>Candidate Email</label>
+        <input
+          type="text"
+          value={candidateEmail}
+          onChange={(e) => setCandidateEmail(e.target.value)}
+          placeholder="Enter candidate email"
+        />
+      </div>
+      <div className="form-group">
+        <label>Manager Email</label>
+        <input
+          type="text"
+          value={managerEmail}
+          onChange={(e) => setManagerEmail(e.target.value)}
+          placeholder="Enter manager email"
+        />
+      </div>
+      <div className="form-group">
+        <label>HRBP Email</label>
+        <input
+          type="text"
+          value={hrbpEmail}
+          onChange={(e) => setHrbpEmail(e.target.value)}
+          placeholder="Enter HRBP email"
+        />
+      </div>
+      <button onClick={handleSubmit}>Submit</button>
+    </Styles>
+  );
+}
