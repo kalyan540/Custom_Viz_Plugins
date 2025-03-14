@@ -116,22 +116,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         payloadType: "json",
         x: 110,
         y: 120,
-        wires: [["debug_inject", "candidate_node"]],
+        wires: [["candidate_node"]],
       });
-      
-      workflow.push({
-        id: "debug_inject",
-        type: "debug",
-        z: tabId,
-        name: "Debug Inject",
-        active: true,
-        tosidebar: true,
-        complete: "payload",
-        x: 300,
-        y: 120,
-        wires: [],
-      });
-
 
       workflow.push({
         id: "candidate_node",
@@ -142,25 +128,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         outputs: 1,
         x: 300,
         y: 180,
-        wires: [["debug_candidate", "check_form_completed"]],
+        wires: [["check_form_completed"]],
       });
-      
-
-    // Debug node after Candidate
-    workflow.push({
-        id: "debug_candidate",
-        type: "debug",
-        z: tabId,
-        name: "Debug Candidate",
-        active: true,
-        tosidebar: true,
-        complete: "payload",
-        x: 500,
-        y: 180,
-        wires: [],
-    });
-
-
+    
     workflow.push({
         id: "check_form_completed",
         type: "switch",
@@ -177,10 +147,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         y: 180,
         wires: [
           ["debug_approve", "postgres_insert_candidate_approve"],
-          ["debug_reject", "postgres_insert_candidate_reject"],
         ],
     });
-
 
     workflow.push({
         id: "debug_approve",
