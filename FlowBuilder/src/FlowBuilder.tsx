@@ -164,7 +164,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       outputs: 1,
       x: 700,
       y: 120,
-      wires: [],
+      wires: [["debug_output"]],
     });
 
     // Insert into PostgreSQL (Candidate Reject)
@@ -181,7 +181,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       outputs: 1,
       x: 700,
       y: 180,
-      wires: [],
+      wires: [["debug_output"]],
     });
 
     // Debug node
