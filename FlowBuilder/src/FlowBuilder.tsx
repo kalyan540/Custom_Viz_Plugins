@@ -101,20 +101,24 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 60, // Y position in the Node-RED editor
     });
 
-        // Start node
-        workflow.push({
+    workflow.push({
         id: "inject_start",
         type: "inject",
         z: tabId,
         name: "Start Request",
         props: [{ p: "payload" }],
-        payload: JSON.stringify({ requestId: 73, status: "Pending", candidate: candidateEmail }),
+        payload: JSON.stringify({ 
+          requestId: 123, 
+          status: "Pending", 
+          candidate: candidateEmail,
+          formCompleted: true // Add formCompleted property
+        }),
         payloadType: "json",
         x: 110,
         y: 120,
-        wires: [["debug_inject", "candidate_node"]], // Add debug node after inject
+        wires: [["debug_inject", "candidate_node"]],
       });
-
+      
       workflow.push({
         id: "debug_inject",
         type: "debug",
@@ -129,18 +133,18 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       });
 
 
-    // Candidate node
-    workflow.push({
+      workflow.push({
         id: "candidate_node",
         type: "function",
         z: tabId,
         name: "Candidate",
-        func: `msg.payload = {}; msg.payload.candidate = \"${candidateEmail}\";\nreturn msg;`,
+        func: `msg.payload.candidate = \"${candidateEmail}\";\nreturn msg;`, // Do not overwrite the payload
         outputs: 1,
         x: 300,
         y: 180,
-        wires: [["debug_candidate", "check_form_completed"]], // Add debug node after candidate
-    });
+        wires: [["debug_candidate", "check_form_completed"]],
+      });
+      
 
     // Debug node after Candidate
     workflow.push({
@@ -156,29 +160,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         wires: [],
     });
 
-    // Check if the form is completed
-    // workflow.push({
-    //   id: "check_form_completed",
-    //   type: "switch",
-    //   z: tabId,
-    //   name: "Check if the form completed",
-    //   property: "payload.formCompleted",
-    //   propertyType: "msg",
-    //   rules: [
-    //     { t: "eq", v: true, vt: "bool" },
-    //     { t: "eq", v: false, vt: "bool" },
-    //   ],
-    //   outputs: 2,
-    //   x: 500,
-    //   y: 120,
-    //   wires: [
-    //     ["email_manager_approve", "postgres_insert_candidate_approve","manager_node"],
-    //     ["postgres_insert_candidate_reject"],
-    //   ],
-    // });
 
-    // Check if the form is completed
-       workflow.push({
+    workflow.push({
         id: "check_form_completed",
         type: "switch",
         z: tabId,
@@ -186,34 +169,34 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         property: "payload.formCompleted",
         propertyType: "msg",
         rules: [
-        { t: "eq", v: true, vt: "bool" },
-        { t: "eq", v: false, vt: "bool" },
+          { t: "eq", v: true, vt: "bool" },
+          { t: "eq", v: false, vt: "bool" },
         ],
         outputs: 2,
         x: 700,
         y: 180,
         wires: [
-            ["debug_approve", "postgres_insert_candidate_approve"], // Add debug node for approve
-            ["debug_reject", "postgres_insert_candidate_reject"], // Add debug node for reject
-          ],
-        });
+          ["debug_approve", "postgres_insert_candidate_approve"],
+          ["debug_reject", "postgres_insert_candidate_reject"],
+        ],
+    });
 
 
-        // Debug node for Approve
-        workflow.push({
-            id: "debug_approve",
-            type: "debug",
-            z: tabId,
-            name: "Debug Approve",
-            active: true,
-            tosidebar: true,
-            complete: "payload",
-            x: 900,
-            y: 120,
-            wires: [],
-        });
+    workflow.push({
+        id: "debug_approve",
+        type: "debug",
+        z: tabId,
+        name: "Debug Approve",
+        active: true,
+        tosidebar: true,
+        complete: "payload",
+        x: 900,
+        y: 120,
+        wires: [],
+      });
 
 
+    
         // Debug node for Reject
         workflow.push({
             id: "debug_reject",
@@ -227,7 +210,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             y: 240,
             wires: [],
         });
-
 
 
     // Insert into PostgreSQL (Candidate Approve)
