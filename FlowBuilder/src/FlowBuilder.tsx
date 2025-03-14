@@ -134,7 +134,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     //   wires: [],
     // });
     workflow.push({
-        id: "approval_email",
+        id: "email_user",
         type: "e-mail",
         z: tabId,
         name: "dihiwo5319@easipro.com",
