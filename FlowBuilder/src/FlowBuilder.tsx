@@ -179,21 +179,21 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       outputs: 1,
       x: 800,
       y: 180,
-      wires: [["postgres_insert_candidate_approve"]],
+      wires: [["debug_before_insert"]],
     });
   
-    // Debug Approve Node
+    // Debug Before Insert Node
     workflow.push({
-      id: "debug_approve",
+      id: "debug_before_insert",
       type: "debug",
       z: tabId,
-      name: "Debug Approve",
+      name: "Debug Before Insert",
       active: true,
       tosidebar: true,
       complete: "payload",
-      x: 900,
+      x: 1000,
       y: 120,
-      wires: [],
+      wires: [["postgres_insert_candidate_approve"]],
     });
   
     // Insert into PostgreSQL (Candidate Approve) Node
