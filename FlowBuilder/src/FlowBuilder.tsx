@@ -82,25 +82,24 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     const workflow = [];
     const tabId = "e0ba68613f04424c";
 
-
     // PostgreSQL Config Node
     workflow.push({
-        id: "7b9ec91590d534cc",
-        type: "postgreSQLConfig",
-        z: tabId,
-        name: "PostgreSQL Config",
-        host: "52.91.38.126", // Replace with your PostgreSQL host
-        port: 5433, // Replace with your PostgreSQL port
-        database: "nodered_db", // Replace with your database name
-        ssl: false, // Set to true if using SSL
-        user: "nodered_user", // Replace with your PostgreSQL username
-        password: "nodered_password", // Replace with your PostgreSQL password
-        max: 10, // Maximum number of connections in the pool
-        idleTimeoutMillis: 1000, // Idle connection timeout
-        connectionTimeoutMillis: 10000, // Connection timeout
-        x: 320, // X position in the Node-RED editor
-        y: 60, // Y position in the Node-RED editor
-      });
+      id: "7b9ec91590d534cc",
+      type: "postgreSQLConfig",
+      z: tabId,
+      name: "PostgreSQL Config",
+      host: "52.91.38.126", // Replace with your PostgreSQL host
+      port: 5433, // Replace with your PostgreSQL port
+      database: "nodered_db", // Replace with your database name
+      ssl: false, // Set to true if using SSL
+      user: "nodered_user", // Replace with your PostgreSQL username
+      password: "nodered_password", // Replace with your PostgreSQL password
+      max: 10, // Maximum number of connections in the pool
+      idleTimeoutMillis: 1000, // Idle connection timeout
+      connectionTimeoutMillis: 10000, // Connection timeout
+      x: 320, // X position in the Node-RED editor
+      y: 60, // Y position in the Node-RED editor
+    });
 
     // Start node
     workflow.push({
@@ -117,37 +116,22 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     });
 
     // Email to User
-    // workflow.push({
-    //   id: "email_user",
-    //   type: "e-mail",
-    //   z: tabId,
-    //   name: "dihiwo5319@easipro.com",
-    //   server: "sandbox.smtp.mailtrap.io", // Replace with your SMTP server
-    //   port: 2525,
-    //   secure: false,
-    //   from: "noreply@example.com",
-    //   to: candidate.email,
-    //   subject: "Workflow Started",
-    //   text: "Your workflow has started.",
-    //   x: 300,
-    //   y: 60,
-    //   wires: [],
-    // });
     workflow.push({
-        id: "email_user",
-        type: "e-mail",
-        z: tabId,
-        name: "dihiwo5319@easipro.com",
-        server: "sandbox.smtp.mailtrap.io",
-        port: "2525",
-        username: "62753aa9883bbc",
-        password: "a249d24a02ce4f",
-        subject: "Workflow Completed",
-        body: "{{payload.html}}",
-        x: 770,
-        y: 150,
-        wires: [],
-      });
+      id: "email_user",
+      type: "email",
+      z: tabId,
+      name: "Email to User",
+      server: "smtp.example.com", // Replace with your SMTP server
+      port: 587,
+      secure: false,
+      from: "noreply@example.com",
+      to: candidate.email,
+      subject: "Workflow Started",
+      text: "Your workflow has started.",
+      x: 300,
+      y: 60,
+      wires: [],
+    });
 
     // Candidate node
     workflow.push({
@@ -209,7 +193,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       name: "Insert into PostgreSQL (Candidate Approve)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
       params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": " + JSON.stringify(candidate) + "}, \"Approved\", 1, 5]",
-      postgreSQLConfig: "7b9ec91590d534cc",
+      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
       outputs: 1,
@@ -226,7 +210,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       name: "Insert into PostgreSQL (Candidate Reject)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
       params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": " + JSON.stringify(candidate) + "}, \"Rejected\", 1, 5]",
-      postgreSQLConfig: "7b9ec91590d534cc",
+      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
       outputs: 1,
@@ -295,7 +279,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       name: "Insert into PostgreSQL (Manager Approve)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
       params: "[2, {\"workflowName\": \"" + workflowName + "\", \"manager\": " + JSON.stringify(manager) + "}, \"Approved\", 2, 5]",
-      postgreSQLConfig: "7b9ec91590d534cc",
+      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
       outputs: 1,
@@ -312,7 +296,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       name: "Insert into PostgreSQL (Manager Reject)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
       params: "[2, {\"workflowName\": \"" + workflowName + "\", \"manager\": " + JSON.stringify(manager) + "}, \"Rejected\", 2, 5]",
-      postgreSQLConfig: "7b9ec91590d534cc",
+      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
       outputs: 1,
@@ -381,7 +365,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       name: "Insert into PostgreSQL (HRBP Approve)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
       params: "[2, {\"workflowName\": \"" + workflowName + "\", \"hrbp\": " + JSON.stringify(hrbp) + "}, \"Approved\", 3, 5]",
-      postgreSQLConfig: "7b9ec91590d534cc",
+      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
       outputs: 1,
@@ -398,7 +382,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       name: "Insert into PostgreSQL (HRBP Reject)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
       params: "[2, {\"workflowName\": \"" + workflowName + "\", \"hrbp\": " + JSON.stringify(hrbp) + "}, \"Rejected\", 3, 5]",
-      postgreSQLConfig: "7b9ec91590d534cc",
+      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
       outputs: 1,
@@ -467,7 +451,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       name: "Insert into PostgreSQL (Candidate Signature Approve)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
       params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": " + JSON.stringify(candidate) + "}, \"Approved\", 4, 5]",
-      postgreSQLConfig: "7b9ec91590d534cc",
+      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
       outputs: 1,
@@ -477,193 +461,219 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     });
 
     // Insert into PostgreSQL (Candidate Signature Reject)
-    // Insert into PostgreSQL (Candidate Signature Reject)
     workflow.push({
-    id: "postgres_insert_candidate_signature_reject",
-    type: "postgresql",
-    z: tabId,
-    name: "Insert into PostgreSQL (Candidate Signature Reject)",
-    query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-    params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": " + JSON.stringify(candidate) + "}, \"Rejected\", 4, 5]",
-    postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-    split: false,
-    rowsPerMsg: 1,
-    outputs: 1,
-    x: 2500,
-    y: 180,
-    wires: [], // No further connections after this node
-  });
+      id: "postgres_insert_candidate_signature_reject",
+      type: "postgresql",
+      z: tabId,
+      name: "Insert into PostgreSQL (Candidate Signature Reject)",
+      query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": " + JSON.stringify(candidate) + "}, \"Rejected\", 4, 5]",
+      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+      split: false,
+      rowsPerMsg: 1,
+      outputs: 1,
+      x: 2500,
+      y: 180,
+      wires: [],
+    });
 
-      // Manager Signature node
-      workflow.push({
-        id: "manager_signature_node",
-        type: "function",
-        z: tabId,
-        name: "Manager Signature",
-        func: `msg.payload = {}; msg.payload.manager = \"${manager.name}\";\nreturn msg;`,
-        outputs: 1,
-        x: 2700,
-        y: 120,
-        wires: [["check_manager_signature"]],
-      });
-  
-      // Check Manager Signature
-      workflow.push({
-        id: "check_manager_signature",
-        type: "switch",
-        z: tabId,
-        name: "Check Manager Signature",
-        property: "payload.approval",
-        propertyType: "msg",
-        rules: [
-          { t: "eq", v: "Approved", vt: "str" },
-          { t: "eq", v: "Rejected", vt: "str" },
-        ],
-        outputs: 2,
-        x: 2900,
-        y: 120,
-        wires: [
-          ["postgres_insert_manager_signature_approve"],
-          ["postgres_insert_manager_signature_reject"],
-        ],
-      });
-  
-      // Insert into PostgreSQL (Manager Signature Approve)
-      workflow.push({
-        id: "postgres_insert_manager_signature_approve",
-        type: "postgresql",
-        z: tabId,
-        name: "Insert into PostgreSQL (Manager Signature Approve)",
-        query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-        params: "[2, {\"workflowName\": \"" + workflowName + "\", \"manager\": " + JSON.stringify(manager) + "}, \"Approved\", 5, 5]",
-        postgreSQLConfig: "7b9ec91590d534cc",
-        split: false,
-        rowsPerMsg: 1,
-        outputs: 1,
-        x: 3100,
-        y: 120,
-        wires: [["set_status_completed"]],
-      });
-  
-      // Insert into PostgreSQL (Manager Signature Reject)
-      workflow.push({
-        id: "postgres_insert_manager_signature_reject",
-        type: "postgresql",
-        z: tabId,
-        name: "Insert into PostgreSQL (Manager Signature Reject)",
-        query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-        params: "[2, {\"workflowName\": \"" + workflowName + "\", \"manager\": " + JSON.stringify(manager) + "}, \"Rejected\", 5, 5]",
-        postgreSQLConfig: "7b9ec91590d534cc",
-        split: false,
-        rowsPerMsg: 1,
-        outputs: 1,
-        x: 3100,
-        y: 180,
-        wires: [],
-      });
-  
-      // Set Status Completed
-      workflow.push({
-        id: "set_status_completed",
-        type: "function",
-        z: tabId,
-        name: "Set Status Completed",
-        func: `msg.payload.status = \"Completed\";\nmsg.payload.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = \`Workflow \${msg.payload.request_id}\`;\nreturn msg;`,
-        outputs: 1,
-        x: 3300,
-        y: 120,
-        wires: [["postgres_insert_final"]],
-      });
-  
-      // Insert into PostgreSQL (Final)
-      workflow.push({
-        id: "postgres_insert_final",
-        type: "postgresql",
-        z: tabId,
-        name: "Insert into PostgreSQL (Final)",
-        query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-        params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": " + JSON.stringify(candidate) + ", \"manager\": " + JSON.stringify(manager) + ", \"hrbp\": " + JSON.stringify(hrbp) + "}, \"Completed\", 5, 5]",
-        postgreSQLConfig: "7b9ec91590d534cc",
-        split: false,
-        rowsPerMsg: 1,
-        outputs: 1,
-        x: 3500,
-        y: 120,
-        wires: [["debug_output"]],
-      });
-  
-      // Debug node
-      workflow.push({
-        id: "debug_output",
-        type: "debug",
-        z: tabId,
-        name: "Debug Output",
-        active: true,
-        tosidebar: true,
-        console: false,
-        tostatus: false,
-        complete: "payload",
-        targetType: "msg",
-        statusVal: "",
-        statusType: "auto",
-        x: 3700,
-        y: 120,
-        wires: [],
-      });
-  
-      return workflow;
-    };
-  
-    useEffect(() => {
-      const root = rootElem.current as HTMLElement;
-      console.log('Plugin element', root);
-    }, []);
-  
-    return (
-      <Styles
-        ref={rootElem}
-        boldText={props.boldText}
-        headerFontSize={props.headerFontSize}
-        height={height}
-        width={width}
-      >
-        <div className="form-group">
-          <label>Workflow Name</label>
-          <input
-            type="text"
-            value={workflowName}
-            onChange={(e) => setWorkflowName(e.target.value)}
-            placeholder="Enter workflow name"
-          />
-        </div>
-        <div className="form-group">
-          <label>Candidate Email</label>
-          <input
-            type="text"
-            value={candidate.email}
-            onChange={(e) => setCandidate({ ...candidate, email: e.target.value })}
-            placeholder="Enter candidate email"
-          />
-        </div>
-        <div className="form-group">
-          <label>Manager Email</label>
-          <input
-            type="text"
-            value={manager.email}
-            onChange={(e) => setManager({ ...manager, email: e.target.value })}
-            placeholder="Enter manager email"
-          />
-        </div>
-        <div className="form-group">
-          <label>HRBP Email</label>
-          <input
-            type="text"
-            value={hrbp.email}
-            onChange={(e) => setHrbp({ ...hrbp, email: e.target.value })}
-            placeholder="Enter HRBP email"
-          />
-        </div>
-        <button onClick={handleSubmit}>Submit</button>
-      </Styles>
-    );
-  }
+    // Manager Signature node
+    workflow.push({
+      id: "manager_signature_node",
+      type: "function",
+      z: tabId,
+      name: "Manager Signature",
+      func: `msg.payload = {}; msg.payload.manager = \"${manager.name}\";\nreturn msg;`,
+      outputs: 1,
+      x: 2700,
+      y: 120,
+      wires: [["check_manager_signature"]],
+    });
+
+    // Check Manager Signature
+    workflow.push({
+      id: "check_manager_signature",
+      type: "switch",
+      z: tabId,
+      name: "Check Manager Signature",
+      property: "payload.approval",
+      propertyType: "msg",
+      rules: [
+        { t: "eq", v: "Approved", vt: "str" },
+        { t: "eq", v: "Rejected", vt: "str" },
+      ],
+      outputs: 2,
+      x: 2900,
+      y: 120,
+      wires: [
+        ["postgres_insert_manager_signature_approve"],
+        ["postgres_insert_manager_signature_reject"],
+      ],
+    });
+
+    // Insert into PostgreSQL (Manager Signature Approve)
+    workflow.push({
+      id: "postgres_insert_manager_signature_approve",
+      type: "postgresql",
+      z: tabId,
+      name: "Insert into PostgreSQL (Manager Signature Approve)",
+      query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"manager\": " + JSON.stringify(manager) + "}, \"Approved\", 5, 5]",
+      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+      split: false,
+      rowsPerMsg: 1,
+      outputs: 1,
+      x: 3100,
+      y: 120,
+      wires: [["set_status_completed"]],
+    });
+
+    // Insert into PostgreSQL (Manager Signature Reject)
+    workflow.push({
+      id: "postgres_insert_manager_signature_reject",
+      type: "postgresql",
+      z: tabId,
+      name: "Insert into PostgreSQL (Manager Signature Reject)",
+      query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"manager\": " + JSON.stringify(manager) + "}, \"Rejected\", 5, 5]",
+      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+      split: false,
+      rowsPerMsg: 1,
+      outputs: 1,
+      x: 3100,
+      y: 180,
+      wires: [],
+    });
+
+    // Set Status Completed
+    workflow.push({
+      id: "set_status_completed",
+      type: "function",
+      z: tabId,
+      name: "Set Status Completed",
+      func: `msg.payload.status = \"Completed\";\nmsg.payload.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = \`Workflow \${msg.payload.request_id}\`;\nreturn msg;`,
+      outputs: 1,
+      x: 3300,
+      y: 120,
+      wires: [["postgres_insert_final"]],
+    });
+
+    // Insert into PostgreSQL (Final)
+    workflow.push({
+      id: "postgres_insert_final",
+      type: "postgresql",
+      z: tabId,
+      name: "Insert into PostgreSQL (Final)",
+      query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": " + JSON.stringify(candidate) + ", \"manager\": " + JSON.stringify(manager) + ", \"hrbp\": " + JSON.stringify(hrbp) + "}, \"Completed\", 5, 5]",
+      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+      split: false,
+      rowsPerMsg: 1,
+      outputs: 1,
+      x: 3500,
+      y: 120,
+      wires: [["debug_output"]],
+    });
+
+    // Debug node
+    workflow.push({
+      id: "debug_output",
+      type: "debug",
+      z: tabId,
+      name: "Debug Output",
+      active: true,
+      tosidebar: true,
+      console: false,
+      tostatus: false,
+      complete: "payload",
+      targetType: "msg",
+      statusVal: "",
+      statusType: "auto",
+      x: 3700,
+      y: 120,
+      wires: [],
+    });
+
+    return workflow;
+  };
+
+  useEffect(() => {
+    const root = rootElem.current as HTMLElement;
+    console.log('Plugin element', root);
+  }, []);
+
+  return (
+    <Styles
+      ref={rootElem}
+      boldText={props.boldText}
+      headerFontSize={props.headerFontSize}
+      height={height}
+      width={width}
+    >
+      <div className="form-group">
+        <label>Workflow Name</label>
+        <input
+          type="text"
+          value={workflowName}
+          onChange={(e) => setWorkflowName(e.target.value)}
+          placeholder="Enter workflow name"
+        />
+      </div>
+      <div className="form-group">
+        <label>Candidate Name</label>
+        <input
+          type="text"
+          value={candidate.name}
+          onChange={(e) => setCandidate({ ...candidate, name: e.target.value })}
+          placeholder="Enter candidate name"
+        />
+      </div>
+      <div className="form-group">
+        <label>Candidate Email</label>
+        <input
+          type="text"
+          value={candidate.email}
+          onChange={(e) => setCandidate({ ...candidate, email: e.target.value })}
+          placeholder="Enter candidate email"
+        />
+      </div>
+      <div className="form-group">
+        <label>Manager Name</label>
+        <input
+          type="text"
+          value={manager.name}
+          onChange={(e) => setManager({ ...manager, name: e.target.value })}
+          placeholder="Enter manager name"
+        />
+      </div>
+      <div className="form-group">
+        <label>Manager Email</label>
+        <input
+          type="text"
+          value={manager.email}
+          onChange={(e) => setManager({ ...manager, email: e.target.value })}
+          placeholder="Enter manager email"
+        />
+      </div>
+      <div className="form-group">
+        <label>HRBP Name</label>
+        <input
+          type="text"
+          value={hrbp.name}
+          onChange={(e) => setHrbp({ ...hrbp, name: e.target.value })}
+          placeholder="Enter HRBP name"
+        />
+      </div>
+      <div className="form-group">
+        <label>HRBP Email</label>
+        <input
+          type="text"
+          value={hrbp.email}
+          onChange={(e) => setHrbp({ ...hrbp, email: e.target.value })}
+          placeholder="Enter HRBP email"
+        />
+      </div>
+      <button onClick={handleSubmit}>Submit</button>
+    </Styles>
+  );
+}
