@@ -126,7 +126,13 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       type: "function",
       z: tabId,
       name: "Candidate",
-      func: `msg.payload.candidate = \"${candidateEmail}\";\nreturn msg;`,
+      func: `
+        // Add workflowName and candidateEmail to the msg object
+        msg.workflowName = "${workflowName}";
+        msg.candidateEmail = "${candidateEmail}";
+        msg.payload.candidate = "${candidateEmail}";
+        return msg;
+      `,
       outputs: 1,
       x: 300,
       y: 180,
@@ -163,7 +169,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         // Prepare the parameters for the PostgreSQL query
         msg.params = [
           2, // user_id
-          JSON.stringify({ workflowName: workflowName, candidate: candidateEmail }), // request_data
+          JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
           "Approved", // status
           1, // current_level
           5 // total_levels
