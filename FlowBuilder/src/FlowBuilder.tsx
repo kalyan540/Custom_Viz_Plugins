@@ -1,7 +1,7 @@
 import React, { useEffect, createRef, useState } from 'react';
 import { styled } from '@superset-ui/core';
 import { FlowBuilderProps, FlowBuilderStylesProps } from './types';
-import { Popover } from 'antd'; // Assuming you're using Ant Design for the popover
+import { Popover } from 'antd';
 
 const Styles = styled.div<FlowBuilderStylesProps>`
   background-color: ${({ theme }) => theme.colors.secondary.light2};
@@ -28,8 +28,7 @@ const Styles = styled.div<FlowBuilderStylesProps>`
   }
 
   button {
-    padding: ${({ theme }) => theme.gridUnit * 2}px ${({ theme }) =>
-  theme.gridUnit * 4}px;
+    padding: ${({ theme }) => theme.gridUnit * 2}px ${({ theme }) => theme.gridUnit * 4}px;
     background-color: ${({ theme }) => theme.colors.primary.base};
     color: white;
     border: none;
@@ -44,8 +43,8 @@ const Styles = styled.div<FlowBuilderStylesProps>`
 
   .manager-list {
     margin-top: ${({ theme }) => theme.gridUnit * 3}px;
-    max-height: 75px; /* Set a max height for the scrollable area */
-    overflow-y: auto; /* Enable vertical scrolling */
+    max-height: 75px;
+    overflow-y: auto;
     border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
     border-radius: ${({ theme }) => theme.gridUnit}px;
     padding: ${({ theme }) => theme.gridUnit * 2}px;
@@ -66,23 +65,13 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const { height, width, apiEndpoint } = props;
   const rootElem = createRef<HTMLDivElement>();
 
-  // State for form inputs
-  const [workflowName, setWorkflowName] = useState(
-    `Workflow-${Math.floor(Math.random() * 1000)}`, // Auto-generate workflow name
-  );
-  const [managers, setManagers] = useState<{ name: string; email: string }[]>(
-    [],
-  );
-  const [currentUserEmail, setCurrentUserEmail] = useState(
-    'user@example.com', // Replace with dynamic value if available
-  );
+  const [workflowName, setWorkflowName] = useState(`Workflow-${Math.floor(Math.random() * 1000)}`);
+  const [candidate, setCandidate] = useState({ name: '', email: '' });
+  const [manager, setManager] = useState({ name: '', email: '' });
+  const [hrbp, setHrbp] = useState({ name: '', email: '' });
 
-  // Popover visibility state
-  const [popoverVisible, setPopoverVisible] = useState(false);
-
-  // Handle form submission
   const handleSubmit = async () => {
-    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail);
+    const workflowJson = generateWorkflowJson(workflowName, candidate, manager, hrbp);
     console.log('Workflow JSON:', workflowJson);
 
     try {
@@ -98,7 +87,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         console.log('Workflow created successfully!');
         alert('Workflow created successfully!');
       } else {
-        const result = await response.json(); // Handle other success responses (if any)
+        const result = await response.json();
         console.log('API Response:', result);
         alert('Workflow created successfully!');
       }
@@ -108,19 +97,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     }
   };
 
-  // Add a manager to the list
-  const addManager = (manager: { name: string; email: string }) => {
-    setManagers([...managers, manager]);
-  };
-
-  // Generate JSON for Node-Red
-  const generateWorkflowJson = (
-    workflowName: string,
-    managers: { name: string; email: string }[],
-    userEmail: string,
-  ) => {
+  const generateWorkflowJson = (workflowName, candidate, manager, hrbp) => {
     const workflow = [];
-    const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
+    const tabId = "e0ba68613f04424c";
 
     // Start node
     workflow.push({
@@ -129,49 +108,79 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       z: tabId,
       name: "Start Request",
       props: [{ p: "payload" }],
-      payload: JSON.stringify({ requestId: 123, status: "Pending", userEmail }),
+      payload: JSON.stringify({ requestId: 123, status: "Pending", candidate: candidate.email }),
       payloadType: "json",
       x: 110,
       y: 120,
-      wires: [[`manager_0`]],
+      wires: [["check_form_completed"]],
     });
 
-    // Manager approval nodes
-    managers.forEach((manager, index) => {
-      workflow.push({
-        id: `manager_${index}`,
-        type: "function",
-        z: tabId,
-        name: `${manager.name} Approval`,
-        func: `msg.payload = {}; msg.payload.approval = Math.random() > 0.5 ? \"Approved\" : \"Rejected\";\nmsg.payload.manager = \"${manager.name}\";\nreturn msg;`,
-        outputs: 1,
-        x: 300,
-        y: 120 + index * 80,
-        wires: [[`decision_${index}`]],
-      });
-
-      workflow.push({
-        id: `decision_${index}`,
-        type: "switch",
-        z: tabId,
-        name: `Check ${manager.name} Decision`,
-        property: "payload.approval",
-        propertyType: "msg",
-        rules: [
-          { t: "eq", v: "Approved", vt: "str" },
-          { t: "eq", v: "Rejected", vt: "str" },
-        ],
-        outputs: 2,
-        x: 220,
-        y: 160 + index * 80,
-        wires: [
-          [index === managers.length - 1 ? "set_completed_status" : `manager_${index + 1}`],
-          ["reject_notification"],
-        ],
-      });
+    // Check if the form is completed
+    workflow.push({
+      id: "check_form_completed",
+      type: "function",
+      z: tabId,
+      name: "Check if the form completed",
+      func: `msg.payload = {}; msg.payload.formCompleted = true;\nreturn msg;`,
+      outputs: 1,
+      x: 300,
+      y: 120,
+      wires: [["manager_decision"]],
     });
 
-    // Set completed status node
+    // Manager decision
+    workflow.push({
+      id: "manager_decision",
+      type: "function",
+      z: tabId,
+      name: "Check Manager Decision",
+      func: `msg.payload = {}; msg.payload.approval = Math.random() > 0.5 ? \"Approved\" : \"Rejected\";\nmsg.payload.manager = \"${manager.name}\";\nreturn msg;`,
+      outputs: 1,
+      x: 500,
+      y: 120,
+      wires: [["hrbp_decision"]],
+    });
+
+    // HRBP decision
+    workflow.push({
+      id: "hrbp_decision",
+      type: "function",
+      z: tabId,
+      name: "Check HRBP Decision",
+      func: `msg.payload = {}; msg.payload.approval = Math.random() > 0.5 ? \"Approved\" : \"Rejected\";\nmsg.payload.hrbp = \"${hrbp.name}\";\nreturn msg;`,
+      outputs: 1,
+      x: 700,
+      y: 120,
+      wires: [["candidate_decision"]],
+    });
+
+    // Candidate decision
+    workflow.push({
+      id: "candidate_decision",
+      type: "function",
+      z: tabId,
+      name: "Check Candidate Decision",
+      func: `msg.payload = {}; msg.payload.approval = Math.random() > 0.5 ? \"Approved\" : \"Rejected\";\nmsg.payload.candidate = \"${candidate.name}\";\nreturn msg;`,
+      outputs: 1,
+      x: 900,
+      y: 120,
+      wires: [["manager_final_decision"]],
+    });
+
+    // Manager final decision
+    workflow.push({
+      id: "manager_final_decision",
+      type: "function",
+      z: tabId,
+      name: "Check Manager Final Decision",
+      func: `msg.payload = {}; msg.payload.approval = Math.random() > 0.5 ? \"Approved\" : \"Rejected\";\nmsg.payload.manager = \"${manager.name}\";\nreturn msg;`,
+      outputs: 1,
+      x: 1100,
+      y: 120,
+      wires: [["set_completed_status"]],
+    });
+
+    // Set completed status
     workflow.push({
       id: "set_completed_status",
       type: "function",
@@ -179,41 +188,40 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       name: "Set status to completed",
       func: `msg.payload.status = \"Completed\";\nmsg.payload.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = \`Workflow \${msg.payload.request_id}\`;\nreturn msg;`,
       outputs: 1,
-      x: 550,
-      y: 180,
-      wires: [["postgres_insert"]], // Connect to PostgreSQL insert node
+      x: 1300,
+      y: 120,
+      wires: [["postgres_insert"]],
     });
 
     // PostgreSQL Config Node
     workflow.push({
-        id: "7b9ec91590d534cc",
-        type: "postgreSQLConfig",
-        z: tabId,
-        name: "postgres",
-        host: "127.0.0.1", // Replace with your PostgreSQL host
-        hostFieldType: "str",
-        port: 5433, // Replace with your PostgreSQL port
-        portFieldType: "num",
-        database: "nodered_db", // Replace with your database name
-        databaseFieldType: "str",
-        ssl: "false",
-        sslFieldType: "bool",
-        applicationName: "",
-        applicationNameType: "str",
-        max: 10,
-        maxFieldType: "num",
-        idle: 1000,
-        idleFieldType: "num",
-        connectionTimeout: 10000,
-        connectionTimeoutFieldType: "num",
-        user: "nodered_user", // Replace with your PostgreSQL username
-        userFieldType: "str",
-        password: "nodered_password", // Replace with your PostgreSQL password
-        passwordFieldType: "str",
-        x: 320,
-        y: 60,
-      });
-
+      id: "7b9ec91590d534cc",
+      type: "postgreSQLConfig",
+      z: tabId,
+      name: "postgres",
+      host: "52.91.38.126", // Replace with your PostgreSQL host
+      hostFieldType: "str",
+      port: 5433, // Replace with your PostgreSQL port
+      portFieldType: "num",
+      database: "nodered_db", // Replace with your database name
+      databaseFieldType: "str",
+      ssl: "false",
+      sslFieldType: "bool",
+      applicationName: "",
+      applicationNameType: "str",
+      max: 10,
+      maxFieldType: "num",
+      idle: 1000,
+      idleFieldType: "num",
+      connectionTimeout: 10000,
+      connectionTimeoutFieldType: "num",
+      user: "nodered_user", // Replace with your PostgreSQL username
+      userFieldType: "str",
+      password: "nodered_password", // Replace with your PostgreSQL password
+      passwordFieldType: "str",
+      x: 320,
+      y: 60,
+    });
 
     // PostgreSQL Insert Node
     workflow.push({
@@ -222,13 +230,13 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       z: tabId,
       name: "Insert into approval_requests",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"managers\": " + JSON.stringify(managers) + "}, \"{{payload.approval}}\", 1, " + managers.length + "]",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": " + JSON.stringify(candidate) + ", \"manager\": " + JSON.stringify(manager) + ", \"hrbp\": " + JSON.stringify(hrbp) + "}, \"{{payload.approval}}\", 1, 5]",
       postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
       outputs: 1,
-      x: 770,
-      y: 180,
+      x: 1500,
+      y: 120,
       wires: [["debug_output"]],
     });
 
@@ -246,44 +254,13 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       targetType: "msg",
       statusVal: "",
       statusType: "auto",
-      x: 950,
-      y: 180,
+      x: 1700,
+      y: 120,
       wires: [],
     });
 
-    return workflow; // Return a plain JavaScript object
+    return workflow;
   };
-
-  // Popover content for selecting a manager
-  const managerPopoverContent = (
-    <div>
-      <input
-        type="text"
-        placeholder="Search manager..."
-        style={{ marginBottom: '8px' }}
-      />
-      <div>
-        <div
-          style={{ padding: '8px', cursor: 'pointer' }}
-          onClick={() => {
-            addManager({ name: 'John Doe', email: 'john.doe@example.com' });
-            setPopoverVisible(false);
-          }}
-        >
-          John Doe (john.doe@example.com)
-        </div>
-        <div
-          style={{ padding: '8px', cursor: 'pointer' }}
-          onClick={() => {
-            addManager({ name: 'Jane Smith', email: 'jane.smith@example.com' });
-            setPopoverVisible(false);
-          }}
-        >
-          Jane Smith (jane.smith@example.com)
-        </div>
-      </div>
-    </div>
-  );
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -308,39 +285,31 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         />
       </div>
       <div className="form-group">
-        <label>Current User Email</label>
+        <label>Candidate Email</label>
         <input
           type="text"
-          value={currentUserEmail}
-          onChange={(e) => setCurrentUserEmail(e.target.value)}
-          placeholder="Enter your email"
+          value={candidate.email}
+          onChange={(e) => setCandidate({ ...candidate, email: e.target.value })}
+          placeholder="Enter candidate email"
         />
       </div>
-      <div className="manager-list">
-        {managers.map((manager, index) => (
-          <div key={index} className="manager-item">
-            <span>
-              {manager.name} ({manager.email})
-            </span>
-            <button
-              onClick={() =>
-                setManagers(managers.filter((_, i) => i !== index))
-              }
-            >
-              Remove
-            </button>
-          </div>
-        ))}
+      <div className="form-group">
+        <label>Manager Email</label>
+        <input
+          type="text"
+          value={manager.email}
+          onChange={(e) => setManager({ ...manager, email: e.target.value })}
+          placeholder="Enter manager email"
+        />
       </div>
       <div className="form-group">
-        <Popover
-          content={managerPopoverContent}
-          trigger="click"
-          visible={popoverVisible}
-          onVisibleChange={(visible) => setPopoverVisible(visible)}
-        >
-          <button>Add Manager/Approver</button>
-        </Popover>
+        <label>HRBP Email</label>
+        <input
+          type="text"
+          value={hrbp.email}
+          onChange={(e) => setHrbp({ ...hrbp, email: e.target.value })}
+          placeholder="Enter HRBP email"
+        />
       </div>
       <button onClick={handleSubmit}>Submit</button>
     </Styles>
