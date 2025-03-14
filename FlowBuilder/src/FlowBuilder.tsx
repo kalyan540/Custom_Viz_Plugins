@@ -162,7 +162,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       x: 500,
       y: 120,
       wires: [
-        ["email_manager_approve", "postgres_insert_candidate_approve"],
+        ["email_manager_approve", "postgres_insert_candidate_approve","manager_node"],
         ["postgres_insert_candidate_reject"],
       ],
     });
@@ -199,7 +199,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       outputs: 1,
       x: 700,
       y: 120,
-      wires: [["manager_node"]],
+      wires: [],
     });
 
     // Insert into PostgreSQL (Candidate Reject)
@@ -248,7 +248,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       x: 1100,
       y: 120,
       wires: [
-        ["email_hrbp_approve", "postgres_insert_manager_approve"],
+        ["email_hrbp_approve", "postgres_insert_manager_approve","hrbp_node"],
         ["postgres_insert_manager_reject"],
       ],
     });
@@ -285,7 +285,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       outputs: 1,
       x: 1300,
       y: 120,
-      wires: [["hrbp_node"]],
+      wires: [],
     });
 
     // Insert into PostgreSQL (Manager Reject)
@@ -334,7 +334,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       x: 1700,
       y: 120,
       wires: [
-        ["email_manager_hrbp_approve", "postgres_insert_hrbp_approve"],
+        ["email_manager_hrbp_approve", "postgres_insert_hrbp_approve","candidate_signature_node"],
         ["postgres_insert_hrbp_reject"],
       ],
     });
@@ -371,7 +371,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       outputs: 1,
       x: 1900,
       y: 120,
-      wires: [["candidate_signature_node"]],
+      wires: [],
     });
 
     // Insert into PostgreSQL (HRBP Reject)
@@ -420,7 +420,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       x: 2300,
       y: 120,
       wires: [
-        ["email_manager_candidate_approve", "postgres_insert_candidate_signature_approve"],
+        ["email_manager_candidate_approve", "postgres_insert_candidate_signature_approve","manager_signature_node"],
         ["postgres_insert_candidate_signature_reject"],
       ],
     });
@@ -457,7 +457,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       outputs: 1,
       x: 2500,
       y: 120,
-      wires: [["manager_signature_node"]],
+      wires: [],
     });
 
     // Insert into PostgreSQL (Candidate Signature Reject)
