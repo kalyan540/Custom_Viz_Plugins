@@ -47,12 +47,12 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const rootElem = createRef<HTMLDivElement>();
 
   const [workflowName, setWorkflowName] = useState(`Workflow-${Math.floor(Math.random() * 1000)}`);
-  const [candidate, setCandidate] = useState({ name: '', email: '' });
-  const [manager, setManager] = useState({ name: '', email: '' });
-  const [hrbp, setHrbp] = useState({ name: '', email: '' });
+  const [candidateEmail, setCandidateEmail] = useState('');
+  const [managerEmail, setManagerEmail] = useState('');
+  const [hrbpEmail, setHrbpEmail] = useState('');
 
   const handleSubmit = async () => {
-    const workflowJson = generateWorkflowJson(workflowName, candidate, manager, hrbp);
+    const workflowJson = generateWorkflowJson(workflowName, candidateEmail, managerEmail, hrbpEmail);
     console.log('Workflow JSON:', workflowJson);
 
     try {
@@ -78,7 +78,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     }
   };
 
-  const generateWorkflowJson = (workflowName, candidate, manager, hrbp) => {
+  const generateWorkflowJson = (workflowName, candidateEmail, managerEmail, hrbpEmail) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c";
 
@@ -108,7 +108,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       z: tabId,
       name: "Start Request",
       props: [{ p: "payload" }],
-      payload: JSON.stringify({ requestId: 123, status: "Pending", candidate: candidate.email }),
+      payload: JSON.stringify({ requestId: 123, status: "Pending", candidate: candidateEmail }),
       payloadType: "json",
       x: 110,
       y: 120,
@@ -125,7 +125,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       port: 587,
       secure: false,
       from: "noreply@example.com",
-      to: candidate.email,
+      to: candidateEmail,
       subject: "Workflow Started",
       text: "Your workflow has started.",
       x: 300,
@@ -139,7 +139,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       type: "function",
       z: tabId,
       name: "Candidate",
-      func: `msg.payload = {}; msg.payload.candidate = \"${candidate.name}\";\nreturn msg;`,
+      func: `msg.payload = {}; msg.payload.candidate = \"${candidateEmail}\";\nreturn msg;`,
       outputs: 1,
       x: 300,
       y: 120,
@@ -177,7 +177,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       port: 587,
       secure: false,
       from: "noreply@example.com",
-      to: manager.email,
+      to: managerEmail,
       subject: "Candidate Approved",
       text: "The candidate has approved the form.",
       x: 700,
@@ -192,7 +192,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       z: tabId,
       name: "Insert into PostgreSQL (Candidate Approve)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": " + JSON.stringify(candidate) + "}, \"Approved\", 1, 5]",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": \"" + candidateEmail + "\"}, \"Approved\", 1, 5]",
       postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
@@ -209,7 +209,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       z: tabId,
       name: "Insert into PostgreSQL (Candidate Reject)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": " + JSON.stringify(candidate) + "}, \"Rejected\", 1, 5]",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": \"" + candidateEmail + "\"}, \"Rejected\", 1, 5]",
       postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
@@ -225,7 +225,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       type: "function",
       z: tabId,
       name: "Manager",
-      func: `msg.payload = {}; msg.payload.manager = \"${manager.name}\";\nreturn msg;`,
+      func: `msg.payload = {}; msg.payload.manager = \"${managerEmail}\";\nreturn msg;`,
       outputs: 1,
       x: 900,
       y: 120,
@@ -263,7 +263,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       port: 587,
       secure: false,
       from: "noreply@example.com",
-      to: hrbp.email,
+      to: hrbpEmail,
       subject: "Manager Approved",
       text: "The manager has approved the form.",
       x: 1300,
@@ -278,7 +278,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       z: tabId,
       name: "Insert into PostgreSQL (Manager Approve)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"manager\": " + JSON.stringify(manager) + "}, \"Approved\", 2, 5]",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"manager\": \"" + managerEmail + "\"}, \"Approved\", 2, 5]",
       postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
@@ -295,7 +295,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       z: tabId,
       name: "Insert into PostgreSQL (Manager Reject)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"manager\": " + JSON.stringify(manager) + "}, \"Rejected\", 2, 5]",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"manager\": \"" + managerEmail + "\"}, \"Rejected\", 2, 5]",
       postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
@@ -311,7 +311,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       type: "function",
       z: tabId,
       name: "HRBP",
-      func: `msg.payload = {}; msg.payload.hrbp = \"${hrbp.name}\";\nreturn msg;`,
+      func: `msg.payload = {}; msg.payload.hrbp = \"${hrbpEmail}\";\nreturn msg;`,
       outputs: 1,
       x: 1500,
       y: 120,
@@ -349,7 +349,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       port: 587,
       secure: false,
       from: "noreply@example.com",
-      to: manager.email,
+      to: managerEmail,
       subject: "HRBP Approved",
       text: "The HRBP has approved the form.",
       x: 1900,
@@ -364,7 +364,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       z: tabId,
       name: "Insert into PostgreSQL (HRBP Approve)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"hrbp\": " + JSON.stringify(hrbp) + "}, \"Approved\", 3, 5]",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"hrbp\": \"" + hrbpEmail + "\"}, \"Approved\", 3, 5]",
       postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
@@ -381,7 +381,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       z: tabId,
       name: "Insert into PostgreSQL (HRBP Reject)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"hrbp\": " + JSON.stringify(hrbp) + "}, \"Rejected\", 3, 5]",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"hrbp\": \"" + hrbpEmail + "\"}, \"Rejected\", 3, 5]",
       postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
@@ -397,7 +397,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       type: "function",
       z: tabId,
       name: "Candidate Signature",
-      func: `msg.payload = {}; msg.payload.candidate = \"${candidate.name}\";\nreturn msg;`,
+      func: `msg.payload = {}; msg.payload.candidate = \"${candidateEmail}\";\nreturn msg;`,
       outputs: 1,
       x: 2100,
       y: 120,
@@ -435,7 +435,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       port: 587,
       secure: false,
       from: "noreply@example.com",
-      to: manager.email,
+      to: managerEmail,
       subject: "Candidate Signature Approved",
       text: "The candidate has signed the form.",
       x: 2500,
@@ -450,7 +450,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       z: tabId,
       name: "Insert into PostgreSQL (Candidate Signature Approve)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": " + JSON.stringify(candidate) + "}, \"Approved\", 4, 5]",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": \"" + candidateEmail + "\"}, \"Approved\", 4, 5]",
       postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
@@ -467,7 +467,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       z: tabId,
       name: "Insert into PostgreSQL (Candidate Signature Reject)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": " + JSON.stringify(candidate) + "}, \"Rejected\", 4, 5]",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": \"" + candidateEmail + "\"}, \"Rejected\", 4, 5]",
       postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
@@ -483,7 +483,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       type: "function",
       z: tabId,
       name: "Manager Signature",
-      func: `msg.payload = {}; msg.payload.manager = \"${manager.name}\";\nreturn msg;`,
+      func: `msg.payload = {}; msg.payload.manager = \"${managerEmail}\";\nreturn msg;`,
       outputs: 1,
       x: 2700,
       y: 120,
@@ -518,7 +518,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       z: tabId,
       name: "Insert into PostgreSQL (Manager Signature Approve)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"manager\": " + JSON.stringify(manager) + "}, \"Approved\", 5, 5]",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"manager\": \"" + managerEmail + "\"}, \"Approved\", 5, 5]",
       postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
@@ -535,7 +535,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       z: tabId,
       name: "Insert into PostgreSQL (Manager Signature Reject)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"manager\": " + JSON.stringify(manager) + "}, \"Rejected\", 5, 5]",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"manager\": \"" + managerEmail + "\"}, \"Rejected\", 5, 5]",
       postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
@@ -565,7 +565,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       z: tabId,
       name: "Insert into PostgreSQL (Final)",
       query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": " + JSON.stringify(candidate) + ", \"manager\": " + JSON.stringify(manager) + ", \"hrbp\": " + JSON.stringify(hrbp) + "}, \"Completed\", 5, 5]",
+      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": \"" + candidateEmail + "\", \"manager\": \"" + managerEmail + "\", \"hrbp\": \"" + hrbpEmail + "\"}, \"Completed\", 5, 5]",
       postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
@@ -620,56 +620,29 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         />
       </div>
       <div className="form-group">
-        <label>Candidate Name</label>
-        <input
-          type="text"
-          value={candidate.name}
-          onChange={(e) => setCandidate({ ...candidate, name: e.target.value })}
-          placeholder="Enter candidate name"
-        />
-      </div>
-      <div className="form-group">
         <label>Candidate Email</label>
         <input
           type="text"
-          value={candidate.email}
-          onChange={(e) => setCandidate({ ...candidate, email: e.target.value })}
+          value={candidateEmail}
+          onChange={(e) => setCandidateEmail(e.target.value)}
           placeholder="Enter candidate email"
-        />
-      </div>
-      <div className="form-group">
-        <label>Manager Name</label>
-        <input
-          type="text"
-          value={manager.name}
-          onChange={(e) => setManager({ ...manager, name: e.target.value })}
-          placeholder="Enter manager name"
         />
       </div>
       <div className="form-group">
         <label>Manager Email</label>
         <input
           type="text"
-          value={manager.email}
-          onChange={(e) => setManager({ ...manager, email: e.target.value })}
+          value={managerEmail}
+          onChange={(e) => setManagerEmail(e.target.value)}
           placeholder="Enter manager email"
-        />
-      </div>
-      <div className="form-group">
-        <label>HRBP Name</label>
-        <input
-          type="text"
-          value={hrbp.name}
-          onChange={(e) => setHrbp({ ...hrbp, name: e.target.value })}
-          placeholder="Enter HRBP name"
         />
       </div>
       <div className="form-group">
         <label>HRBP Email</label>
         <input
           type="text"
-          value={hrbp.email}
-          onChange={(e) => setHrbp({ ...hrbp, email: e.target.value })}
+          value={hrbpEmail}
+          onChange={(e) => setHrbpEmail(e.target.value)}
           placeholder="Enter HRBP email"
         />
       </div>
