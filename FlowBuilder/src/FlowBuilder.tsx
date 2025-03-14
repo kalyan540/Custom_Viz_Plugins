@@ -205,13 +205,13 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         name: "Insert into PostgreSQL (Candidate Approve)",
         query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
         params: [
-            2, // user_id (Replace 2 with a dynamic value if needed)
-            JSON.stringify({ workflowName: workflowName, candidate: candidateEmail }), // request_data
-            "Approved", // status
-            1, // current_level
-            5  // total_levels
-        ], 
-        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+            { value: 2, type: "int4" }, // Ensure type is explicitly set
+            { value: JSON.stringify({ workflowName: workflowName, candidate: candidateEmail }), type: "text" }, // Ensure JSON is a text type
+            { value: "Approved", type: "varchar" }, 
+            { value: 1, type: "int4" },
+            { value: 5, type: "int4" }
+        ],
+        postgreSQLConfig: "7b9ec91590d534cc",
         split: false,
         rowsPerMsg: 1,
         outputs: 1,
@@ -219,6 +219,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         y: 120,
         wires: [["debug_output"]],
     });
+    
     
 
       workflow.push({
