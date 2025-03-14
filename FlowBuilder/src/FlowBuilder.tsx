@@ -117,22 +117,37 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     });
 
     // Email to User
+    // workflow.push({
+    //   id: "email_user",
+    //   type: "e-mail",
+    //   z: tabId,
+    //   name: "dihiwo5319@easipro.com",
+    //   server: "sandbox.smtp.mailtrap.io", // Replace with your SMTP server
+    //   port: 2525,
+    //   secure: false,
+    //   from: "noreply@example.com",
+    //   to: candidate.email,
+    //   subject: "Workflow Started",
+    //   text: "Your workflow has started.",
+    //   x: 300,
+    //   y: 60,
+    //   wires: [],
+    // });
     workflow.push({
-      id: "email_user",
-      type: "email",
-      z: tabId,
-      name: "Email to User",
-      server: "smtp.example.com", // Replace with your SMTP server
-      port: 587,
-      secure: false,
-      from: "noreply@example.com",
-      to: candidate.email,
-      subject: "Workflow Started",
-      text: "Your workflow has started.",
-      x: 300,
-      y: 60,
-      wires: [],
-    });
+        id: "approval_email",
+        type: "e-mail",
+        z: tabId,
+        name: "dihiwo5319@easipro.com",
+        server: "sandbox.smtp.mailtrap.io",
+        port: "2525",
+        username: "62753aa9883bbc",
+        password: "a249d24a02ce4f",
+        subject: "Workflow Completed",
+        body: "{{payload.html}}",
+        x: 770,
+        y: 150,
+        wires: [],
+      });
 
     // Candidate node
     workflow.push({
