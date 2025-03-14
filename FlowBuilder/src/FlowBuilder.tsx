@@ -179,7 +179,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       outputs: 1,
       x: 800,
       y: 180,
-      wires: [["debug_before_insert"]],
+      wires: [["debug_before_insert","postgres_insert_candidate_approve"]],
     });
   
     // Debug Before Insert Node
@@ -193,7 +193,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       complete: "payload",
       x: 1000,
       y: 120,
-      wires: [["postgres_insert_candidate_approve"]],
+      wires: [[]],
     });
   
     // Insert into PostgreSQL (Candidate Approve) Node
