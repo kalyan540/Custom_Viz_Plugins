@@ -196,56 +196,36 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       });
 
 
-    
-        // Debug node for Reject
-        workflow.push({
-            id: "debug_reject",
-            type: "debug",
-            z: tabId,
-            name: "Debug Reject",
-            active: true,
-            tosidebar: true,
-            complete: "payload",
-            x: 900,
-            y: 240,
-            wires: [],
-        });
-
 
     // Insert into PostgreSQL (Candidate Approve)
     workflow.push({
-      id: "postgres_insert_candidate_approve",
-      type: "postgresql",
-      z: tabId,
-      name: "Insert into PostgreSQL (Candidate Approve)",
-      query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": \"" + candidateEmail + "\"}, \"Approved\", 1, 5]",
-      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-      split: false,
-      rowsPerMsg: 1,
-      outputs: 1,
-      x: 700,
-      y: 120,
-      wires: [["debug_output"]],
-    });
+        id: "postgres_insert_candidate_approve",
+        type: "postgresql",
+        z: tabId,
+        name: "Insert into PostgreSQL (Candidate Approve)",
+        query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+        params: [2, JSON.stringify({ workflowName: workflowName, candidate: candidateEmail }), "Approved", 1, 5], // Use an array
+        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 1100,
+        y: 120,
+        wires: [["debug_output"]],
+      });
 
-    // Insert into PostgreSQL (Candidate Reject)
-    workflow.push({
-      id: "postgres_insert_candidate_reject",
-      type: "postgresql",
-      z: tabId,
-      name: "Insert into PostgreSQL (Candidate Reject)",
-      query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": \"" + candidateEmail + "\"}, \"Rejected\", 1, 5]",
-      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-      split: false,
-      rowsPerMsg: 1,
-      outputs: 1,
-      x: 700,
-      y: 180,
-      wires: [["debug_output"]],
-    });
-
+      workflow.push({
+        id: "debug_output",
+        type: "debug",
+        z: tabId,
+        name: "Debug Output",
+        active: true,
+        tosidebar: true,
+        complete: "payload",
+        x: 1300,
+        y: 120,
+        wires: [],
+      });
     return workflow;
   };
 
