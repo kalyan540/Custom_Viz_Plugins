@@ -3,7 +3,7 @@ import { styled } from '@superset-ui/core';
 import { FlowBuilderProps, FlowBuilderStylesProps } from './types';
 import { Popover } from 'antd';
 
-const Styles = styled.div<FlowBuilderStylesProps>`
+const Styles = styled.div<FlowBuilderStylesProps>
   background-color: ${({ theme }) => theme.colors.secondary.light2};
   padding: ${({ theme }) => theme.gridUnit * 4}px;
   border-radius: ${({ theme }) => theme.gridUnit * 2}px;
@@ -40,13 +40,13 @@ const Styles = styled.div<FlowBuilderStylesProps>`
   button:hover {
     background-color: ${({ theme }) => theme.colors.primary.dark1};
   }
-`;
+;
 
 export default function FlowBuilder(props: FlowBuilderProps) {
   const { height, width, apiEndpoint } = props;
   const rootElem = createRef<HTMLDivElement>();
 
-  const [workflowName, setWorkflowName] = useState(`Workflow-${Math.floor(Math.random() * 1000)}`);
+  const [workflowName, setWorkflowName] = useState(Workflow-${Math.floor(Math.random() * 1000)});
   const [candidateEmail, setCandidateEmail] = useState('');
   const [managerEmail, setManagerEmail] = useState('');
   const [hrbpEmail, setHrbpEmail] = useState('');
@@ -81,7 +81,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const generateWorkflowJson = (workflowName, candidateEmail, managerEmail, hrbpEmail) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c";
-  
+
     // PostgreSQL Config Node
     workflow.push({
       id: "7b9ec91590d534cc",
@@ -100,158 +100,135 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       x: 320, // X position in the Node-RED editor
       y: 60, // Y position in the Node-RED editor
     });
-  
-    // Inject Node to Start the Workflow
+
     workflow.push({
-      id: "inject_start",
-      type: "inject",
-      z: tabId,
-      name: "Start Request",
-      props: [{ p: "payload" }],
-      payload: JSON.stringify({ 
-        requestId: 123, 
-        status: "Pending", 
-        candidate: candidateEmail,
-        formCompleted: true // Add formCompleted property
-      }),
-      payloadType: "json",
-      x: 110,
-      y: 120,
-      wires: [["debug_inject", "candidate_node"]],
-    });
-  
-    // Debug Node for Inject
+        id: "inject_start",
+        type: "inject",
+        z: tabId,
+        name: "Start Request",
+        props: [{ p: "payload" }],
+        payload: JSON.stringify({ 
+          requestId: 123, 
+          status: "Pending", 
+          candidate: candidateEmail,
+          formCompleted: true // Add formCompleted property
+        }),
+        payloadType: "json",
+        x: 110,
+        y: 120,
+        wires: [["debug_inject", "candidate_node"]],
+      });
+      
+      workflow.push({
+        id: "debug_inject",
+        type: "debug",
+        z: tabId,
+        name: "Debug Inject",
+        active: true,
+        tosidebar: true,
+        complete: "payload",
+        x: 300,
+        y: 120,
+        wires: [],
+      });
+
+
+      workflow.push({
+        id: "candidate_node",
+        type: "function",
+        z: tabId,
+        name: "Candidate",
+        func: msg.payload.candidate = \"${candidateEmail}\";\nreturn msg;, // Do not overwrite the payload
+        outputs: 1,
+        x: 300,
+        y: 180,
+        wires: [["debug_candidate", "check_form_completed"]],
+      });
+      
+
+    // Debug node after Candidate
     workflow.push({
-      id: "debug_inject",
-      type: "debug",
-      z: tabId,
-      name: "Debug Inject",
-      active: true,
-      tosidebar: true,
-      complete: "payload",
-      x: 300,
-      y: 120,
-      wires: [],
+        id: "debug_candidate",
+        type: "debug",
+        z: tabId,
+        name: "Debug Candidate",
+        active: true,
+        tosidebar: true,
+        complete: "payload",
+        x: 500,
+        y: 180,
+        wires: [],
     });
-  
-    // Candidate Node
+
+
     workflow.push({
-      id: "candidate_node",
-      type: "function",
-      z: tabId,
-      name: "Candidate",
-      func: `msg.payload.candidate = \"${candidateEmail}\";\nreturn msg;`, // Do not overwrite the payload
-      outputs: 1,
-      x: 300,
-      y: 180,
-      wires: [["debug_candidate", "check_form_completed"]],
+        id: "check_form_completed",
+        type: "switch",
+        z: tabId,
+        name: "Check if the form completed",
+        property: "payload.formCompleted",
+        propertyType: "msg",
+        rules: [
+          { t: "eq", v: true, vt: "bool" },
+          { t: "eq", v: false, vt: "bool" },
+        ],
+        outputs: 2,
+        x: 700,
+        y: 180,
+        wires: [
+          ["debug_approve", "postgres_insert_candidate_approve"],
+          ["debug_reject", "postgres_insert_candidate_reject"],
+        ],
     });
-  
-    // Debug Node for Candidate
+
+
     workflow.push({
-      id: "debug_candidate",
-      type: "debug",
-      z: tabId,
-      name: "Debug Candidate",
-      active: true,
-      tosidebar: true,
-      complete: "payload",
-      x: 500,
-      y: 180,
-      wires: [],
-    });
-  
-    // Switch Node to Check Form Completion
+        id: "debug_approve",
+        type: "debug",
+        z: tabId,
+        name: "Debug Approve",
+        active: true,
+        tosidebar: true,
+        complete: "payload",
+        x: 900,
+        y: 120,
+        wires: [],
+      });
+
+
+
+    // Insert into PostgreSQL (Candidate Approve)
     workflow.push({
-      id: "check_form_completed",
-      type: "switch",
-      z: tabId,
-      name: "Check if the form completed",
-      property: "payload.formCompleted",
-      propertyType: "msg",
-      rules: [
-        { t: "eq", v: true, vt: "bool" },
-        { t: "eq", v: false, vt: "bool" },
-      ],
-      outputs: 2,
-      x: 700,
-      y: 180,
-      wires: [
-        ["set_postgres_params", "postgres_insert_candidate_approve"], // Wire to set_postgres_params
-        ["debug_reject", "postgres_insert_candidate_reject"],
-      ],
-    });
-  
-    // Function Node to Set PostgreSQL Params
-    workflow.push({
-      id: "set_postgres_params",
-      type: "function",
-      z: tabId,
-      name: "Set PostgreSQL Params",
-      func: `
-        // Set the params array for the PostgreSQL query
-        msg.params = [
-          2, // user_id
-          JSON.stringify({ workflowName: "${workflowName}", candidate: "${candidateEmail}" }), // request_data
-          "Approved", // status
-          1, // current_level
-          5  // total_levels
-        ];
-        return msg;
-      `,
-      outputs: 1,
-      x: 900,
-      y: 120,
-      wires: [["debug_before_postgres", "postgres_insert_candidate_approve"]],
-    });
-  
-    // Debug Node Before PostgreSQL
-    workflow.push({
-      id: "debug_before_postgres",
-      type: "debug",
-      z: tabId,
-      name: "Debug Before PostgreSQL",
-      active: true,
-      tosidebar: true,
-      complete: "true", // Inspect the entire msg object
-      x: 1100,
-      y: 120,
-      wires: [],
-    });
-  
-    // PostgreSQL Node for Candidate Approve
-    workflow.push({
-      id: "postgres_insert_candidate_approve",
-      type: "postgresql",
-      z: tabId,
-      name: "Insert into PostgreSQL (Candidate Approve)",
-      query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      params: "{{msg.params}}", // Use the params array from the msg object
-      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-      split: false, // Set to false to get all rows in a single message
-      rowsPerMsg: 1, // Only relevant if split is true
-      outputs: 1,
-      x: 1300,
-      y: 120,
-      wires: [["debug_output"]],
-    });
-  
-    // Debug Node for PostgreSQL Output
-    workflow.push({
-      id: "debug_output",
-      type: "debug",
-      z: tabId,
-      name: "Debug Output",
-      active: true,
-      tosidebar: true,
-      complete: "true", // Inspect the entire msg object
-      x: 1500,
-      y: 120,
-      wires: [],
-    });
-  
+        id: "postgres_insert_candidate_approve",
+        type: "postgresql",
+        z: tabId,
+        name: "Insert into PostgreSQL (Candidate Approve)",
+        query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+        params: [2, JSON.stringify({ workflowName: workflowName, candidate: candidateEmail }), "Approved", 1, 5], // Use an array
+        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 1100,
+        y: 120,
+        wires: [["debug_output"]],
+      });
+
+      workflow.push({
+        id: "debug_output",
+        type: "debug",
+        z: tabId,
+        name: "Debug Output",
+        active: true,
+        tosidebar: true,
+        complete: "payload",
+        x: 1300,
+        y: 120,
+        wires: [],
+      });
     return workflow;
   };
+
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);
