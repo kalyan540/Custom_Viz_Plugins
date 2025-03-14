@@ -3,7 +3,7 @@ import { styled } from '@superset-ui/core';
 import { FlowBuilderProps, FlowBuilderStylesProps } from './types';
 import { Popover } from 'antd';
 
-const Styles = styled.div<FlowBuilderStylesProps>
+const Styles = styled.div<FlowBuilderStylesProps>`
   background-color: ${({ theme }) => theme.colors.secondary.light2};
   padding: ${({ theme }) => theme.gridUnit * 4}px;
   border-radius: ${({ theme }) => theme.gridUnit * 2}px;
@@ -40,13 +40,13 @@ const Styles = styled.div<FlowBuilderStylesProps>
   button:hover {
     background-color: ${({ theme }) => theme.colors.primary.dark1};
   }
-;
+`;
 
 export default function FlowBuilder(props: FlowBuilderProps) {
   const { height, width, apiEndpoint } = props;
   const rootElem = createRef<HTMLDivElement>();
 
-  const [workflowName, setWorkflowName] = useState(Workflow-${Math.floor(Math.random() * 1000)});
+  const [workflowName, setWorkflowName] = useState(`Workflow-${Math.floor(Math.random() * 1000)}`);
   const [candidateEmail, setCandidateEmail] = useState('');
   const [managerEmail, setManagerEmail] = useState('');
   const [hrbpEmail, setHrbpEmail] = useState('');
@@ -138,7 +138,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         type: "function",
         z: tabId,
         name: "Candidate",
-        func: msg.payload.candidate = \"${candidateEmail}\";\nreturn msg;, // Do not overwrite the payload
+        func: `msg.payload.candidate = \"${candidateEmail}\";\nreturn msg;`, // Do not overwrite the payload
         outputs: 1,
         x: 300,
         y: 180,
