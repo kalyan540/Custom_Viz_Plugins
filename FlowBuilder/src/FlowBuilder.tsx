@@ -484,8 +484,129 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         wires: [],
       });
 
+      workflow.push({
+        id: "manager_signature_node",
+        type: "function",
+        z: tabId,
+        name: "Manager Signature",
+        func: `
+          // Add manager details to the msg object
+          msg.payload = {};
+          msg.payload.manager = "${managerEmail}";
+          msg.payload.approval = "Approved"; // Set approval status (replace with actual logic if needed)
+          return msg;
+        `,
+        outputs: 1,
+        x: 2700,
+        y: 120,
+        wires: [["check_manager_signature"]],
+      });
 
-  
+
+      workflow.push({
+        id: "check_manager_signature",
+        type: "function",
+        z: tabId,
+        name: "Check Manager Signature",
+        func: `
+          // Check if the manager has approved the request
+          if (msg.payload.approval === "Approved") {
+            // Manager approves the request
+            msg.payload.managerSignature = "Approved"; // Add manager's signature decision to the payload
+            msg.params = [
+              2, // user_id
+              JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
+              "Approved", // status
+              5, // current_level (assuming this is the final level)
+              5 // total_levels
+            ];
+            return [msg, null]; // Send msg to the first output (for approval)
+          } else {
+            // Manager rejects the request
+            msg.payload.managerSignature = "Rejected"; // Add manager's signature decision to the payload
+            msg.params = [
+              2, // user_id
+              JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
+              "Rejected", // status
+              5, // current_level
+              5 // total_levels
+            ];
+            return [null, msg]; // Send msg to the second output (for rejection)
+          }
+        `,
+        outputs: 2,
+        x: 2900,
+        y: 120,
+        wires: [
+          ["postgres_insert_manager_signature_approve", "set_status_completed"], // Approved case
+          ["postgres_insert_manager_signature_reject"] // Rejected case
+        ],
+      });
+
+      // PostgreSQL Insert Node for Manager Signature Approve
+    workflow.push({
+        id: "postgres_insert_manager_signature_approve",
+        type: "postgresql",
+        z: tabId,
+        name: "Insert into PostgreSQL (Manager Signature Approve)",
+        query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 3100,
+        y: 120,
+        wires: [], // No further action for approval
+    });
+    
+    // PostgreSQL Insert Node for Manager Signature Reject
+    workflow.push({
+        id: "postgres_insert_manager_signature_reject",
+        type: "postgresql",
+        z: tabId,
+        name: "Insert into PostgreSQL (Manager Signature Reject)",
+        query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 3100,
+        y: 180,
+        wires: [], // No further action for rejection
+    });
+
+    workflow.push({
+        id: "set_status_completed",
+        type: "function",
+        z: tabId,
+        name: "Set Status Completed",
+        func: `
+          // Set the status to "Completed"
+          msg.payload.status = "Completed";
+          msg.payload.request_id = msg.payload?.requestId || "UnknownID"; // Ensure request_id is set
+          msg.topic = \`Workflow \${msg.payload.request_id}\`; // Add a topic for debugging
+          return msg;
+        `,
+        outputs: 1,
+        x: 3300,
+        y: 120,
+        wires: [["postgres_insert_final"]],
+      });
+
+      workflow.push({
+        id: "postgres_insert_final",
+        type: "postgresql",
+        z: tabId,
+        name: "Insert into PostgreSQL (Final)",
+        query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 3500,
+        y: 120,
+        wires: ["debud_output"], // No further action
+      });
 
 
 
