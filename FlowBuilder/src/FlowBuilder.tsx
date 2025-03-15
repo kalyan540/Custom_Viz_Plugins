@@ -141,36 +141,34 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   
     // Check Form Completed Node (Function Node)
     workflow.push({
-      id: "check_form_completed",
-      type: "function",
-      z: tabId,
-      name: "Check if the form completed",
-      func: `
-        // Check if the form is completed
-        if (msg.payload.formCompleted === true) {
-          // Prepare the parameters for the PostgreSQL query
-          msg.params = [
-            393, // id
-            2, // user_id
-            JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
-            "Approved", // status
-            1, // current_level
-            5 // total_levels
-          ];
-          return [msg, null]; // Send msg to the first output (for true case)
-        } else {
-          return [null, msg]; // Send msg to the second output (for false case)
-        }
-      `,
-      outputs: 2,
-      x: 700,
-      y: 180,
-      wires: [
-        ["debug_params", "postgres_insert"], // True case
-        ["debug_reject"] // False case (optional, for debugging)
-      ],
-    });
-
+        id: "check_form_completed",
+        type: "function",
+        z: tabId,
+        name: "Check if the form completed",
+        func: `
+          // Check if the form is completed
+          if (msg.payload.formCompleted === true) {
+            // Prepare the parameters for the PostgreSQL query (omit the id)
+            msg.params = [
+              2, // user_id
+              JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
+              "Approved", // status
+              1, // current_level
+              5 // total_levels
+            ];
+            return [msg, null]; // Send msg to the first output (for true case)
+          } else {
+            return [null, msg]; // Send msg to the second output (for false case)
+          }
+        `,
+        outputs: 2,
+        x: 700,
+        y: 180,
+        wires: [
+          ["debug_params", "postgres_insert"], // True case
+          ["debug_reject"] // False case (optional, for debugging)
+        ],
+      });
     // Debug Node to Log Parameters
     workflow.push({
       id: "debug_params",
@@ -187,19 +185,19 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   
     // PostgreSQL Insert Node
     workflow.push({
-      id: "postgres_insert",
-      type: "postgresql",
-      z: tabId,
-      name: "Insert into PostgreSQL",
-      query: "INSERT INTO public.approval_requests (id, user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, $6, now());",
-      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-      split: false,
-      rowsPerMsg: 1,
-      outputs: 1,
-      x: 1100,
-      y: 120,
-      wires: [["debug_output"]],
-    });
+        id: "postgres_insert",
+        type: "postgresql",
+        z: tabId,
+        name: "Insert into PostgreSQL",
+        query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 1100,
+        y: 120,
+        wires: [["debug_output"]],
+      });
   
     // Debug Output Node
     workflow.push({
