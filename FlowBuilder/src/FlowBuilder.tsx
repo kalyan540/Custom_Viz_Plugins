@@ -142,20 +142,32 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     // Check Form Completed Node
     workflow.push({
       id: "check_form_completed",
-      type: "switch",
+      type: "function", // Changed from "switch" to "function"
       z: tabId,
       name: "Check if the form completed",
-      property: "payload.formCompleted",
-      propertyType: "msg",
-      rules: [
-        { t: "eq", v: true, vt: "bool" },
-        { t: "eq", v: false, vt: "bool" },
-      ],
-      outputs: 2,
+      func: `
+        // Check if the form is completed
+        if (msg.payload.formCompleted === true) {
+          // Prepare the parameters for the PostgreSQL query
+          msg.params = [
+            343, // id
+            2, // user_id
+            JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
+            "Approved", // status
+            1, // current_level
+            5 // total_levels
+          ];
+          return [msg, null]; // Send msg to the first output (for true case)
+        } else {
+          return [null, msg]; // Send msg to the second output (for false case)
+        }
+      `,
+      outputs: 2, // Two outputs for true/false cases
       x: 700,
       y: 180,
       wires: [
-        ["debug_approve", "postgres_insert_candidate_approve"], // Updated wiring
+        ["debug_approve", "postgres_insert_candidate_approve"], // True case
+        ["debug_reject"] // False case (optional, for debugging)
       ],
     });
   
