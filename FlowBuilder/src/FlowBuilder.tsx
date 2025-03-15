@@ -148,7 +148,7 @@ workflow.push({
     name: "Check if the form completed",
     func: `
       // Check if the form is completed
-      if (msg.payload.formCompleted === true)
+      if (msg.payload.formCompleted === true){
         // Prepare the parameters for the PostgreSQL query
         msg.params = [
           2, // user_id
