@@ -148,13 +148,9 @@ workflow.push({
     name: "Check if the form completed",
     func: `
       // Check if the form is completed
-      if (msg.payload.formCompleted === true) {
-        // Generate a unique ID
-        const uniqueId = Math.floor(Math.random() * 1000000); // Random number between 0 and 999999
-  
+      if (msg.payload.formCompleted === true)
         // Prepare the parameters for the PostgreSQL query
         msg.params = [
-          uniqueId, // id
           2, // user_id
           JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
           "Approved", // status
@@ -195,7 +191,7 @@ workflow.push({
         type: "postgresql",
         z: tabId,
         name: "Insert into PostgreSQL",
-        query: "INSERT INTO approval_requests (id, user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, $6, now());",
+        query: "INSERT INTO approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
         postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
         split: false,
         rowsPerMsg: 1,
