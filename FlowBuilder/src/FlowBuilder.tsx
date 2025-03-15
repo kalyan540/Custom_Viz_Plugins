@@ -350,13 +350,10 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         x: 1700,
         y: 180,
         wires: [
-          ["postgres_insert_hrbp_approve", "debug_output"], // True case (Approved)
+          ["postgres_insert_hrbp_approve", "candidate_signature_node"], // True case (Approved)
           ["postgres_insert_hrbp_reject"] // False case (Rejected)
         ],
       });
-
-
-
 
     
 
@@ -391,6 +388,107 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         y: 120,
         wires: [],
     });
+
+    workflow.push({
+        id: "candidate_signature_node",
+        type: "function",
+        z: tabId,
+        name: "Candidate Signature",
+        func: `
+          // Add candidate details to the msg object
+          msg.payload = {};
+          msg.payload.candidate = "${candidateEmail}";
+          msg.payload.approval = "Approved"; // Set approval status (replace with actual logic if needed)
+          return msg;
+        `,
+        outputs: 1,
+        x: 2100,
+        y: 120,
+        wires: [["check_candidate_signature"]],
+      });
+
+
+      workflow.push({
+        id: "check_candidate_signature",
+        type: "function",
+        z: tabId,
+        name: "Check Candidate Signature",
+        func: `
+          // Check if the candidate has approved the request
+          if (msg.payload.approval === "Approved") {
+            // Candidate approves the request
+            msg.payload.candidateSignature = "Approved"; // Add candidate's signature decision to the payload
+            msg.params = [
+              2, // user_id
+              JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
+              "Approved", // status
+              4, // current_level (assuming this is the next level after HRBP)
+              5 // total_levels
+            ];
+            return [msg, null]; // Send msg to the first output (for approval)
+          } else {
+            // Candidate rejects the request
+            msg.payload.candidateSignature = "Rejected"; // Add candidate's signature decision to the payload
+            msg.params = [
+              2, // user_id
+              JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
+              "Rejected", // status
+              4, // current_level
+              5 // total_levels
+            ];
+            return [null, msg]; // Send msg to the second output (for rejection)
+          }
+        `,
+        outputs: 2,
+        x: 2300,
+        y: 120,
+        wires: [
+          ["postgres_insert_candidate_signature_approve", "manager_signature_node"], // Approved case
+          ["postgres_insert_candidate_signature_reject"] // Rejected case
+        ],
+      });
+
+
+      // Insert into PostgreSQL (Candidate Signature Approve)
+    workflow.push({
+        id: "postgres_insert_candidate_signature_approve",
+        type: "postgresql",
+        z: tabId,
+        name: "Insert into PostgreSQL (Candidate Signature Approve)",
+        query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+        params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": \"" + candidateEmail + "\"}, \"Approved\", 4, 5]",
+        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 2500,
+        y: 120,
+        wires: ["debug_output"],
+      });
+
+
+      // Insert into PostgreSQL (Candidate Signature Reject)
+    workflow.push({
+        id: "postgres_insert_candidate_signature_reject",
+        type: "postgresql",
+        z: tabId,
+        name: "Insert into PostgreSQL (Candidate Signature Reject)",
+        query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+        params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": \"" + candidateEmail + "\"}, \"Rejected\", 4, 5]",
+        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 2500,
+        y: 180,
+        wires: [],
+      });
+
+
+  
+
+
+
 
     // Debug Output Node
     workflow.push({
