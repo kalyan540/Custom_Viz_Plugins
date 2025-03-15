@@ -322,7 +322,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         name: "Check HRBP decision",
         func: `
           // Check if the manager has approved the request
-          if (msg.payload.managerDecision === "Rejected") {
+          if (msg.payload.managerDecision === "Approved") {
             // HRBP proceeds with approval
             msg.payload.hrbpDecision = "Approved"; // Add HRBP's decision to the payload
             msg.params = [
