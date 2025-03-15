@@ -109,7 +109,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       name: "Start Request",
       props: [{ p: "payload" }],
       payload: JSON.stringify({
-        requestId: 123,
+        requestId: 873,
         status: "Pending",
         candidate: candidateEmail,
         formCompleted: true,
@@ -157,7 +157,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         if (msg.payload.formCompleted === true) {
           // Prepare the parameters for the PostgreSQL query
           msg.params = [
-            333, // id
+            453, // id
             2, // user_id
             JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
             "Approved", // status
@@ -172,9 +172,23 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       x: 700,
       y: 180,
       wires: [
-        ["postgres_insert"], // True case
+        ["debug_params", "postgres_insert"], // True case
         ["debug_reject"] // False case (optional, for debugging)
       ],
+    });
+
+    // Debug Node to Log Parameters
+    workflow.push({
+      id: "debug_params",
+      type: "debug",
+      z: tabId,
+      name: "Debug Parameters",
+      active: true,
+      tosidebar: true,
+      complete: "params",
+      x: 900,
+      y: 120,
+      wires: [],
     });
   
     // PostgreSQL Insert Node
