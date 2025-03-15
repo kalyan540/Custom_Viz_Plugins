@@ -191,7 +191,7 @@ workflow.push({
         type: "postgresql",
         z: tabId,
         name: "Insert into PostgreSQL",
-        query: "INSERT INTO approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+        query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
         postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
         split: false,
         rowsPerMsg: 1,
