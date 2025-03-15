@@ -109,7 +109,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       name: "Start Request",
       props: [{ p: "payload" }],
       payload: JSON.stringify({
-        requestId: 873,
+        requestId: 183,
         status: "Pending",
         candidate: candidateEmail,
         formCompleted: true,
@@ -139,25 +139,18 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       wires: [["check_form_completed"]],
     });
   
-    // Check Form Completed Node (Switch Node)
+    // Check Form Completed Node (Function Node)
     workflow.push({
       id: "check_form_completed",
-      type: "switch",
+      type: "function",
       z: tabId,
       name: "Check if the form completed",
-      property: "payload.formCompleted",
-      propertyType: "msg",
-      rules: [
-        { t: "eq", v: true, vt: "bool" }, // True case
-        { t: "eq", v: false, vt: "bool" }, // False case
-      ],
-      outputs: 2,
       func: `
         // Check if the form is completed
         if (msg.payload.formCompleted === true) {
           // Prepare the parameters for the PostgreSQL query
           msg.params = [
-            453, // id
+            393, // id
             2, // user_id
             JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
             "Approved", // status
@@ -169,6 +162,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           return [null, msg]; // Send msg to the second output (for false case)
         }
       `,
+      outputs: 2,
       x: 700,
       y: 180,
       wires: [
@@ -191,7 +185,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       wires: [],
     });
   
-    
     // PostgreSQL Insert Node
     workflow.push({
       id: "postgres_insert",
