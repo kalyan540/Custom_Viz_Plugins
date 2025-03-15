@@ -155,46 +155,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       x: 700,
       y: 180,
       wires: [
-        ["debug_approve", "prepare_postgres_params"], // Updated wiring
+        ["debug_approve", "postgres_insert_candidate_approve"], // Updated wiring
       ],
-    });
-  
-    // Prepare PostgreSQL Params Node
-    workflow.push({
-      id: "prepare_postgres_params",
-      type: "function",
-      z: tabId,
-      name: "Prepare PostgreSQL Params",
-      func: `
-        // Prepare the parameters for the PostgreSQL query
-        msg.params = [
-          343, // id
-          2, // user_id
-          JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
-          "Approved", // status
-          1, // current_level
-          5 // total_levels
-        ];
-        return msg;
-      `,
-      outputs: 1,
-      x: 800,
-      y: 180,
-      wires: [["debug_before_insert","postgres_insert_candidate_approve"]],
-    });
-  
-    // Debug Before Insert Node
-    workflow.push({
-      id: "debug_before_insert",
-      type: "debug",
-      z: tabId,
-      name: "Debug Before Insert",
-      active: true,
-      tosidebar: true,
-      complete: "payload",
-      x: 1000,
-      y: 120,
-      wires: [[]],
     });
   
     // Insert into PostgreSQL (Candidate Approve) Node
