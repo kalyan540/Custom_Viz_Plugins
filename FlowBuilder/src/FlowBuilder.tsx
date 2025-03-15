@@ -206,86 +206,95 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         wires: [],
     });
 
-    // Manager node
-    // workflow.push({
-    //     id: "manager_node",
-    //     type: "function",
-    //     z: tabId,
-    //     name: "Manager",
-    //     func: `
-    //         // Add candidate details to the msg object
-    //         msg.candidateEmail = "${candidateEmail}";
-    //         msg.workflowName = "${workflowName}";
-    //         msg.payload.candidate = "${candidateEmail}";
-    //         return msg;
-    //     `,
-    //     outputs: 1,
-    //     x: 900,
-    //     y: 120,
-    //     wires: [["check_manager_decision"]],
-    //   });
+    workflow.push({
+        id: "manager_node",
+        type: "function",
+        z: tabId,
+        name: "Manager",
+        func: `
+          // Add candidate details to the msg object
+          msg.candidateEmail = "${candidateEmail}";
+          msg.workflowName = "${workflowName}";
+          msg.payload.candidate = "${candidateEmail}";
+          return msg;
+        `,
+        outputs: 1,
+        x: 900,
+        y: 120,
+        wires: [["check_manager_decision"]],
+      });
 
-    //   workflow.push({
-    //     id: "check_manager_decision",
-    //     type: "function",
-    //     z: tabId,
-    //     name: "Check manager decision",
-    //     func: `
-    //       // Check if the form is completed
-    //       if (msg.payload.formCompleted === true){
-    //         // Prepare the parameters for the PostgreSQL query
-    //         msg.params = [
-    //           2, // user_id
-    //           JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
-    //           "Approved", // status
-    //           2, // current_level
-    //           5 // total_levels
-    //         ];
-    //         return [msg, null]; // Send msg to the first output (for true case)
-    //       } else {
-    //         return [null, msg]; // Send msg to the second output (for false case)
-    //       }
-    //     `,
-    //     outputs: 2,
-    //     x: 700,
-    //     y: 180,
-    //     wires: [
-    //       ["postgres_insert_manager_approve","hrbp_node"], // True case
-    //       ["postgres_insert_manager_reject"] // False case (optional, for debugging)
-    //     ],
-    //   });
+      workflow.push({
+        id: "check_manager_decision",
+        type: "function",
+        z: tabId,
+        name: "Check manager decision",
+        func: `
+          // Check if the form is completed
+          if (msg.payload.formCompleted === true) {
+            // Manager approves the request
+            msg.payload.managerDecision = "Approved"; // Add manager's decision to the payload
+            msg.params = [
+              2, // user_id
+              JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
+              "Approved", // status
+              2, // current_level
+              5 // total_levels
+            ];
+            return [msg, null]; // Send msg to the first output (for approval)
+          } else {
+            // Manager rejects the request
+            msg.payload.managerDecision = "Rejected"; // Add manager's decision to the payload
+            msg.params = [
+              2, // user_id
+              JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
+              "Rejected", // status
+              2, // current_level
+              5 // total_levels
+            ];
+            return [null, msg]; // Send msg to the second output (for rejection)
+          }
+        `,
+        outputs: 2,
+        x: 1100,
+        y: 180,
+        wires: [
+          ["postgres_insert_manager_approve", "hrbp_node"], // True case (Approved)
+          ["postgres_insert_manager_reject"] // False case (Rejected)
+        ],
+      });
     
     // // PostgreSQL Insert Node
-    // workflow.push({
-    //     id: "postgres_insert_manager_approve",
-    //     type: "postgresql",
-    //     z: tabId,
-    //     name: "Insert into PostgreSQL(Approve)",
-    //     query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-    //     postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-    //     split: false,
-    //     rowsPerMsg: 1,
-    //     outputs: 1,
-    //     x: 1100,
-    //     y: 120,
-    //     wires: ["debug_output"],
-    // });
+    workflow.push({
+        id: "postgres_insert_manager_approve",
+        type: "postgresql",
+        z: tabId,
+        name: "Insert into PostgreSQL(Approve)",
+        query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 1100,
+        y: 120,
+        wires: ["debug_output"],
+    });
 
     //  // PostgreSQL Insert Node
-    //  workflow.push({
-    //     id: "postgres_insert_manager_reject",
-    //     type: "postgresql",
-    //     z: tabId,
-    //     name: "Insert into PostgreSQL(Reject)",
-    //     query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-    //     postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-    //     split: false,
-    //     rowsPerMsg: 1,
-    //     outputs: 1,
-    //     x: 1100,
-    //     y: 120,
-    //     wires: [],
-    // });
+     workflow.push({
+        id: "postgres_insert_manager_reject",
+        type: "postgresql",
+        z: tabId,
+        name: "Insert into PostgreSQL(Reject)",
+        query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 1100,
+        y: 120,
+        wires: [],
+    });
 
 
     // HRBP node
