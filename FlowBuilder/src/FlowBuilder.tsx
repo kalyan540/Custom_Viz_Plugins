@@ -455,7 +455,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         type: "postgresql",
         z: tabId,
         name: "Insert into PostgreSQL (Candidate Signature Approve)",
-        query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+        query: "INSERT INTO public.approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
         params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": \"" + candidateEmail + "\"}, \"Approved\", 4, 5]",
         postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
         split: false,
@@ -473,7 +473,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         type: "postgresql",
         z: tabId,
         name: "Insert into PostgreSQL (Candidate Signature Reject)",
-        query: "INSERT INTO public.approval_requests (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+        query: "INSERT INTO public.approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
         params: "[2, {\"workflowName\": \"" + workflowName + "\", \"candidate\": \"" + candidateEmail + "\"}, \"Rejected\", 4, 5]",
         postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
         split: false,
