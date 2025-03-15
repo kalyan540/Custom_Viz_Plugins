@@ -157,7 +157,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         if (msg.payload.formCompleted === true) {
           // Prepare the parameters for the PostgreSQL query
           msg.params = [
-            393, // id
+            333, // id
             2, // user_id
             JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
             "Approved", // status
