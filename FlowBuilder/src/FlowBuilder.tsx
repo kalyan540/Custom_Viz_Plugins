@@ -538,7 +538,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         x: 2900,
         y: 120,
         wires: [
-          ["postgres_insert_manager_signature_approve", "set_status_completed"], // Approved case
+          ["postgres_insert_manager_signature_approve", ], // Approved case
           ["postgres_insert_manager_signature_reject"] // Rejected case
         ],
       });
@@ -574,74 +574,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         y: 180,
         wires: [], // No further action for rejection
     });
-
-
-
-
-      workflow.push({
-        id: "set_status_completed",
-        type: "function",
-        z: tabId,
-        name: "Set Status Completed",
-        func: `
-          // Ensure msg.payload is an object
-          msg.payload = msg.payload || {}; // Initialize if undefined
-      
-          // Set required properties for the PostgreSQL query
-          msg.payload.user_id = 2; // Example: Replace with actual user_id logic
-          msg.payload.request_data = JSON.stringify({
-            workflowName: "${workflowName}",
-            candidate: "${candidateEmail}"
-          });
-          msg.payload.status = "Completed";
-          msg.payload.current_level = 5; // Example: Replace with actual current_level logic
-          msg.payload.total_levels = 5; // Example: Replace with actual total_levels logic
-      
-          // Set additional properties for debugging
-          msg.payload.request_id = msg.payload?.requestId || "UnknownID";
-          msg.topic = \`Workflow \${msg.payload.request_id}\`;
-      
-          return msg;
-        `,
-        outputs: 1,
-        x: 3300,
-        y: 120,
-        wires: [["insert_into_final"]],
-      });
-
-      workflow.push({
-        id: "insert_into_final",
-        type: "postgresql",
-        z: tabId,
-        name: "Insert into PostgreSQL (Final)",
-        query: `
-          INSERT INTO approval_request (
-            user_id, 
-            request_data, 
-            status, 
-            current_level, 
-            total_levels, 
-            created_at
-          ) VALUES ($1, $2, $3, $4, $5, now());
-        `,
-        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-        split: false,
-        rowsPerMsg: 1,
-        outputs: 1,
-        x: 3500,
-        y: 120,
-        wires: ["debug_output"],
-        params: [
-          { p: "payload.user_id", pt: "msg" }, // Example: Replace with actual user_id logic
-          { p: "payload.request_data", pt: "msg" }, // Example: Replace with actual request_data logic
-          { p: "payload.status", pt: "msg" }, // Use the status from msg.payload
-          { p: "payload.current_level", pt: "msg" }, // Example: Replace with actual current_level logic
-          { p: "payload.total_levels", pt: "msg" } // Example: Replace with actual total_levels logic
-        ]
-      });
-
-
-
 
     // Debug Output Node
     workflow.push({
