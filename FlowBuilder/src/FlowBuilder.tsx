@@ -101,75 +101,77 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 60, // Y position in the Node-RED editor
     });
   
-    // Inject Node
     workflow.push({
-      id: "inject_start",
-      type: "inject",
-      z: tabId,
-      name: "Start Request",
-      props: [{ p: "payload" }],
-      payload: JSON.stringify({
-        requestId: 183,
-        status: "Pending",
-        candidate: candidateEmail,
-        formCompleted: true,
-      }),
-      payloadType: "json",
-      x: 110,
-      y: 120,
-      wires: [["candidate_node"]],
-    });
-  
-    // Candidate Node
+        id: "inject_start",
+        type: "inject",
+        z: tabId,
+        name: "Start Request",
+        props: [{ p: "payload" }],
+        payload: JSON.stringify({
+          requestId: 183,
+          status: "Pending",
+          candidate: candidateEmail,
+        }),
+        payloadType: "json",
+        x: 110,
+        y: 120,
+        wires: [["candidate_node"]],
+      });
+
     workflow.push({
-      id: "candidate_node",
-      type: "function",
-      z: tabId,
-      name: "Candidate",
-      func: `
-        // Add workflowName and candidateEmail to the msg object
-        msg.workflowName = "${workflowName}";
-        msg.candidateEmail = "${candidateEmail}";
-        msg.payload.candidate = "${candidateEmail}";
-        return msg;
-      `,
-      outputs: 1,
-      x: 300,
-      y: 180,
-      wires: [["check_form_completed"]],
-    });
+        id: "candidate_node",
+        type: "function",
+        z: tabId,
+        name: "Candidate",
+        func: `
+          // Add workflowName and candidateEmail to the msg object
+          msg.workflowName = "${workflowName}";
+          msg.candidateEmail = "${candidateEmail}";
+          msg.payload.candidate = "${candidateEmail}";
+      
+          // Set formCompleted here
+          msg.payload.formCompleted = true; // Replace with your logic if needed
+      
+          return msg;
+        `,
+        outputs: 1,
+        x: 300,
+        y: 180,
+        wires: [["check_form_completed"]],
+      });
   
     // Check Form Completed Node (Function Node)
     // Check Form Completed Node (Function Node)
-workflow.push({
-    id: "check_form_completed",
-    type: "function",
-    z: tabId,
-    name: "Check if the form completed",
-    func: `
-      // Check if the form is completed
-      if (msg.payload.formCompleted === true){
-        // Prepare the parameters for the PostgreSQL query
-        msg.params = [
-          2, // user_id
-          JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
-          "Completed", // status
-          1, // current_level
-          5 // total_levels
-        ];
-        return [msg, null]; // Send msg to the first output (for true case)
-      } else {
-        return [null, msg]; // Send msg to the second output (for false case)
-      }
-    `,
-    outputs: 2,
-    x: 700,
-    y: 180,
-    wires: [
-      ["postgres_insert_candidate_approve","manager_node"], // True case
-      ["postgres_insert_candidate_reject"] // False case (optional, for debugging)
-    ],
-  });
+    workflow.push({
+        id: "check_form_completed",
+        type: "function",
+        z: tabId,
+        name: "Check if the form completed",
+        func: `
+          // Check if the form is completed
+          if (msg.payload.formCompleted === true) {
+            // Prepare the parameters for the PostgreSQL query
+            msg.params = [
+              2, // user_id
+              JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
+              "Completed", // status
+              1, // current_level
+              5 // total_levels
+            ];
+            return [msg, null]; // Send msg to the first output (for true case)
+          } else {
+            return [null, msg]; // Send msg to the second output (for false case)
+          }
+        `,
+        outputs: 2,
+        x: 700,
+        y: 180,
+        wires: [
+          ["postgres_insert_candidate_approve", "manager_node"], // True case
+          ["postgres_insert_candidate_reject"] // False case
+        ],
+      });
+
 
   
     // PostgreSQL Insert Node
@@ -204,18 +206,17 @@ workflow.push({
         wires: [],
     });
 
-    // Manager node
     workflow.push({
         id: "manager_node",
         type: "function",
         z: tabId,
         name: "Manager",
         func: `
-            // Add candidate details to the msg object
-            msg.candidateEmail = "${candidateEmail}";
-            msg.workflowName = "${workflowName}";
-            msg.payload.candidate = "${candidateEmail}";
-            return msg;
+          // Add candidate details to the msg object
+          msg.candidateEmail = "${candidateEmail}";
+          msg.workflowName = "${workflowName}";
+          msg.payload.candidate = "${candidateEmail}";
+          return msg;
         `,
         outputs: 1,
         x: 900,
@@ -230,8 +231,9 @@ workflow.push({
         name: "Check manager decision",
         func: `
           // Check if the form is completed
-          if (msg.payload.formCompleted === true){
-            // Prepare the parameters for the PostgreSQL query
+          if (msg.payload.formCompleted === true) {
+            // Manager approves the request
+            msg.payload.managerDecision = "Approved"; // Add manager's decision to the payload
             msg.params = [
               2, // user_id
               JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
@@ -239,21 +241,30 @@ workflow.push({
               2, // current_level
               5 // total_levels
             ];
-            return [msg, null]; // Send msg to the first output (for true case)
+            return [msg, null]; // Send msg to the first output (for approval)
           } else {
-            return [null, msg]; // Send msg to the second output (for false case)
+            // Manager rejects the request
+            msg.payload.managerDecision = "Rejected"; // Add manager's decision to the payload
+            msg.params = [
+              2, // user_id
+              JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
+              "Rejected", // status
+              2, // current_level
+              5 // total_levels
+            ];
+            return [null, msg]; // Send msg to the second output (for rejection)
           }
         `,
         outputs: 2,
-        x: 700,
+        x: 1100,
         y: 180,
         wires: [
-          ["postgres_insert_manager_approve","hrbp_node"], // True case
-          ["postgres_insert_manager_reject"] // False case (optional, for debugging)
+          ["postgres_insert_manager_approve", "hrbp_node"], // True case (Approved)
+          ["postgres_insert_manager_reject"] // False case (Rejected)
         ],
       });
     
-    // PostgreSQL Insert Node
+    // // PostgreSQL Insert Node
     workflow.push({
         id: "postgres_insert_manager_approve",
         type: "postgresql",
@@ -269,7 +280,7 @@ workflow.push({
         wires: ["debug_output"],
     });
 
-     // PostgreSQL Insert Node
+    //  // PostgreSQL Insert Node
      workflow.push({
         id: "postgres_insert_manager_reject",
         type: "postgresql",
@@ -286,18 +297,17 @@ workflow.push({
     });
 
 
-    // HRBP node
-    workflow.push({
+     workflow.push({
         id: "hrbp_node",
         type: "function",
         z: tabId,
         name: "HRBP",
         func: `
-            // Add candidate details to the msg object
-            msg.candidateEmail = "${candidateEmail}";
-            msg.workflowName = "${workflowName}";
-            msg.payload.candidate = "${candidateEmail}";
-            return msg;
+          // Add candidate details to the msg object
+          msg.candidateEmail = "${candidateEmail}";
+          msg.workflowName = "${workflowName}";
+          msg.payload.candidate = "${candidateEmail}";
+          return msg;
         `,
         outputs: 1,
         x: 1500,
@@ -305,16 +315,16 @@ workflow.push({
         wires: [["check_hrbp_decision"]],
       });
 
-
       workflow.push({
         id: "check_hrbp_decision",
         type: "function",
         z: tabId,
         name: "Check HRBP decision",
         func: `
-          // Check if the form is completed
-          if (msg.payload.formCompleted === true){
-            // Prepare the parameters for the PostgreSQL query
+          // Check if the manager has approved the request
+          if (msg.payload.managerDecision === "Rejected") {
+            // HRBP proceeds with approval
+            msg.payload.hrbpDecision = "Approved"; // Add HRBP's decision to the payload
             msg.params = [
               2, // user_id
               JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
@@ -322,19 +332,33 @@ workflow.push({
               3, // current_level
               5 // total_levels
             ];
-            return [msg, null]; // Send msg to the first output (for true case)
+            return [msg, null]; // Send msg to the first output (for approval)
           } else {
-            return [null, msg]; // Send msg to the second output (for false case)
+            // HRBP rejects the request
+            msg.payload.hrbpDecision = "Rejected"; // Add HRBP's decision to the payload
+            msg.params = [
+              2, // user_id
+              JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
+              "Rejected", // status
+              3, // current_level
+              5 // total_levels
+            ];
+            return [null, msg]; // Send msg to the second output (for rejection)
           }
         `,
         outputs: 2,
-        x: 700,
+        x: 1700,
         y: 180,
         wires: [
-          ["postgres_insert_hrbp_approve","debug_output"], // True case
-          ["postgres_insert_hrbp_reject"] // False case (optional, for debugging)
+          ["postgres_insert_hrbp_approve", "debug_output"], // True case (Approved)
+          ["postgres_insert_hrbp_reject"] // False case (Rejected)
         ],
       });
+
+
+
+
+    
 
       // PostgreSQL Insert Node
     workflow.push({
