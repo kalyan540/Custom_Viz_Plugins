@@ -191,6 +191,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       wires: [],
     });
   
+    
     // PostgreSQL Insert Node
     workflow.push({
       id: "postgres_insert",
