@@ -166,7 +166,7 @@ workflow.push({
     x: 700,
     y: 180,
     wires: [
-      ["postgres_insert_candidate_approve","manager_node","debug_output"], // True case
+      ["postgres_insert_candidate_approve","manager_node"], // True case
       ["postgres_insert_candidate_reject"] // False case (optional, for debugging)
     ],
   });
@@ -185,7 +185,7 @@ workflow.push({
         outputs: 1,
         x: 1100,
         y: 120,
-        wires: ["debug_output"],
+        wires: [],
     });
 
     // PostgreSQL Insert Node
@@ -210,7 +210,13 @@ workflow.push({
         type: "function",
         z: tabId,
         name: "Manager",
-        func: `msg.payload = {}; msg.payload.manager = \"${managerEmail}\";\nreturn msg;`,
+        func: `
+            // Add candidate details to the msg object
+            msg.candidateEmail = "${candidateEmail}";
+            msg.workflowName = "${workflowName}";
+            msg.payload.candidate = "${candidateEmail}";
+            return msg;
+        `,
         outputs: 1,
         x: 900,
         y: 120,
@@ -242,7 +248,7 @@ workflow.push({
         x: 700,
         y: 180,
         wires: [
-          ["postgres_insert_manager_approve","hrbp_node","debug_output"], // True case
+          ["postgres_insert_manager_approve","debug_output"], // True case
           ["postgres_insert_manager_reject"] // False case (optional, for debugging)
         ],
       });
@@ -265,7 +271,7 @@ workflow.push({
 
      // PostgreSQL Insert Node
      workflow.push({
-        id: "postgres_insert_candidate_reject",
+        id: "postgres_insert_manager_reject",
         type: "postgresql",
         z: tabId,
         name: "Insert into PostgreSQL(Reject)",
