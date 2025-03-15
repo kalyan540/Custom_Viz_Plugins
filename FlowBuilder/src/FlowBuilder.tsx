@@ -139,18 +139,25 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       wires: [["check_form_completed"]],
     });
   
-    // Check Form Completed Node
+    // Check Form Completed Node (Switch Node)
     workflow.push({
       id: "check_form_completed",
-      type: "function", // Changed from "switch" to "function"
+      type: "switch",
       z: tabId,
       name: "Check if the form completed",
+      property: "payload.formCompleted",
+      propertyType: "msg",
+      rules: [
+        { t: "eq", v: true, vt: "bool" }, // True case
+        { t: "eq", v: false, vt: "bool" }, // False case
+      ],
+      outputs: 2,
       func: `
         // Check if the form is completed
         if (msg.payload.formCompleted === true) {
           // Prepare the parameters for the PostgreSQL query
           msg.params = [
-            343, // id
+            393, // id
             2, // user_id
             JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
             "Approved", // status
@@ -162,22 +169,21 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           return [null, msg]; // Send msg to the second output (for false case)
         }
       `,
-      outputs: 2, // Two outputs for true/false cases
       x: 700,
       y: 180,
       wires: [
-        ["debug_approve", "postgres_insert_candidate_approve"], // True case
+        ["postgres_insert"], // True case
         ["debug_reject"] // False case (optional, for debugging)
       ],
     });
   
-    // Insert into PostgreSQL (Candidate Approve) Node
+    // PostgreSQL Insert Node
     workflow.push({
-      id: "postgres_insert_candidate_approve",
+      id: "postgres_insert",
       type: "postgresql",
       z: tabId,
-      name: "Insert into PostgreSQL (Candidate Approve)",
-      query: "INSERT INTO public.approval_requests (id,user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, $6, now());",
+      name: "Insert into PostgreSQL",
+      query: "INSERT INTO public.approval_requests (id, user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, $6, now());",
       postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
       split: false,
       rowsPerMsg: 1,
@@ -203,6 +209,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   
     return workflow;
   };
+
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);
