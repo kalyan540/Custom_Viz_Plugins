@@ -277,7 +277,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         outputs: 1,
         x: 1100,
         y: 120,
-        wires: ["debug_output"],
+        wires: [],
     });
 
     //  // PostgreSQL Insert Node
@@ -463,7 +463,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         outputs: 1,
         x: 2500,
         y: 120,
-        wires: ["debug_output"],
+        wires: [],
       });
 
 
