@@ -605,7 +605,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         outputs: 1,
         x: 3500,
         y: 120,
-        wires: ["debud_output"], // No further action
+        wires: ["debug_output"], // No further action
       });
 
 
