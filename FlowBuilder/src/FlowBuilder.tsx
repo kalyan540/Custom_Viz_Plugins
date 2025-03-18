@@ -70,7 +70,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const [workflowName, setWorkflowName] = useState(
     `Workflow-${Math.floor(Math.random() * 1000)}`, // Auto-generate workflow name
   );
-  const [managers, setManagers] = useState<{ name: string; email: string }[]>(
+  const [nodes, setNodes] = useState<{ type: string; name: string; email: string }[]>(
     [],
   );
   const [currentUserEmail, setCurrentUserEmail] = useState(
@@ -82,7 +82,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
   // Handle form submission
   const handleSubmit = async () => {
-    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail);
+    const workflowJson = generateWorkflowJson(workflowName, nodes, currentUserEmail);
     console.log('Workflow JSON:', workflowJson);
 
     try {
@@ -108,20 +108,20 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     }
   };
 
-  // Add a manager to the list
-  const addManager = (manager: { name: string; email: string }) => {
-    setManagers([...managers, manager]);
+  // Add a node to the list
+  const addNode = (node: { type: string; name: string; email: string }) => {
+    setNodes([...nodes, node]);
   };
 
   // Generate JSON for Node-Red
   const generateWorkflowJson = (
     workflowName: string,
-    managers: { name: string; email: string }[],
+    nodes: { type: string; name: string; email: string }[],
     userEmail: string,
   ) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
-  
+
     // Start node
     workflow.push({
       id: "inject_start",
@@ -133,28 +133,28 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       payloadType: "json",
       x: 110,
       y: 120,
-      wires: [[`manager_0`]],
+      wires: [[`node_0`]],
     });
-  
-    // Manager approval nodes
-    managers.forEach((manager, index) => {
+
+    // Node approval nodes
+    nodes.forEach((node, index) => {
       workflow.push({
-        id: `manager_${index}`,
+        id: `node_${index}`,
         type: "function",
         z: tabId,
-        name: `${manager.name} Approval`,
-        func: `msg.payload = {}; msg.payload.approval = Math.random() > 0.5 ? \"Approved\" : \"Rejected\";\nmsg.payload.manager = \"${manager.name}\";\nreturn msg;`,
+        name: `${node.name} (${node.type}) Approval`,
+        func: `msg.payload = {}; msg.payload.approval = Math.random() > 0.5 ? \"Approved\" : \"Rejected\";\nmsg.payload.${node.type.toLowerCase()} = \"${node.name}\";\nreturn msg;`,
         outputs: 1,
         x: 300,
         y: 120 + index * 80,
         wires: [[`decision_${index}`]],
       });
-      
+
       workflow.push({
         id: `decision_${index}`,
         type: "switch",
         z: tabId,
-        name: `Check ${manager.name} Decision`,
+        name: `Check ${node.name} Decision`,
         property: "payload.approval",
         propertyType: "msg",
         rules: [
@@ -165,12 +165,12 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         x: 220,
         y: 160 + index * 80,
         wires: [
-          [index === managers.length - 1 ? "set_completed_status" : `manager_${index + 1}`],
+          [index === nodes.length - 1 ? "set_completed_status" : `node_${index + 1}`],
           ["reject_notification"],
         ],
       });
     });
-  
+
     // Set completed status node
     workflow.push({
       id: "set_completed_status",
@@ -183,7 +183,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 180,
       wires: [["approval_email"]],
     });
-  
+
     // Approval email node
     workflow.push({
       id: "approval_email",
@@ -200,7 +200,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       wires: [],
     });
 
-    //Reject notification email node
+    // Reject notification email node
     workflow.push({
       id: "reject_notification",
       type: "e-mail",
@@ -215,37 +215,39 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 300,
       wires: [],
     });
-  
+
     return workflow; // Return a plain JavaScript object
   };
 
-  // Popover content for selecting a manager
-  const managerPopoverContent = (
+  // Popover content for selecting a node
+  const nodePopoverContent = (
     <div>
-      <input
-        type="text"
-        placeholder="Search manager..."
-        style={{ marginBottom: '8px' }}
-      />
-      <div>
-        <div
-          style={{ padding: '8px', cursor: 'pointer' }}
-          onClick={() => {
-            addManager({ name: 'John Doe', email: 'john.doe@example.com' });
-            setPopoverVisible(false);
-          }}
-        >
-          John Doe (john.doe@example.com)
-        </div>
-        <div
-          style={{ padding: '8px', cursor: 'pointer' }}
-          onClick={() => {
-            addManager({ name: 'Jane Smith', email: 'jane.smith@example.com' });
-            setPopoverVisible(false);
-          }}
-        >
-          Jane Smith (jane.smith@example.com)
-        </div>
+      <div
+        style={{ padding: '8px', cursor: 'pointer' }}
+        onClick={() => {
+          addNode({ type: 'Manager', name: 'John Doe', email: 'john.doe@example.com' });
+          setPopoverVisible(false);
+        }}
+      >
+        Manager (John Doe)
+      </div>
+      <div
+        style={{ padding: '8px', cursor: 'pointer' }}
+        onClick={() => {
+          addNode({ type: 'HRBP', name: 'Jane Smith', email: 'jane.smith@example.com' });
+          setPopoverVisible(false);
+        }}
+      >
+        HRBP (Jane Smith)
+      </div>
+      <div
+        style={{ padding: '8px', cursor: 'pointer' }}
+        onClick={() => {
+          addNode({ type: 'Candidate', name: 'Alice Johnson', email: 'alice.johnson@example.com' });
+          setPopoverVisible(false);
+        }}
+      >
+        Candidate (Alice Johnson)
       </div>
     </div>
   );
@@ -282,14 +284,14 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         />
       </div>
       <div className="manager-list">
-        {managers.map((manager, index) => (
+        {nodes.map((node, index) => (
           <div key={index} className="manager-item">
             <span>
-              {manager.name} ({manager.email})
+              {node.name} ({node.type}) - {node.email}
             </span>
             <button
               onClick={() =>
-                setManagers(managers.filter((_, i) => i !== index))
+                setNodes(nodes.filter((_, i) => i !== index))
               }
             >
               Remove
@@ -299,12 +301,12 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       </div>
       <div className="form-group">
         <Popover
-          content={managerPopoverContent}
+          content={nodePopoverContent}
           trigger="click"
           visible={popoverVisible}
           onVisibleChange={(visible) => setPopoverVisible(visible)}
         >
-          <button>Add Manager/Approver</button>
+          <button>Add Nodes</button>
         </Popover>
       </div>
       <button onClick={handleSubmit}>Submit</button>
