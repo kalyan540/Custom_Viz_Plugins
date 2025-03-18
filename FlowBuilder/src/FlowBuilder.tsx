@@ -136,7 +136,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     workflow.push({
             "id": "approval_email",
             "type": "e-mail",
-            z: tabId,
+            "z": "e0ba68613f04424c",
             "name": "wameya7577@excederm.com",
             "server": "sandbox.smtp.mailtrap.io",
             "port": "2525",
