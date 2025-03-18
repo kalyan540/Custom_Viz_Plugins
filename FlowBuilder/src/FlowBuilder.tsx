@@ -41,6 +41,8 @@ const Styles = styled.div<FlowBuilderStylesProps>`
     background-color: ${({ theme }) => theme.colors.primary.dark1};
   }
 `;
+
+
 export default function FlowBuilder(props: FlowBuilderProps) {
   const { height, width, apiEndpoint } = props;
   const rootElem = createRef<HTMLDivElement>();
@@ -122,7 +124,92 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       method: "post",
       x: 100,
       y: 100,
-      wires: [["prepare_email_0"]], // Start with the first node
+      wires: [["candidate"]], // Connect to the candidate node
+    });
+
+    // Candidate Node
+    workflow.push({
+      id: "candidate",
+      type: "function",
+      z: tabId,
+      name: "Candidate",
+      func: `
+        msg.workflowName = "${workflowName}";
+        msg.candidateEmail = "wameya7577@excederm.com"; // Use the provided email
+        msg.payload.candidate = "wameya7577@excederm.com";
+        msg.payload.formCompleted = true;
+        return msg;
+      `,
+      outputs: 1,
+      x: 300,
+      y: 180,
+      wires: [["check_form_completed"]],
+    });
+
+    // Check Form Completed Node
+    workflow.push({
+      id: "check_form_completed",
+      type: "function",
+      z: tabId,
+      name: "Check if the form completed",
+      func: `
+        if (msg.payload.formCompleted === true) {
+          msg.params = [
+            2, // user_id
+            JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }),
+            "Completed", // status
+            1, // current_level
+            5 // total_levels
+          ];
+          return [msg, null];
+        } else {
+          return [null, msg];
+        }
+      `,
+      outputs: 2,
+      x: 700,
+      y: 180,
+      wires: [
+        ["postgres_insert_candidate_approve", "http_response"],
+        ["postgres_insert_candidate_reject", "http_response"],
+      ],
+    });
+
+    // PostgreSQL Insert Nodes
+    workflow.push({
+      id: "postgres_insert_candidate_approve",
+      type: "postgresql",
+      z: tabId,
+      name: "Insert into PostgreSQL (Approve)",
+      query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+      postgreSQLConfig: "7b9ec91590d534cc",
+      x: 1100,
+      y: 120,
+      wires: [],
+    });
+
+    workflow.push({
+      id: "postgres_insert_candidate_reject",
+      type: "postgresql",
+      z: tabId,
+      name: "Insert into PostgreSQL (Reject)",
+      query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+      postgreSQLConfig: "7b9ec91590d534cc",
+      x: 1100,
+      y: 120,
+      wires: [],
+    });
+
+    // HTTP Response Node
+    workflow.push({
+      id: "http_response",
+      type: "http response",
+      z: tabId,
+      name: "HTTP Response",
+      statusCode: "200",
+      x: 500,
+      y: 100,
+      wires: [],
     });
 
     // Dynamically generate nodes for each selected node
@@ -137,7 +224,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           msg.payload.status = "Pending";
           msg.request_id = msg.payload?.requestId || "UnknownID";
           msg.topic = \`Workflow \${msg.request_id}\`;
-          msg.to = "${node.email}"; // Send email to the node
+          msg.to = "wameya7577@excederm.com"; // Use the provided email
           msg.html = \`
             <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
               <h2 style="color: #2c3e50;">Workflow Request Update</h2>
@@ -173,8 +260,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         z: tabId,
         server: "sandbox.smtp.mailtrap.io",
         port: "2525",
-        username: "62753aa9883bbc",
-        password: "a249d24a02ce4f",
+        username: "62753aa9883bbc", // Visible in the email field
+        password: "a249d24a02ce4f", // Visible in the email field
         subject: "Workflow Update",
         body: "{{payload.html}}",
         x: 770,
@@ -190,8 +277,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         name: `Process ${node.type}`,
         func: `
           msg.workflowName = "${workflowName}";
-          msg.nodeEmail = "${node.email}";
-          msg.payload.node = "${node.email}";
+          msg.nodeEmail = "wameya7577@excederm.com"; // Use the provided email
+          msg.payload.node = "wameya7577@excederm.com";
           msg.payload.formCompleted = true;
           return msg;
         `,
@@ -261,18 +348,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       }
     });
 
-    // HTTP Response Node
-    workflow.push({
-      id: "http_response",
-      type: "http response",
-      z: tabId,
-      name: "HTTP Response",
-      statusCode: "200",
-      x: 500,
-      y: 100,
-      wires: [],
-    });
-
     return workflow;
   };
 
@@ -282,29 +357,29 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       <div
         style={{ padding: '8px', cursor: 'pointer' }}
         onClick={() => {
-          addNode('Manager', 'manager@example.com');
+          addNode('Manager', 'wameya7577@excederm.com');
           setPopoverVisible(false);
         }}
       >
-        Manager (manager@example.com)
+        Manager (wameya7577@excederm.com)
       </div>
       <div
         style={{ padding: '8px', cursor: 'pointer' }}
         onClick={() => {
-          addNode('HRBP', 'hrbp@example.com');
+          addNode('HRBP', 'wameya7577@excederm.com');
           setPopoverVisible(false);
         }}
       >
-        HRBP (hrbp@example.com)
+        HRBP (wameya7577@excederm.com)
       </div>
       <div
         style={{ padding: '8px', cursor: 'pointer' }}
         onClick={() => {
-          addNode('Candidate', 'candidate@example.com');
+          addNode('Candidate', 'wameya7577@excederm.com');
           setPopoverVisible(false);
         }}
       >
-        Candidate (candidate@example.com)
+        Candidate (wameya7577@excederm.com)
       </div>
     </div>
   );
@@ -335,7 +410,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         {nodes.map((node, index) => (
           <div key={index} className="node-item">
             <span>
-              {node.type} ({node.email})
+              {node.type} (wameya7577@excederm.com)
             </span>
             <button
               onClick={() =>
