@@ -40,25 +40,6 @@ const Styles = styled.div<FlowBuilderStylesProps>`
   button:hover {
     background-color: ${({ theme }) => theme.colors.primary.dark1};
   }
-
-  .node-list {
-    margin-top: ${({ theme }) => theme.gridUnit * 3}px;
-    max-height: 150px; /* Set a max height for the scrollable area */
-    overflow-y: auto; /* Enable vertical scrolling */
-    border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
-    border-radius: ${({ theme }) => theme.gridUnit}px;
-    padding: ${({ theme }) => theme.gridUnit * 2}px;
-  }
-
-  .node-item {
-    padding: ${({ theme }) => theme.gridUnit * 2}px;
-    border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
-    border-radius: ${({ theme }) => theme.gridUnit}px;
-    margin-bottom: ${({ theme }) => theme.gridUnit}px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
 `;
 
 export default function FlowBuilder(props: FlowBuilderProps) {
@@ -147,7 +128,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       wires: [["candidate_node", "prepare_email"]],
     });
 
-    // Prepare Email Node
+    // Prepare Email Node (for Candidate)
     workflow.push({
       id: "prepare_email",
       type: "function",
@@ -186,7 +167,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       wires: [["send_email"]],
     });
 
-    // Send Email Node
+    // Send Email Node (for Candidate)
     workflow.push({
       id: "send_email",
       type: "e-mail",
@@ -287,6 +268,139 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       wires: [],
     });
 
+    // Add Manager Nodes Dynamically
+    nodes.forEach((node, index) => {
+      if (node.type === 'Manager') {
+        // Prepare Email Node for Manager
+        workflow.push({
+          id: `prepare_email_manager_${index}`,
+          type: "function",
+          z: tabId,
+          name: `Prepare Email for Manager ${index + 1}`,
+          func: `
+            msg.payload.status = "Pending";
+            msg.request_id = msg.payload?.requestId || "UnknownID";
+            msg.topic = \`Workflow \${msg.request_id}\`;
+            msg.to = "${node.email}"; // Send email to manager
+            msg.html = \`
+              <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                <h2 style="color: #2c3e50;">Workflow Request Update</h2>
+                <p style="font-size: 16px;">Workflow \${msg.request_id} has been created. To approve or reject, please click on the link <a href="http://www.google.com">Google</a>.</p>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                  <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Request ID:</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">\${msg.request_id}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Status:</strong></td>
+                    <td style="padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};">
+                      <strong>\${msg.payload.status}</strong>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">This is an automated message. Please do not reply.</p>
+              </div>
+            \`;
+            msg.payload = msg.html;
+            return msg;
+          `,
+          outputs: 1,
+          x: 310,
+          y: 240 + index * 80,
+          wires: [[`send_email_manager_${index}`]],
+        });
+
+        // Send Email Node for Manager
+        workflow.push({
+          id: `send_email_manager_${index}`,
+          type: "e-mail",
+          z: tabId,
+          server: "sandbox.smtp.mailtrap.io",
+          port: "2525",
+          username: "62753aa9883bbc",
+          password: "a249d24a02ce4f",
+          subject: "Workflow Update",
+          body: "{{payload.html}}",
+          x: 770,
+          y: 240 + index * 80,
+          wires: [],
+        });
+
+        // Manager Node
+        workflow.push({
+          id: `manager_node_${index}`,
+          type: "function",
+          z: tabId,
+          name: `Manager ${index + 1}`,
+          func: `
+            msg.workflowName = "${workflowName}";
+            msg.managerEmail = "${node.email}";
+            msg.payload.manager = "${node.email}";
+            msg.payload.formCompleted = true;
+            return msg;
+          `,
+          outputs: 1,
+          x: 300,
+          y: 300 + index * 80,
+          wires: [[`check_form_completed_manager_${index}`]],
+        });
+
+        // Check Form Completed Node for Manager
+        workflow.push({
+          id: `check_form_completed_manager_${index}`,
+          type: "function",
+          z: tabId,
+          name: `Check if the form completed for Manager ${index + 1}`,
+          func: `
+            if (msg.payload.formCompleted === true) {
+              msg.params = [
+                2, // user_id
+                JSON.stringify({ workflowName: msg.workflowName, manager: msg.managerEmail }),
+                "Completed", // status
+                1, // current_level
+                5 // total_levels
+              ];
+              return [msg, null];
+            } else {
+              return [null, msg];
+            }
+          `,
+          outputs: 2,
+          x: 700,
+          y: 300 + index * 80,
+          wires: [
+            [`postgres_insert_manager_approve_${index}`, "http_response"],
+            [`postgres_insert_manager_reject_${index}`, "http_response"],
+          ],
+        });
+
+        // PostgreSQL Insert Nodes for Manager
+        workflow.push({
+          id: `postgres_insert_manager_approve_${index}`,
+          type: "postgresql",
+          z: tabId,
+          name: `Insert into PostgreSQL (Approve) for Manager ${index + 1}`,
+          query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+          postgreSQLConfig: "7b9ec91590d534cc",
+          x: 1100,
+          y: 240 + index * 80,
+          wires: [],
+        });
+
+        workflow.push({
+          id: `postgres_insert_manager_reject_${index}`,
+          type: "postgresql",
+          z: tabId,
+          name: `Insert into PostgreSQL (Reject) for Manager ${index + 1}`,
+          query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+          postgreSQLConfig: "7b9ec91590d534cc",
+          x: 1100,
+          y: 240 + index * 80,
+          wires: [],
+        });
+      }
+    });
+
     return workflow;
   };
 
@@ -382,7 +496,5 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       </div>
       <button onClick={handleSubmit}>Submit</button>
     </Styles>
-
-    
   );
 }
