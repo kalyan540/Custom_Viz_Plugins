@@ -111,13 +111,13 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         "swaggerDoc": "",
         "x": 100,
         "y": 100,
-        "wires": [["candidate_node","email_details"]]
+        "wires": [["candidate_node","email_detail"]]
       });
       
 
       workflow.push(
         {
-            "id": "send_email",
+            "id": "email_detail",
             "type": "function",
             "z": "fed1a005e4bce54b",
             "name": "email_details",
