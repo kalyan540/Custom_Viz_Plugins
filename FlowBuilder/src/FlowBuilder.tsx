@@ -139,7 +139,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
       // Approval email node
     workflow.push({
-            "id": "send_mail",
+            "id": "send_email",
             "type": "e-mail",
             "z": "e0ba68613f04424c",
             //"name": "wameya7577@excederm.com",
