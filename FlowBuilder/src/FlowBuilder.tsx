@@ -110,8 +110,27 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         "swaggerDoc": "",
         "x": 100,
         "y": 100,
-        "wires": [["approval_email","candidate_node"]]
+        "wires": [["approval_email","candidate_node","Send_email"]]
       });
+      workflow.push(
+        {
+            "id": "Send_email",
+            "type": "function",
+            "z": "fed1a005e4bce54b",
+            "name": "Set status to completed",
+            "func": "\nmsg.payload.status = \"Completed\";\nmsg.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = `Workflow ${msg.request_id}`;\n//msg.payload = `Your request with ID ${msg.request_id} has been processed.`;\n\nmsg.html = `\n    <div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\">\n        <h2 style=\"color: #2c3e50;\">Workflow Request Update</h2>\n        <p style=\"font-size: 16px;\">Workflow ${msg.request_id} has been created, to approve or reject please click on the link <a href=\"www.google.com\"> Google</a> </p>\n        <table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\">\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd;\">${msg.request_id}</td>\n            </tr>\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd; color: ${msg.payload.status === 'Completed' ? 'green' : 'red'};\">\n                    <strong>${msg.payload.status}</strong>\n                </td>\n            </tr>\n        </table>\n        <p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p>\n    </div>\n`;\nmsg.payload = msg.html;\nreturn msg;",
+            "outputs": 1,
+            "timeout": 0,
+            "noerr": 0,
+            "initialize": "",
+            "finalize": "",
+            "libs": [],
+            "x": 310,
+            "y": 120,
+            "wires": [
+                ["approval_email"]
+            ]
+        })
 
       // Approval email node
     workflow.push({
