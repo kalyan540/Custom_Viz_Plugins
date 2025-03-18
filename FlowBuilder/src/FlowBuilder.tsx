@@ -279,6 +279,23 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         y: 120,
         wires: [],
     });
+
+    //  // PostgreSQL Insert Node
+     workflow.push({
+        id: "postgres_insert_manager_reject",
+        type: "postgresql",
+        z: tabId,
+        name: "Insert into PostgreSQL(Reject)",
+        query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 1100,
+        y: 120,
+        wires: [],
+    });
+
     
 
     // Debug Output Node
