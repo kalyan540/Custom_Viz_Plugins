@@ -207,7 +207,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         x: 700,
         y: 180,
         wires: [
-          ["postgres_insert_candidate_approve","http_response","manager_node","email_details"], // True case
+          ["postgres_insert_candidate_approve","http_response","manager_node","email_detail"], // True case
           ["postgres_insert_candidate_reject","http_response"] // False case
         ],
       });
