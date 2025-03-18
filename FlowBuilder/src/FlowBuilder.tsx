@@ -42,7 +42,6 @@ const Styles = styled.div<FlowBuilderStylesProps>`
   }
 `;
 
-
 export default function FlowBuilder(props: FlowBuilderProps) {
   const { height, width, apiEndpoint } = props;
   const rootElem = createRef<HTMLDivElement>();
@@ -124,15 +123,70 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       method: "post",
       x: 100,
       y: 100,
-      wires: [["candidate"]], // Connect to the candidate node
+      wires: [["prepare_email", "process_candidate"]], // Two wires: prepare_email and process_candidate
     });
 
-    // Candidate Node
+    // Prepare Email Node
     workflow.push({
-      id: "candidate",
+      id: "prepare_email",
       type: "function",
       z: tabId,
-      name: "Candidate",
+      name: "Prepare Email",
+      func: `
+        msg.payload.status = "Pending";
+        msg.request_id = msg.payload?.requestId || "UnknownID";
+        msg.topic = \`Workflow \${msg.request_id}\`;
+        msg.to = "wameya7577@excederm.com"; // Use the provided email
+        msg.html = \`
+          <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+            <h2 style="color: #2c3e50;">Workflow Request Update</h2>
+            <p style="font-size: 16px;">Workflow \${msg.request_id} has been created. To approve or reject, please click on the link <a href="http://www.google.com">Google</a>.</p>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+              <tr>
+                <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Request ID:</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">\${msg.request_id}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Status:</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};">
+                  <strong>\${msg.payload.status}</strong>
+                </td>
+              </tr>
+            </table>
+            <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">This is an automated message. Please do not reply.</p>
+          </div>
+        \`;
+        msg.payload = msg.html;
+        return msg;
+      `,
+      outputs: 1,
+      x: 310,
+      y: 120,
+      wires: [["send_email"]],
+    });
+
+    // Send Email Node
+    workflow.push({
+      id: "send_email",
+      type: "e-mail",
+      z: tabId,
+      server: "sandbox.smtp.mailtrap.io",
+      port: "2525",
+      username: "62753aa9883bbc", // Visible in the email field
+      password: "a249d24a02ce4f", // Visible in the email field
+      subject: "Workflow Update",
+      body: "{{payload.html}}",
+      x: 770,
+      y: 120,
+      wires: [],
+    });
+
+    // Process Candidate Node
+    workflow.push({
+      id: "process_candidate",
+      type: "function",
+      z: tabId,
+      name: "Process Candidate",
       func: `
         msg.workflowName = "${workflowName}";
         msg.candidateEmail = "wameya7577@excederm.com"; // Use the provided email
@@ -143,36 +197,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       outputs: 1,
       x: 300,
       y: 180,
-      wires: [["check_form_completed"]],
-    });
-
-    // Check Form Completed Node
-    workflow.push({
-      id: "check_form_completed",
-      type: "function",
-      z: tabId,
-      name: "Check if the form completed",
-      func: `
-        if (msg.payload.formCompleted === true) {
-          msg.params = [
-            2, // user_id
-            JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }),
-            "Completed", // status
-            1, // current_level
-            5 // total_levels
-          ];
-          return [msg, null];
-        } else {
-          return [null, msg];
-        }
-      `,
-      outputs: 2,
-      x: 700,
-      y: 180,
-      wires: [
-        ["postgres_insert_candidate_approve", "http_response"],
-        ["postgres_insert_candidate_reject", "http_response"],
-      ],
+      wires: [["postgres_insert_candidate_approve", "postgres_insert_candidate_reject"]],
     });
 
     // PostgreSQL Insert Nodes
@@ -249,7 +274,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         `,
         outputs: 1,
         x: 310,
-        y: 120 + index * 80,
+        y: 240 + index * 80,
         wires: [[`send_email_${index}`]],
       });
 
@@ -265,7 +290,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         subject: "Workflow Update",
         body: "{{payload.html}}",
         x: 770,
-        y: 120 + index * 80,
+        y: 240 + index * 80,
         wires: [],
       });
 
@@ -284,37 +309,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         `,
         outputs: 1,
         x: 300,
-        y: 180 + index * 80,
-        wires: [[`check_form_completed_${index}`]],
-      });
-
-      // Check Form Completed Node
-      workflow.push({
-        id: `check_form_completed_${index}`,
-        type: "function",
-        z: tabId,
-        name: `Check if the form completed for ${node.type}`,
-        func: `
-          if (msg.payload.formCompleted === true) {
-            msg.params = [
-              2, // user_id
-              JSON.stringify({ workflowName: msg.workflowName, node: msg.nodeEmail }),
-              "Completed", // status
-              ${index + 1}, // current_level
-              ${nodes.length} // total_levels
-            ];
-            return [msg, null];
-          } else {
-            return [null, msg];
-          }
-        `,
-        outputs: 2,
-        x: 700,
-        y: 180 + index * 80,
-        wires: [
-          [`postgres_insert_approve_${index}`, "http_response"],
-          [`postgres_insert_reject_${index}`, "http_response"],
-        ],
+        y: 300 + index * 80,
+        wires: [[`postgres_insert_approve_${index}`, `postgres_insert_reject_${index}`]],
       });
 
       // PostgreSQL Insert Nodes
@@ -326,7 +322,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
         postgreSQLConfig: "7b9ec91590d534cc",
         x: 1100,
-        y: 120 + index * 80,
+        y: 240 + index * 80,
         wires: [],
       });
 
@@ -338,7 +334,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
         postgreSQLConfig: "7b9ec91590d534cc",
         x: 1100,
-        y: 120 + index * 80,
+        y: 240 + index * 80,
         wires: [],
       });
 
