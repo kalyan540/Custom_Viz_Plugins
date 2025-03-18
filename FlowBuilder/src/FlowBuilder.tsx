@@ -48,6 +48,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
   const [workflowName, setWorkflowName] = useState(`Workflow-${Math.floor(Math.random() * 1000)}`);
   const [candidateEmail, setCandidateEmail] = useState('');
+  const [managerEmail, setManagerEmail] = useState('');
 
   const handleSubmit = async () => {
     const workflowJson = generateWorkflowJson(workflowName, candidateEmail);
@@ -76,7 +77,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     }
   };
 
-  const generateWorkflowJson = (workflowName, candidateEmail) => {
+  const generateWorkflowJson = (workflowName, candidateEmail, managerEmail) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c";
   
@@ -407,6 +408,15 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           value={candidateEmail}
           onChange={(e) => setCandidateEmail(e.target.value)}
           placeholder="Enter candidate email"
+        />
+      </div>
+      <div className="form-group">
+        <label>Manager Email</label>
+        <input
+          type="text"
+          value={managerEmail}
+          onChange={(e) => setManagerEmail(e.target.value)}
+          placeholder="Enter manager email"
         />
       </div>
       <button onClick={handleSubmit}>Submit</button>
