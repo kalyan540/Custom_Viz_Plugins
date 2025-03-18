@@ -111,13 +111,13 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         "swaggerDoc": "",
         "x": 100,
         "y": 100,
-        "wires": [["candidate_node","email_detail"]]
+        "wires": [["candidate_node","email_details"]]
       });
       
 
       workflow.push(
         {
-            "id": "email_detail",
+            "id": "email_details",
             "type": "function",
             "z": "fed1a005e4bce54b",
             "name": "email_details",
@@ -207,7 +207,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         x: 700,
         y: 180,
         wires: [
-          ["postgres_insert_candidate_approve","http_response","manager_node","email_detail"], // True case
+          ["postgres_insert_candidate_approve","http_response","manager_node","email_details"], // True case
           ["postgres_insert_candidate_reject","http_response"] // False case
         ],
       });
@@ -279,7 +279,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
       workflow.push(
         {
-            "id": "send_email",
+            "id": "email_details",
             "type": "function",
             "z": "fed1a005e4bce54b",
             "name": "email_details",
