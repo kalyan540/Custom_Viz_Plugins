@@ -49,6 +49,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const [workflowName, setWorkflowName] = useState(`Workflow-${Math.floor(Math.random() * 1000)}`);
   const [candidateEmail, setCandidateEmail] = useState('');
   const [managerEmail, setManagerEmail] = useState('');
+const [hrbpEmail, setHrbpEmail] = useState('');
+
 
   const handleSubmit = async () => {
     const workflowJson = generateWorkflowJson(workflowName, candidateEmail);
@@ -77,7 +79,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     }
   };
 
-  const generateWorkflowJson = (workflowName, candidateEmail, managerEmail) => {
+  const generateWorkflowJson = (workflowName, candidateEmail, managerEmail,hrbpEmail) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c";
   
@@ -111,16 +113,16 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         "swaggerDoc": "",
         "x": 100,
         "y": 100,
-        "wires": [["candidate_node","email_details"]]
+        "wires": [["candidate_node","prepare_email"]]
       });
       
 
       workflow.push(
         {
-            "id": "email_details",
+            "id": "prepare_email",
             "type": "function",
             "z": "fed1a005e4bce54b",
-            "name": "email_details",
+            "name": "prepare_email",
             "func": "\nmsg.payload.status = \"Completed\";\nmsg.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = `Workflow ${msg.request_id}`;\nmsg.to = msg.payload.to || \"herig68683@cybtric.com\";\n//msg.payload = Your request with ID ${msg.request_id} has been processed.;\n\nmsg.html = \n    `<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\">\n        <h2 style=\"color: #2c3e50;\">Workflow Request Update</h2>\n        <p style=\"font-size: 16px;\">Workflow ${msg.request_id} has been created, to approve or reject please click on the link <a href=\"http://www.google.com\"> Google</a> </p>\n        <table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\">\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd;\">${msg.request_id}</td>\n            </tr>\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd; color: ${msg.payload.status === 'Completed' ? 'green' : 'red'};\">\n                    <strong>${msg.payload.status}</strong>\n                </td>\n            </tr>\n        </table>\n        <p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p>\n    </div>`;\nmsg.payload = msg.html;\nreturn msg;",
             "outputs": 1,
             "timeout": 0,
@@ -207,32 +209,13 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         x: 700,
         y: 180,
         wires: [
-          ["postgres_insert_candidate_approve","http_response","manager_node","email_details"], // True case
+          ["postgres_insert_candidate_approve","http_response"], // True case
           ["postgres_insert_candidate_reject","http_response"] // False case
         ],
       });
 
 
-      workflow.push(
-        {
-            "id": "email_details",
-            "type": "function",
-            "z": "fed1a005e4bce54b",
-            "name": "email_details",
-            "func": "\nmsg.payload.status = \"Completed\";\nmsg.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = `Workflow ${msg.request_id}`;\nmsg.to = msg.payload.to || \"herig68683@cybtric.com\";\n//msg.payload = Your request with ID ${msg.request_id} has been processed.;\n\nmsg.html = \n    `<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\">\n        <h2 style=\"color: #2c3e50;\">Workflow Request Update</h2>\n        <p style=\"font-size: 16px;\">Workflow ${msg.request_id} has been created, to approve or reject please click on the link <a href=\"http://www.google.com\"> Google</a> </p>\n        <table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\">\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd;\">${msg.request_id}</td>\n            </tr>\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd; color: ${msg.payload.status === 'Completed' ? 'green' : 'red'};\">\n                    <strong>${msg.payload.status}</strong>\n                </td>\n            </tr>\n        </table>\n        <p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p>\n    </div>`;\nmsg.payload = msg.html;\nreturn msg;",
-            "outputs": 1,
-            "timeout": 0,
-            "noerr": 0,
-            "initialize": "",
-            "finalize": "",
-            "libs": [],
-            "x": 310,
-            "y": 120,
-            "wires": [
-                ["send_email"]
-            ]
-        }
-    )
+      
       workflow.push({
       
         "id": "http_response",
@@ -280,122 +263,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         wires: [],
     });
 
-    workflow.push({
-        id: "manager_node",
-        type: "function",
-        z: tabId,
-        name: "Manager",
-        func: `
-          // Add candidate details to the msg object
-          msg.candidateEmail = "${candidateEmail}";
-          msg.workflowName = "${workflowName}";
-          msg.payload.candidate = "${candidateEmail}";
-          return msg;
-        `,
-        outputs: 1,
-        x: 900,
-        y: 120,
-        wires: [["check_manager_decision"]],
-      });
-
-
-      workflow.push(
-        {
-            "id": "email_details",
-            "type": "function",
-            "z": "fed1a005e4bce54b",
-            "name": "email_details",
-            "func": "\nmsg.payload.status = \"Completed\";\nmsg.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = `Workflow ${msg.request_id}`;\nmsg.to = msg.payload.to || \"herig68683@cybtric.com\";\n//msg.payload = Your request with ID ${msg.request_id} has been processed.;\n\nmsg.html = \n    `<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\">\n        <h2 style=\"color: #2c3e50;\">Workflow Request Update</h2>\n        <p style=\"font-size: 16px;\">Workflow ${msg.request_id} has been created, to approve or reject please click on the link <a href=\"http://www.google.com\"> Google</a> </p>\n        <table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\">\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd;\">${msg.request_id}</td>\n            </tr>\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd; color: ${msg.payload.status === 'Completed' ? 'green' : 'red'};\">\n                    <strong>${msg.payload.status}</strong>\n                </td>\n            </tr>\n        </table>\n        <p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p>\n    </div>`;\nmsg.payload = msg.html;\nreturn msg;",
-            "outputs": 1,
-            "timeout": 0,
-            "noerr": 0,
-            "initialize": "",
-            "finalize": "",
-            "libs": [],
-            "x": 310,
-            "y": 120,
-            "wires": [
-                ["send_email"]
-            ]
-        }
-    )
-
-
-      workflow.push({
-        id: "check_manager_decision",
-        type: "function",
-        z: tabId,
-        name: "Check manager decision",
-        func: `
-          // Check if the form is completed
-          if (msg.payload.formCompleted === true) {
-            // Manager approves the request
-            msg.payload.managerDecision = "Approved"; // Add manager's decision to the payload
-            msg.params = [
-              2, // user_id
-              JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
-              "Approved", // status
-              2, // current_level
-              5 // total_levels
-            ];
-            return [msg, null]; // Send msg to the first output (for approval)
-          } else {
-            // Manager rejects the request
-            msg.payload.managerDecision = "Rejected"; // Add manager's decision to the payload
-            msg.params = [
-              2, // user_id
-              JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
-              "Rejected", // status
-              2, // current_level
-              5 // total_levels
-            ];
-            return [null, msg]; // Send msg to the second output (for rejection)
-          }
-        `,
-        outputs: 2,
-        x: 1100,
-        y: 180,
-        wires: [
-          ["postgres_insert_manager_approve"], // True case (Approved)
-          ["postgres_insert_manager_reject"] // False case (Rejected)
-        ],
-      });
-    
-    // // PostgreSQL Insert Node
-    workflow.push({
-        id: "postgres_insert_manager_approve",
-        type: "postgresql",
-        z: tabId,
-        name: "Insert into PostgreSQL(Approve)",
-        query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-        split: false,
-        rowsPerMsg: 1,
-        outputs: 1,
-        x: 1100,
-        y: 120,
-        wires: [],
-    });
-
-    //  // PostgreSQL Insert Node
-     workflow.push({
-        id: "postgres_insert_manager_reject",
-        type: "postgresql",
-        z: tabId,
-        name: "Insert into PostgreSQL(Reject)",
-        query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-        split: false,
-        rowsPerMsg: 1,
-        outputs: 1,
-        x: 1100,
-        y: 120,
-        wires: [],
-    });
-
-
-
-      
 
   
     return workflow;
