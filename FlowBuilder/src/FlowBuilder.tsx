@@ -270,15 +270,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           placeholder="Enter candidate email"
         />
       </div>
-      <div className="form-group">
-        <label>Manager Email</label>
-        <input
-          type="text"
-          value={managerEmail}
-          onChange={(e) => setManagerEmail(e.target.value)}
-          placeholder="Enter manager email"
-        />
-      </div>
       <button onClick={handleSubmit}>Submit</button>
     </Styles>
   );
