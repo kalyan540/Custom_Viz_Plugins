@@ -48,11 +48,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
   const [workflowName, setWorkflowName] = useState(`Workflow-${Math.floor(Math.random() * 1000)}`);
   const [candidateEmail, setCandidateEmail] = useState('');
-  const [managerEmail, setManagerEmail] = useState('');
-  const [hrbpEmail, setHrbpEmail] = useState('');
 
   const handleSubmit = async () => {
-    const workflowJson = generateWorkflowJson(workflowName, candidateEmail, managerEmail, hrbpEmail);
+    const workflowJson = generateWorkflowJson(workflowName, candidateEmail);
     console.log('Workflow JSON:', workflowJson);
 
     try {
@@ -81,7 +79,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const generateWorkflowJson = (workflowName, candidateEmail) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c";
-
+  
     // PostgreSQL Config Node
     workflow.push({
       id: "7b9ec91590d534cc",
@@ -100,108 +98,144 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       x: 320, // X position in the Node-RED editor
       y: 60, // Y position in the Node-RED editor
     });
-
-    // HTTP In Node (Replaces Inject Node)
+  
     workflow.push({
-      id: "http_in_create",
-      type: "http in",
-      z: tabId,
-      name: "Initiate Workflow",
-      url: "/api/initiateWorkflow",
-      method: "post",
-      upload: false,
-      swaggerDoc: "",
-      x: 100,
-      y: 100,
-      wires: [["candidate_node"]],
-    });
+        "id": "http_in_create",
+        "type": "http in",
+        z: tabId,
+        "name": "Initiate Workflow",
+        "url": "/api/initiateWorkflow",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 100,
+        "y": 100,
+        "wires": [["approval_email","candidate_node"]]
+      });
 
-    // Candidate Node (Function Node)
+      // Approval email node
     workflow.push({
-      id: "candidate_node",
-      type: "function",
-      z: tabId,
-      name: "Candidate",
-      func: `
-        // Add workflowName and candidateEmail to the msg object
-        msg.workflowName = "${workflowName}";
-        msg.candidateEmail = "${candidateEmail}";
-        msg.payload.candidate = "${candidateEmail}";
-    
-        // Set formCompleted here
-        msg.payload.formCompleted = true; // Replace with your logic if needed
-    
-        return msg;
-      `,
-      outputs: 1,
-      x: 300,
-      y: 180,
-      wires: [["check_form_completed"]],
-    });
+        id: "approval_email",
+        type: "e-mail",
+        z: tabId,
+        name: "wameya7577@excederm.com",
+        server: "sandbox.smtp.mailtrap.io",
+        port: "2525",
+        username: "62753aa9883bbc",
+        password: "a249d24a02ce4f",
+        to: "wameya7577@excederm.com",
+        subject: "Workflow Completed",
+        body: "{{payload.html}}",
+        x: 770,
+        y: 150,
+        wires: [],
+      });
 
+
+
+    workflow.push({
+        id: "candidate_node",
+        type: "function",
+        z: tabId,
+        name: "Candidate",
+        func: `
+          // Add workflowName and candidateEmail to the msg object
+          msg.workflowName = "${workflowName}";
+          msg.candidateEmail = "${candidateEmail}";
+          msg.payload.candidate = "${candidateEmail}";
+      
+          // Set formCompleted here
+          msg.payload.formCompleted = true; // Replace with your logic if needed
+      
+          return msg;
+        `,
+        outputs: 1,
+        x: 300,
+        y: 180,
+        wires: [["check_form_completed"]],
+      });
+  
+    // Check Form Completed Node (Function Node)
     // Check Form Completed Node (Function Node)
     workflow.push({
-      id: "check_form_completed",
-      type: "function",
-      z: tabId,
-      name: "Check if the form completed",
-      func: `
-        // Check if the form is completed
-        if (msg.payload.formCompleted === true) {
-          // Prepare the parameters for the PostgreSQL query
-          msg.params = [
-            2, // user_id
-            JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
-            "Completed", // status
-            1, // current_level
-            5 // total_levels
-          ];
-          return [msg, null]; // Send msg to the first output (for true case)
-        } else {
-          return [null, msg]; // Send msg to the second output (for false case)
-        }
-      `,
-      outputs: 2,
-      x: 700,
-      y: 180,
-      wires: [
-        ["postgres_insert_candidate_approve"], // True case
-        ["postgres_insert_candidate_reject"] // False case
-      ],
-    });
+        id: "check_form_completed",
+        type: "function",
+        z: tabId,
+        name: "Check if the form completed",
+        func: `
+          // Check if the form is completed
+          if (msg.payload.formCompleted === true) {
+            // Prepare the parameters for the PostgreSQL query
+            msg.params = [
+              2, // user_id
+              JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
+              "Completed", // status
+              1, // current_level
+              5 // total_levels
+            ];
+            return [msg, null]; // Send msg to the first output (for true case)
+          } else {
+            return [null, msg]; // Send msg to the second output (for false case)
+          }
+        `,
+        outputs: 2,
+        x: 700,
+        y: 180,
+        wires: [
+          ["postgres_insert_candidate_approve","http_response"], // True case
+          ["postgres_insert_candidate_reject","http_response"] // False case
+        ],
+      });
+      workflow.push({
+      
+        "id": "http_response",
+        "type": "http response",
+        z: tabId,
+        "name": "HTTP Response",
+        "statusCode": "200",
+        "headers": {},
+        "x": 500,
+        "y": 100,
+        "wires": []
+    })
 
-    // PostgreSQL Insert Node (Approve)
+
+  
+    // PostgreSQL Insert Node
     workflow.push({
-      id: "postgres_insert_candidate_approve",
-      type: "postgresql",
-      z: tabId,
-      name: "Insert into PostgreSQL(Approve)",
-      query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-      split: false,
-      rowsPerMsg: 1,
-      outputs: 1,
-      x: 1100,
-      y: 120,
-      wires: [],
+        id: "postgres_insert_candidate_approve",
+        type: "postgresql",
+        z: tabId,
+        name: "Insert into PostgreSQL(Approve)",
+        query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 1100,
+        y: 120,
+        wires: [],
     });
 
-    // PostgreSQL Insert Node (Reject)
+    // PostgreSQL Insert Node
     workflow.push({
-      id: "postgres_insert_candidate_reject",
-      type: "postgresql",
-      z: tabId,
-      name: "Insert into PostgreSQL(Reject)",
-      query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-      split: false,
-      rowsPerMsg: 1,
-      outputs: 1,
-      x: 1100,
-      y: 120,
-      wires: [],
+        id: "postgres_insert_candidate_reject",
+        type: "postgresql",
+        z: tabId,
+        name: "Insert into PostgreSQL(Reject)",
+        query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 1100,
+        y: 120,
+        wires: [],
     });
 
+      
+
+  
     return workflow;
   };
 
@@ -234,6 +268,15 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           value={candidateEmail}
           onChange={(e) => setCandidateEmail(e.target.value)}
           placeholder="Enter candidate email"
+        />
+      </div>
+      <div className="form-group">
+        <label>Manager Email</label>
+        <input
+          type="text"
+          value={managerEmail}
+          onChange={(e) => setManagerEmail(e.target.value)}
+          placeholder="Enter manager email"
         />
       </div>
       <button onClick={handleSubmit}>Submit</button>
