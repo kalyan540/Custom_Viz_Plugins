@@ -40,20 +40,42 @@ const Styles = styled.div<FlowBuilderStylesProps>`
   button:hover {
     background-color: ${({ theme }) => theme.colors.primary.dark1};
   }
+
+  .node-list {
+    margin-top: ${({ theme }) => theme.gridUnit * 3}px;
+    max-height: 150px; /* Set a max height for the scrollable area */
+    overflow-y: auto; /* Enable vertical scrolling */
+    border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
+    border-radius: ${({ theme }) => theme.gridUnit}px;
+    padding: ${({ theme }) => theme.gridUnit * 2}px;
+  }
+
+  .node-item {
+    padding: ${({ theme }) => theme.gridUnit * 2}px;
+    border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
+    border-radius: ${({ theme }) => theme.gridUnit}px;
+    margin-bottom: ${({ theme }) => theme.gridUnit}px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 `;
 
 export default function FlowBuilder(props: FlowBuilderProps) {
   const { height, width, apiEndpoint } = props;
   const rootElem = createRef<HTMLDivElement>();
 
-  const [workflowName, setWorkflowName] = useState(`Workflow-${Math.floor(Math.random() * 1000)}`);
+  // State for form inputs
+  const [workflowName, setWorkflowName] = useState(
+    `Workflow-${Math.floor(Math.random() * 1000)}`, // Auto-generate workflow name
+  );
   const [candidateEmail, setCandidateEmail] = useState('');
-  const [managerEmail, setManagerEmail] = useState('');
-const [hrbpEmail, setHrbpEmail] = useState('');
+  const [nodes, setNodes] = useState<{ type: string; email: string }[]>([]); // Stores nodes (Manager, HRBP, Candidate)
+  const [popoverVisible, setPopoverVisible] = useState(false); // Controls popover visibility
 
-
+  // Handle form submission
   const handleSubmit = async () => {
-    const workflowJson = generateWorkflowJson(workflowName, candidateEmail);
+    const workflowJson = generateWorkflowJson(workflowName, candidateEmail, nodes);
     console.log('Workflow JSON:', workflowJson);
 
     try {
@@ -79,10 +101,20 @@ const [hrbpEmail, setHrbpEmail] = useState('');
     }
   };
 
-  const generateWorkflowJson = (workflowName, candidateEmail, managerEmail,hrbpEmail) => {
+  // Add a node to the list
+  const addNode = (type: string, email: string) => {
+    setNodes([...nodes, { type, email }]);
+  };
+
+  // Generate JSON for Node-RED
+  const generateWorkflowJson = (
+    workflowName: string,
+    candidateEmail: string,
+    nodes: { type: string; email: string }[],
+  ) => {
     const workflow = [];
-    const tabId = "e0ba68613f04424c";
-  
+    const tabId = "e0ba68613f04424c"; // Static tab ID for Node-RED
+
     // PostgreSQL Config Node
     workflow.push({
       id: "7b9ec91590d534cc",
@@ -101,172 +133,195 @@ const [hrbpEmail, setHrbpEmail] = useState('');
       x: 320, // X position in the Node-RED editor
       y: 60, // Y position in the Node-RED editor
     });
-  
-    workflow.push({
-        "id": "http_in_create",
-        "type": "http in",
-        z: tabId,
-        "name": "Initiate Workflow",
-        "url": "/api/initiateWorkflow",
-        "method": "post",
-        "upload": false,
-        "swaggerDoc": "",
-        "x": 100,
-        "y": 100,
-        "wires": [["candidate_node","prepare_email"]]
-      });
-      
 
-      workflow.push(
-        {
-            "id": "prepare_email",
-            "type": "function",
-            "z": "fed1a005e4bce54b",
-            "name": "prepare_email",
-            "func": "\nmsg.payload.status = \"Completed\";\nmsg.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = `Workflow ${msg.request_id}`;\nmsg.to = msg.payload.to || \"herig68683@cybtric.com\";\n//msg.payload = Your request with ID ${msg.request_id} has been processed.;\n\nmsg.html = \n    `<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\">\n        <h2 style=\"color: #2c3e50;\">Workflow Request Update</h2>\n        <p style=\"font-size: 16px;\">Workflow ${msg.request_id} has been created, to approve or reject please click on the link <a href=\"http://www.google.com\"> Google</a> </p>\n        <table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\">\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd;\">${msg.request_id}</td>\n            </tr>\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd; color: ${msg.payload.status === 'Completed' ? 'green' : 'red'};\">\n                    <strong>${msg.payload.status}</strong>\n                </td>\n            </tr>\n        </table>\n        <p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p>\n    </div>`;\nmsg.payload = msg.html;\nreturn msg;",
-            "outputs": 1,
-            "timeout": 0,
-            "noerr": 0,
-            "initialize": "",
-            "finalize": "",
-            "libs": [],
-            "x": 310,
-            "y": 120,
-            "wires": [
-                ["send_email"]
-            ]
+    // HTTP Input Node
+    workflow.push({
+      id: "http_in_create",
+      type: "http in",
+      z: tabId,
+      name: "Initiate Workflow",
+      url: "/api/initiateWorkflow",
+      method: "post",
+      x: 100,
+      y: 100,
+      wires: [["candidate_node", "prepare_email"]],
+    });
+
+    // Prepare Email Node
+    workflow.push({
+      id: "prepare_email",
+      type: "function",
+      z: tabId,
+      name: "Prepare Email",
+      func: `
+        msg.payload.status = "Pending";
+        msg.request_id = msg.payload?.requestId || "UnknownID";
+        msg.topic = \`Workflow \${msg.request_id}\`;
+        msg.to = "${candidateEmail}"; // Send email to candidate first
+        msg.html = \`
+          <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+            <h2 style="color: #2c3e50;">Workflow Request Update</h2>
+            <p style="font-size: 16px;">Workflow \${msg.request_id} has been created. To approve or reject, please click on the link <a href="http://www.google.com">Google</a>.</p>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+              <tr>
+                <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Request ID:</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">\${msg.request_id}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Status:</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};">
+                  <strong>\${msg.payload.status}</strong>
+                </td>
+              </tr>
+            </table>
+            <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">This is an automated message. Please do not reply.</p>
+          </div>
+        \`;
+        msg.payload = msg.html;
+        return msg;
+      `,
+      outputs: 1,
+      x: 310,
+      y: 120,
+      wires: [["send_email"]],
+    });
+
+    // Send Email Node
+    workflow.push({
+      id: "send_email",
+      type: "e-mail",
+      z: tabId,
+      server: "sandbox.smtp.mailtrap.io",
+      port: "2525",
+      username: "62753aa9883bbc",
+      password: "a249d24a02ce4f",
+      subject: "Workflow Update",
+      body: "{{payload.html}}",
+      x: 770,
+      y: 150,
+      wires: [],
+    });
+
+    // Candidate Node
+    workflow.push({
+      id: "candidate_node",
+      type: "function",
+      z: tabId,
+      name: "Candidate",
+      func: `
+        msg.workflowName = "${workflowName}";
+        msg.candidateEmail = "${candidateEmail}";
+        msg.payload.candidate = "${candidateEmail}";
+        msg.payload.formCompleted = true;
+        return msg;
+      `,
+      outputs: 1,
+      x: 300,
+      y: 180,
+      wires: [["check_form_completed"]],
+    });
+
+    // Check Form Completed Node
+    workflow.push({
+      id: "check_form_completed",
+      type: "function",
+      z: tabId,
+      name: "Check if the form completed",
+      func: `
+        if (msg.payload.formCompleted === true) {
+          msg.params = [
+            2, // user_id
+            JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }),
+            "Completed", // status
+            1, // current_level
+            5 // total_levels
+          ];
+          return [msg, null];
+        } else {
+          return [null, msg];
         }
-    )
-    
-
-      // Approval email node
-    workflow.push({
-            "id": "send_email",
-            "type": "e-mail",
-            "z": "e0ba68613f04424c",
-            //"name": "wameya7577@excederm.com",
-            "server": "sandbox.smtp.mailtrap.io",
-            "port": "2525",
-            "username": "62753aa9883bbc",
-            "password": "a249d24a02ce4f",
-            //"to": "wameya7577@excederm.com",
-            "subject": "Workflow Completed",
-            "body": "{{payload.html}}",
-            "x": 770,
-            "y": 150,
-            "wires": []
-      });
-
-
-
-
-    workflow.push({
-        id: "candidate_node",
-        type: "function",
-        z: tabId,
-        name: "Candidate",
-        func: `
-          // Add workflowName and candidateEmail to the msg object
-          msg.workflowName = "${workflowName}";
-          msg.candidateEmail = "${candidateEmail}";
-          msg.payload.candidate = "${candidateEmail}";
-      
-          // Set formCompleted here
-          msg.payload.formCompleted = true; // Replace with your logic if needed
-      
-          return msg;
-        `,
-        outputs: 1,
-        x: 300,
-        y: 180,
-        wires: [["check_form_completed"]],
-      });
-  
-    // Check Form Completed Node (Function Node)
-    // Check Form Completed Node (Function Node)
-    workflow.push({
-        id: "check_form_completed",
-        type: "function",
-        z: tabId,
-        name: "Check if the form completed",
-        func: `
-          // Check if the form is completed
-          if (msg.payload.formCompleted === true) {
-            // Prepare the parameters for the PostgreSQL query
-            msg.params = [
-              2, // user_id
-              JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
-              "Completed", // status
-              1, // current_level
-              5 // total_levels
-            ];
-            return [msg, null]; // Send msg to the first output (for true case)
-          } else {
-            return [null, msg]; // Send msg to the second output (for false case)
-          }
-        `,
-        outputs: 2,
-        x: 700,
-        y: 180,
-        wires: [
-          ["postgres_insert_candidate_approve","http_response"], // True case
-          ["postgres_insert_candidate_reject","http_response"] // False case
-        ],
-      });
-
-
-      
-      workflow.push({
-      
-        "id": "http_response",
-        "type": "http response",
-        z: tabId,
-        "name": "HTTP Response",
-        "statusCode": "200",
-        "headers": {},
-        "x": 500,
-        "y": 100,
-        "wires": []
-    })
-
-
-  
-    // PostgreSQL Insert Node
-    workflow.push({
-        id: "postgres_insert_candidate_approve",
-        type: "postgresql",
-        z: tabId,
-        name: "Insert into PostgreSQL(Approve)",
-        query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-        split: false,
-        rowsPerMsg: 1,
-        outputs: 1,
-        x: 1100,
-        y: 120,
-        wires: [],
+      `,
+      outputs: 2,
+      x: 700,
+      y: 180,
+      wires: [
+        ["postgres_insert_candidate_approve", "http_response"],
+        ["postgres_insert_candidate_reject", "http_response"],
+      ],
     });
 
-    // PostgreSQL Insert Node
+    // PostgreSQL Insert Nodes
     workflow.push({
-        id: "postgres_insert_candidate_reject",
-        type: "postgresql",
-        z: tabId,
-        name: "Insert into PostgreSQL(Reject)",
-        query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
-        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-        split: false,
-        rowsPerMsg: 1,
-        outputs: 1,
-        x: 1100,
-        y: 120,
-        wires: [],
+      id: "postgres_insert_candidate_approve",
+      type: "postgresql",
+      z: tabId,
+      name: "Insert into PostgreSQL (Approve)",
+      query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+      postgreSQLConfig: "7b9ec91590d534cc",
+      x: 1100,
+      y: 120,
+      wires: [],
     });
 
+    workflow.push({
+      id: "postgres_insert_candidate_reject",
+      type: "postgresql",
+      z: tabId,
+      name: "Insert into PostgreSQL (Reject)",
+      query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+      postgreSQLConfig: "7b9ec91590d534cc",
+      x: 1100,
+      y: 120,
+      wires: [],
+    });
 
-  
+    // HTTP Response Node
+    workflow.push({
+      id: "http_response",
+      type: "http response",
+      z: tabId,
+      name: "HTTP Response",
+      statusCode: "200",
+      x: 500,
+      y: 100,
+      wires: [],
+    });
+
     return workflow;
   };
+
+  // Popover content for selecting a node
+  const nodePopoverContent = (
+    <div>
+      <div
+        style={{ padding: '8px', cursor: 'pointer' }}
+        onClick={() => {
+          addNode('Manager', 'manager@example.com');
+          setPopoverVisible(false);
+        }}
+      >
+        Manager (manager@example.com)
+      </div>
+      <div
+        style={{ padding: '8px', cursor: 'pointer' }}
+        onClick={() => {
+          addNode('HRBP', 'hrbp@example.com');
+          setPopoverVisible(false);
+        }}
+      >
+        HRBP (hrbp@example.com)
+      </div>
+      <div
+        style={{ padding: '8px', cursor: 'pointer' }}
+        onClick={() => {
+          addNode('Candidate', 'candidate@example.com');
+          setPopoverVisible(false);
+        }}
+      >
+        Candidate (candidate@example.com)
+      </div>
+    </div>
+  );
 
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -299,14 +354,31 @@ const [hrbpEmail, setHrbpEmail] = useState('');
           placeholder="Enter candidate email"
         />
       </div>
+      <div className="node-list">
+        {nodes.map((node, index) => (
+          <div key={index} className="node-item">
+            <span>
+              {node.type} ({node.email})
+            </span>
+            <button
+              onClick={() =>
+                setNodes(nodes.filter((_, i) => i !== index))
+              }
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+      </div>
       <div className="form-group">
-        <label>Manager Email</label>
-        <input
-          type="text"
-          value={managerEmail}
-          onChange={(e) => setManagerEmail(e.target.value)}
-          placeholder="Enter manager email"
-        />
+        <Popover
+          content={nodePopoverContent}
+          trigger="click"
+          visible={popoverVisible}
+          onVisibleChange={(visible) => setPopoverVisible(visible)}
+        >
+          <button>Add Nodes</button>
+        </Popover>
       </div>
       <button onClick={handleSubmit}>Submit</button>
     </Styles>
