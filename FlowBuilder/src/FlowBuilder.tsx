@@ -110,13 +110,13 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         "swaggerDoc": "",
         "x": 100,
         "y": 100,
-        "wires": [["candidate_node","Send_email"]]
+        "wires": [["candidate_node","send_email"]]
       });
       
 
       workflow.push(
         {
-            "id": "Send_email",
+            "id": "send_email",
             "type": "function",
             "z": "fed1a005e4bce54b",
             "name": "Set status to completed",
