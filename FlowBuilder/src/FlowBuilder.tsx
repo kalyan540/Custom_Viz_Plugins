@@ -4,9 +4,43 @@ import { FlowBuilderProps, FlowBuilderStylesProps } from './types';
 import { Popover } from 'antd';
 
 const Styles = styled.div<FlowBuilderStylesProps>`
-  /* ... (keep existing styles) ... */
-`;
+  background-color: ${({ theme }) => theme.colors.secondary.light2};
+  padding: ${({ theme }) => theme.gridUnit * 4}px;
+  border-radius: ${({ theme }) => theme.gridUnit * 2}px;
+  height: ${({ height }) => height}px;
+  width: ${({ width }) => width}px;
 
+  .form-group {
+    margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: ${({ theme }) => theme.gridUnit}px;
+    font-weight: bold;
+  }
+
+  input {
+    width: 100%;
+    padding: ${({ theme }) => theme.gridUnit * 2}px;
+    border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
+    border-radius: ${({ theme }) => theme.gridUnit}px;
+  }
+
+  button {
+    padding: ${({ theme }) => theme.gridUnit * 2}px ${({ theme }) => theme.gridUnit * 4}px;
+    background-color: ${({ theme }) => theme.colors.primary.base};
+    color: white;
+    border: none;
+    border-radius: ${({ theme }) => theme.gridUnit}px;
+    cursor: pointer;
+    margin-right: ${({ theme }) => theme.gridUnit * 2}px;
+  }
+
+  button:hover {
+    background-color: ${({ theme }) => theme.colors.primary.dark1};
+  }
+`;
 export default function FlowBuilder(props: FlowBuilderProps) {
   const { height, width, apiEndpoint } = props;
   const rootElem = createRef<HTMLDivElement>();
