@@ -1,11 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
-import { styled } from "@superset-ui/core";
-import { FlowBuilderProps } from "./types";
-import { Select, Button } from "antd";
+import React, { useEffect, createRef, useState } from 'react';
+import { styled } from '@superset-ui/core';
+import { FlowBuilderProps, FlowBuilderStylesProps } from './types';
+import { Popover } from 'antd';
 
-const { Option } = Select;
-
-const Styles = styled.div`
+const Styles = styled.div<FlowBuilderStylesProps>`
   background-color: ${({ theme }) => theme.colors.secondary.light2};
   padding: ${({ theme }) => theme.gridUnit * 4}px;
   border-radius: ${({ theme }) => theme.gridUnit * 2}px;
@@ -22,57 +20,100 @@ const Styles = styled.div`
     font-weight: bold;
   }
 
-  input, .ant-select {
+  input {
     width: 100%;
     padding: ${({ theme }) => theme.gridUnit * 2}px;
+    border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
     border-radius: ${({ theme }) => theme.gridUnit}px;
   }
 
   button {
-    margin-top: 10px;
+    padding: ${({ theme }) => theme.gridUnit * 2}px ${({ theme }) => theme.gridUnit * 4}px;
+    background-color: ${({ theme }) => theme.colors.primary.base};
+    color: white;
+    border: none;
+    border-radius: ${({ theme }) => theme.gridUnit}px;
+    cursor: pointer;
+    margin-right: ${({ theme }) => theme.gridUnit * 2}px;
+  }
+
+  button:hover {
+    background-color: ${({ theme }) => theme.colors.primary.dark1};
+  }
+
+  .node-list {
+    margin-top: ${({ theme }) => theme.gridUnit * 2}px;
+  }
+
+  .node-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: ${({ theme }) => theme.gridUnit}px;
+    border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
+    border-radius: ${({ theme }) => theme.gridUnit}px;
+    margin-bottom: ${({ theme }) => theme.gridUnit}px;
   }
 `;
 
 export default function FlowBuilder(props: FlowBuilderProps) {
   const { height, width, apiEndpoint } = props;
-  const rootElem = useRef<HTMLDivElement>(null);
+  const rootElem = createRef<HTMLDivElement>();
 
   const [workflowName, setWorkflowName] = useState(`Workflow-${Math.floor(Math.random() * 1000)}`);
-  const [candidateEmail, setCandidateEmail] = useState("");
-  const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
+  const [candidateEmail, setCandidateEmail] = useState('');
+  const [nodes, setNodes] = useState<Array<{ type: string; email: string }>>([]);
+
+  const handleAddNode = (type: string) => {
+    setNodes([...nodes, { type, email: '' }]);
+  };
+
+  const handleRemoveNode = (index: number) => {
+    const newNodes = [...nodes];
+    newNodes.splice(index, 1);
+    setNodes(newNodes);
+  };
+
+  const handleNodeEmailChange = (index: number, email: string) => {
+    const newNodes = [...nodes];
+    newNodes[index].email = email;
+    setNodes(newNodes);
+  };
 
   const handleSubmit = async () => {
-    const workflowJson = generateWorkflowJson(workflowName, candidateEmail, selectedNodes);
-    console.log("Generated Workflow JSON:", workflowJson);
+    const workflowJson = generateWorkflowJson(workflowName, nodes);
+    console.log('Workflow JSON:', workflowJson);
 
     try {
       const response = await fetch(apiEndpoint, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(workflowJson),
       });
 
       if (response.status === 204) {
-        alert("Workflow created successfully!");
+        console.log('Workflow created successfully!');
+        alert('Workflow created successfully!');
       } else {
         const result = await response.json();
-        alert("Workflow created successfully!");
+        console.log('API Response:', result);
+        alert('Workflow created successfully!');
       }
     } catch (error) {
-      console.error("Error submitting workflow:", error);
-      alert("Failed to create workflow.");
+      console.error('Error submitting workflow:', error);
+      alert('Failed to create workflow. Please try again.');
     }
   };
 
-  const generateWorkflowJson = (workflowName: string, candidateEmail: string, selectedNodes: string[]) => {
+  const generateWorkflowJson = (workflowName: string, nodes: Array<{ type: string; email: string }>) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c";
 
     // PostgreSQL Config Node
     workflow.push({
-      id: "postgresql_config",
+      id: "7b9ec91590d534cc",
       type: "postgreSQLConfig",
       z: tabId,
       name: "PostgreSQL Config",
@@ -89,7 +130,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       y: 60,
     });
 
-    // HTTP Start Node
     workflow.push({
       id: "http_in_create",
       type: "http in",
@@ -101,33 +141,46 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       swaggerDoc: "",
       x: 100,
       y: 100,
-      wires: [["prepare_email"]],
+      wires: [["prepare_email"]]
     });
 
-    // Prepare Email Function
     workflow.push({
       id: "prepare_email",
       type: "function",
       z: tabId,
-      name: "Prepare Email",
+      name: "prepare_email",
       func: `
-        msg.payload.status = "Pending";
+        msg.payload.status = "Completed";
         msg.request_id = msg.payload?.requestId || "UnknownID";
-        msg.to = msg.payload.to;
+        msg.topic = \`Workflow ${msg.request_id}\`;
+        msg.to = msg.payload.to || "herig68683@cybtric.com";
         msg.html = \`
-          <div>
-            <h2>Approval Request</h2>
-            <p>Click <a href="http://www.google.com">here</a> to approve.</p>
+          <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+            <h2 style="color: #2c3e50;">Workflow Request Update</h2>
+            <p style="font-size: 16px;">Workflow ${msg.request_id} has been created, to approve or reject please click on the link <a href="http://www.google.com"> Google</a> </p>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+              <tr>
+                <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Request ID:</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">${msg.request_id}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Status:</strong></td>
+                <td style="padding: 10px; border: 1px solid #ddd; color: ${msg.payload.status === 'Completed' ? 'green' : 'red'};">
+                  <strong>${msg.payload.status}</strong>
+                </td>
+              </tr>
+            </table>
+            <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">This is an automated message. Please do not reply.</p>
           </div>\`;
+        msg.payload = msg.html;
         return msg;
       `,
       outputs: 1,
       x: 310,
       y: 120,
-      wires: [["send_email"]],
+      wires: [["send_email"]]
     });
 
-    // Email Node
     workflow.push({
       id: "send_email",
       type: "e-mail",
@@ -136,67 +189,64 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       port: "2525",
       username: "62753aa9883bbc",
       password: "a249d24a02ce4f",
-      subject: "Workflow Approval Required",
+      subject: "Workflow Completed",
       body: "{{payload.html}}",
       x: 770,
       y: 150,
-      wires: [],
+      wires: []
     });
 
-    // Candidate Node
-    workflow.push({
-      id: "candidate_node",
-      type: "function",
-      z: tabId,
-      name: "Candidate Approval",
-      func: `
-        msg.payload.status = "Completed";
-        return msg;
-      `,
-      outputs: 1,
-      x: 300,
-      y: 180,
-      wires: [["process_approval"]],
-    });
-
-    // Dynamic Manager/HRBP Nodes
-    selectedNodes.forEach((node, index) => {
+    nodes.forEach((node, index) => {
       const nodeId = `node_${index}`;
-      const insertId = `postgres_insert_${index}`;
+      const nodeType = node.type.toLowerCase();
 
       workflow.push({
         id: nodeId,
         type: "function",
         z: tabId,
-        name: `${node} Approval`,
+        name: node.type,
         func: `
-          msg.payload.status = "Completed";
+          msg.workflowName = "${workflowName}";
+          msg.${nodeType}Email = "${node.email}";
+          msg.payload.${nodeType} = "${node.email}";
+          msg.payload.formCompleted = true;
           return msg;
         `,
         outputs: 1,
         x: 300,
-        y: 200 + index * 40,
-        wires: [index === selectedNodes.length - 1 ? ["http_response"] : [`node_${index + 1}`]],
-      });
-
-      // PostgreSQL Insert for each node
-      workflow.push({
-        id: insertId,
-        type: "postgresql",
-        z: tabId,
-        name: `Insert ${node} Approval`,
-        query: `INSERT INTO approval_request (user_id, request_data, status, created_at) VALUES ($1, $2, $3, now());`,
-        postgreSQLConfig: "postgresql_config",
-        split: false,
-        rowsPerMsg: 1,
-        outputs: 1,
-        x: 1100,
-        y: 120 + index * 40,
-        wires: [],
+        y: 180 + (index * 60),
+        wires: [["check_approval"]]
       });
     });
 
-    // HTTP Response Node
+    workflow.push({
+      id: "check_approval",
+      type: "function",
+      z: tabId,
+      name: "Check if the form completed",
+      func: `
+        if (msg.payload.formCompleted === true) {
+          msg.params = [
+            2,
+            JSON.stringify({ workflowName: msg.workflowName, nodes: ${JSON.stringify(nodes)} }),
+            "Completed",
+            1,
+            5
+          ];
+          return [msg, null];
+        } else {
+          return [null, msg];
+        }
+      `,
+      outputs: 2,
+      x: 700,
+      y: 180,
+      wires: [
+        ["postgres_insert_approve", "http_response"],
+        ["postgres_insert_reject", "http_response"]
+      ]
+    });
+
     workflow.push({
       id: "http_response",
       type: "http response",
@@ -206,6 +256,36 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       headers: {},
       x: 500,
       y: 100,
+      wires: []
+    });
+
+    workflow.push({
+      id: "postgres_insert_approve",
+      type: "postgresql",
+      z: tabId,
+      name: "Insert into PostgreSQL(Approve)",
+      query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+      postgreSQLConfig: "7b9ec91590d534cc",
+      split: false,
+      rowsPerMsg: 1,
+      outputs: 1,
+      x: 1100,
+      y: 120,
+      wires: [],
+    });
+
+    workflow.push({
+      id: "postgres_insert_reject",
+      type: "postgresql",
+      z: tabId,
+      name: "Insert into PostgreSQL(Reject)",
+      query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+      postgreSQLConfig: "7b9ec91590d534cc",
+      split: false,
+      rowsPerMsg: 1,
+      outputs: 1,
+      x: 1100,
+      y: 120,
       wires: [],
     });
 
@@ -213,29 +293,54 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   };
 
   useEffect(() => {
-    console.log("Plugin loaded");
+    const root = rootElem.current as HTMLElement;
+    console.log('Plugin element', root);
   }, []);
 
   return (
-    <Styles ref={rootElem} height={height} width={width}>
+    <Styles
+      ref={rootElem}
+      boldText={props.boldText}
+      headerFontSize={props.headerFontSize}
+      height={height}
+      width={width}
+    >
       <div className="form-group">
         <label>Workflow Name</label>
-        <input type="text" value={workflowName} disabled />
+        <input
+          type="text"
+          value={workflowName}
+          onChange={(e) => setWorkflowName(e.target.value)}
+          placeholder="Enter workflow name"
+        />
       </div>
       <div className="form-group">
         <label>Candidate Email</label>
-        <input type="email" value={candidateEmail} onChange={(e) => setCandidateEmail(e.target.value)} />
+        <input
+          type="text"
+          value={candidateEmail}
+          onChange={(e) => setCandidateEmail(e.target.value)}
+          placeholder="Enter candidate email"
+        />
       </div>
-      <div className="form-group">
-        <label>Add Nodes</label>
-        <Select mode="multiple" onChange={(value) => setSelectedNodes(value)} placeholder="Select Nodes">
-          <Option value="Manager">Manager</Option>
-          <Option value="HRBP">HRBP</Option>
-        </Select>
+      <button onClick={() => handleAddNode('Candidate')}>Add Candidate</button>
+      <button onClick={() => handleAddNode('Manager')}>Add Manager</button>
+      <button onClick={() => handleAddNode('HRBP')}>Add HRBP</button>
+      <div className="node-list">
+        {nodes.map((node, index) => (
+          <div key={index} className="node-item">
+            <span>{node.type}</span>
+            <input
+              type="text"
+              value={node.email}
+              onChange={(e) => handleNodeEmailChange(index, e.target.value)}
+              placeholder={`Enter ${node.type} email`}
+            />
+            <button onClick={() => handleRemoveNode(index)}>Remove</button>
+          </div>
+        ))}
       </div>
-      <Button type="primary" onClick={handleSubmit}>
-        Submit
-      </Button>
+      <button onClick={handleSubmit}>Submit</button>
     </Styles>
   );
 }
