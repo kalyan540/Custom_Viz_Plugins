@@ -1,7 +1,7 @@
 import React, { useEffect, createRef, useState } from 'react';
 import { styled } from '@superset-ui/core';
 import { FlowBuilderProps, FlowBuilderStylesProps } from './types';
-import { Popover } from 'antd';
+import { Popover, Select } from 'antd';
 
 const Styles = styled.div<FlowBuilderStylesProps>`
   background-color: ${({ theme }) => theme.colors.secondary.light2};
@@ -56,16 +56,21 @@ const Styles = styled.div<FlowBuilderStylesProps>`
   }
 `;
 
+const { Option } = Select;
+
 export default function FlowBuilder(props: FlowBuilderProps) {
   const { height, width, apiEndpoint } = props;
   const rootElem = createRef<HTMLDivElement>();
 
   const [workflowName, setWorkflowName] = useState(`Workflow-${Math.floor(Math.random() * 1000)}`);
-  const [candidateEmail, setCandidateEmail] = useState('');
   const [nodes, setNodes] = useState<Array<{ type: string; email: string }>>([]);
+  const [selectedNodeType, setSelectedNodeType] = useState<string>('');
 
-  const handleAddNode = (type: string) => {
-    setNodes([...nodes, { type, email: '' }]);
+  const handleAddNode = () => {
+    if (selectedNodeType) {
+      setNodes([...nodes, { type: selectedNodeType, email: '' }]);
+      setSelectedNodeType(''); // Reset the selected node type
+    }
   };
 
   const handleRemoveNode = (index: number) => {
@@ -315,17 +320,19 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         />
       </div>
       <div className="form-group">
-        <label>Candidate Email</label>
-        <input
-          type="text"
-          value={candidateEmail}
-          onChange={(e) => setCandidateEmail(e.target.value)}
-          placeholder="Enter candidate email"
-        />
+        <label>Add Node</label>
+        <Select
+          style={{ width: '100%' }}
+          placeholder="Select a node type"
+          value={selectedNodeType}
+          onChange={(value) => setSelectedNodeType(value)}
+        >
+          <Option value="Candidate">Candidate</Option>
+          <Option value="Manager">Manager</Option>
+          <Option value="HRBP">HRBP</Option>
+        </Select>
+        <button onClick={handleAddNode}>Add Node</button>
       </div>
-      <button onClick={() => handleAddNode('Candidate')}>Add Candidate</button>
-      <button onClick={() => handleAddNode('Manager')}>Add Manager</button>
-      <button onClick={() => handleAddNode('HRBP')}>Add HRBP</button>
       <div className="node-list">
         {nodes.map((node, index) => (
           <div key={index} className="node-item">
