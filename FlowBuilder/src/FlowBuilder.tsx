@@ -196,7 +196,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             outputs: 1,
             x: 300,
             y: 180,
-            wires: [[`decision_${index}`],index === 0 ?"http_response":""],
+            wires: [[`decision_${index}`],index === 0 ?"":"http_response"],
           });
 
           workflow.push({
