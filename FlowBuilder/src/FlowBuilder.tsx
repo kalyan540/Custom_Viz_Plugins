@@ -228,8 +228,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   if (msg.payload.formCompleted === true) {
     // Ensure proper JSON structure for request_data
     let requestData = {
-      workflowName: msg.workflowName,
-      candidate: msg.candidateEmail
+      workflowName: msg.payload.workflowName || "Unknown Workflow",
+      candidate: msg.payload.candidateEmail || "Unknown Candidate"
     };
 
     // Prepare the parameters for the PostgreSQL query
