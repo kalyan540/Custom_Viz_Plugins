@@ -121,100 +121,138 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   ) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
-  
-    // Start node
+
+
+    // PostgreSQL Config Node
     workflow.push({
-      id: "inject_start",
-      type: "inject",
-      z: tabId,
-      name: "Start Request",
-      props: [{ p: "payload" }],
-      payload: JSON.stringify({ requestId: 123, status: "Pending", userEmail }),
-      payloadType: "json",
-      x: 110,
-      y: 120,
-      wires: [[`manager_0`]],
-    });
-  
-    // Manager approval nodes
-    managers.forEach((manager, index) => {
-      workflow.push({
-        id: `manager_${index}`,
-        type: "function",
+        id: "7b9ec91590d534cc",
+        type: "postgreSQLConfig",
         z: tabId,
-        name: `${manager.name} Approval`,
-        func: `msg.payload = {}; msg.payload.approval = Math.random() > 0.5 ? \"Approved\" : \"Rejected\";\nmsg.payload.manager = \"${manager.name}\";\nreturn msg;`,
-        outputs: 1,
-        x: 300,
-        y: 120 + index * 80,
-        wires: [[`decision_${index}`]],
+        name: "PostgreSQL Config",
+        host: "52.91.38.126", // Replace with your PostgreSQL host
+        port: 5433, // Replace with your PostgreSQL port
+        database: "nodered_db", // Replace with your database name
+        ssl: false, // Set to true if using SSL
+        user: "nodered_user", // Replace with your PostgreSQL username
+        password: "nodered_password", // Replace with your PostgreSQL password
+        max: 10, // Maximum number of connections in the pool
+        idleTimeoutMillis: 1000, // Idle connection timeout
+        connectionTimeoutMillis: 10000, // Connection timeout
+        x: 320, // X position in the Node-RED editor
+        y: 60, // Y position in the Node-RED editor
       });
-      
+    
       workflow.push({
-        id: `decision_${index}`,
-        type: "switch",
-        z: tabId,
-        name: `Check ${manager.name} Decision`,
-        property: "payload.approval",
-        propertyType: "msg",
-        rules: [
-          { t: "eq", v: "Approved", vt: "str" },
-          { t: "eq", v: "Rejected", vt: "str" },
-        ],
-        outputs: 2,
-        x: 220,
-        y: 160 + index * 80,
-        wires: [
-          [index === managers.length - 1 ? "set_completed_status" : `manager_${index + 1}`],
-          ["reject_notification"],
-        ],
-      });
-    });
-  
-    // Set completed status node
-    workflow.push({
-      id: "set_completed_status",
-      type: "function",
-      z: tabId,
-      name: "Set status to completed",
-      func: `msg.payload.status = \"Completed\";\nmsg.payload.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = \`Workflow \${msg.payload.request_id}\`;\nmsg.payload.html = \`<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\"><h2 style=\"color: #2c3e50;\">Workflow Request Update</h2><p style=\"font-size: 16px;\">Your request has been processed.</p><table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\"><tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td><td style=\"padding: 10px; border: 1px solid #ddd;\">\${msg.payload.request_id}</td></tr><tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td><td style=\"padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};\"><strong>\${msg.payload.status}</strong></td></tr></table><p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p></div>\`;\nreturn msg;`,
-      outputs: 1,
-      x: 550,
-      y: 180,
-      wires: [["approval_email"]],
-    });
-  
-    // Approval email node
-    workflow.push({
-      id: "approval_email",
-      type: "e-mail",
-      z: tabId,
-      name: "Send Approval Email",
-      server: "sandbox.smtp.mailtrap.io",
-      port: "2525",
-      to: userEmail,
-      subject: "Workflow Completed",
-      body: "{{payload.html}}",
-      x: 770,
-      y: 150,
-      wires: [],
+          "id": "http_in_create",
+          "type": "http in",
+          z: tabId,
+          "name": "Initiate Workflow",
+          "url": "/api/initiateWorkflow",
+          "method": "post",
+          "upload": false,
+          "swaggerDoc": "",
+          "x": 100,
+          "y": 100,
+          "wires": [[`manager_0`]]
+        });
+
+        managers.forEach((manager, index) => {
+        workflow.push(
+            {
+                id: `prepare_email_${index}`,
+                type: "function",
+                z: tabId,
+                name: "prepare_email",
+                func: "\nmsg.payload.status = \"Completed\";\nmsg.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = `Workflow ${msg.request_id}`;\nmsg.to = msg.payload.to || \"herig68683@cybtric.com\";\n//msg.payload = Your request with ID ${msg.request_id} has been processed.;\n\nmsg.html = \n    `<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\">\n        <h2 style=\"color: #2c3e50;\">Workflow Request Update</h2>\n        <p style=\"font-size: 16px;\">Workflow ${msg.request_id} has been created, to approve or reject please click on the link <a href=\"http://www.google.com\"> Google</a> </p>\n        <table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\">\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd;\">${msg.request_id}</td>\n            </tr>\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd; color: ${msg.payload.status === 'Completed' ? 'green' : 'red'};\">\n                    <strong>${msg.payload.status}</strong>\n                </td>\n            </tr>\n        </table>\n        <p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p>\n    </div>`;\nmsg.payload = msg.html;\nreturn msg;",
+                outputs: 1,
+                x: 310,
+                y: 120 + index * 80,
+                "wires": [
+                    [`send_email${index}`]
+                ]
+            }
+        );
     });
 
-    //Reject notification email node
-    workflow.push({
-      id: "reject_notification",
-      type: "e-mail",
-      z: tabId,
-      name: "Send Rejection Email",
-      server: "sandbox.smtp.mailtrap.io",
-      port: "2525",
-      to: userEmail,
-      subject: "Workflow Rejected",
-      body: "Your workflow request has been rejected by {{payload.manager}}.",
-      x: 770,
-      y: 300,
-      wires: [],
-    });
+    // Manager approval nodes
+    // managers.forEach((manager, index) => {
+    //   workflow.push({
+    //     id: `manager_${index}`,
+    //     type: "function",
+    //     z: tabId,
+    //     name: `${manager.name} Approval`,
+    //     func: `msg.payload = {}; msg.payload.approval = Math.random() > 0.5 ? \"Approved\" : \"Rejected\";\nmsg.payload.manager = \"${manager.name}\";\nreturn msg;`,
+    //     outputs: 1,
+    //     x: 300,
+    //     y: 120 + index * 80,
+    //     wires: [[`decision_${index}`]],
+    //   });
+      
+    //   workflow.push({
+    //     id: `decision_${index}`,
+    //     type: "switch",
+    //     z: tabId,
+    //     name: `Check ${manager.name} Decision`,
+    //     property: "payload.approval",
+    //     propertyType: "msg",
+    //     rules: [
+    //       { t: "eq", v: "Approved", vt: "str" },
+    //       { t: "eq", v: "Rejected", vt: "str" },
+    //     ],
+    //     outputs: 2,
+    //     x: 220,
+    //     y: 160 + index * 80,
+    //     wires: [
+    //       [index === managers.length - 1 ? "set_completed_status" : `manager_${index + 1}`],
+    //       ["reject_notification"],
+    //     ],
+    //   });
+    // });
+  
+    // // Set completed status node
+    // workflow.push({
+    //   id: "set_completed_status",
+    //   type: "function",
+    //   z: tabId,
+    //   name: "Set status to completed",
+    //   func: `msg.payload.status = \"Completed\";\nmsg.payload.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = \`Workflow \${msg.payload.request_id}\`;\nmsg.payload.html = \`<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\"><h2 style=\"color: #2c3e50;\">Workflow Request Update</h2><p style=\"font-size: 16px;\">Your request has been processed.</p><table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\"><tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td><td style=\"padding: 10px; border: 1px solid #ddd;\">\${msg.payload.request_id}</td></tr><tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td><td style=\"padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};\"><strong>\${msg.payload.status}</strong></td></tr></table><p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p></div>\`;\nreturn msg;`,
+    //   outputs: 1,
+    //   x: 550,
+    //   y: 180,
+    //   wires: [["approval_email"]],
+    // });
+  
+    // // Approval email node
+    // workflow.push({
+    //   id: "approval_email",
+    //   type: "e-mail",
+    //   z: tabId,
+    //   name: "Send Approval Email",
+    //   server: "sandbox.smtp.mailtrap.io",
+    //   port: "2525",
+    //   to: userEmail,
+    //   subject: "Workflow Completed",
+    //   body: "{{payload.html}}",
+    //   x: 770,
+    //   y: 150,
+    //   wires: [],
+    // });
+
+    // //Reject notification email node
+    // workflow.push({
+    //   id: "reject_notification",
+    //   type: "e-mail",
+    //   z: tabId,
+    //   name: "Send Rejection Email",
+    //   server: "sandbox.smtp.mailtrap.io",
+    //   port: "2525",
+    //   to: userEmail,
+    //   subject: "Workflow Rejected",
+    //   body: "Your workflow request has been rejected by {{payload.manager}}.",
+    //   x: 770,
+    //   y: 300,
+    //   wires: [],
+    // });
   
     return workflow; // Return a plain JavaScript object
   };
