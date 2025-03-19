@@ -222,19 +222,27 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         name: `Check ${manager.name} Decision`,
         func: `
           // Check if the form is completed
-          if (msg.payload.formCompleted === true) {
+            if (msg.payload.formCompleted === true) {
+            // Ensure proper JSON structure for request_data
+            let requestData = {
+                workflowName: msg.workflowName,
+                candidate: msg.candidateEmail
+            };
+
             // Prepare the parameters for the PostgreSQL query
             msg.params = [
-              2, // user_id
-              JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
-              msg.payload.status || "Pending", // status
-              ${index + 1}, // current_level
-              ${managers.length} // total_levels
+                2,  // user_id
+                JSON.stringify(requestData), // Ensure request_data is properly stringified
+                msg.payload.status || "Pending", // status
+                1, // current_level
+                1  // total_levels
             ];
+
             return [msg, null]; // Send msg to the first output (for true case)
-          } else {
+            } else {
             return [null, msg]; // Send msg to the second output (for false case)
-          }
+            }
+
         `,
         outputs: 2,
         x: 220,
