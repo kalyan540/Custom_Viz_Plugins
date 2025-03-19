@@ -222,53 +222,52 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             z: tabId,
             name: `Check ${manager.name} Decision`,
             func: `
-            // Check if the form is completed
+              // Check if the form is completed
               if (msg.payload.formCompleted === true) {
-              // Ensure proper JSON structure for request_data
-              let requestData = {
+                // Ensure proper JSON structure for request_data
+                let requestData = {
                   workflowName: msg.workflowName,
                   candidate: msg.candidateEmail
-              };
-  
-              // Prepare the parameters for the PostgreSQL query
-              msg.params = [
+                };
+          
+                // Prepare the parameters for the PostgreSQL query
+                msg.params = [
                   2,  // user_id
                   JSON.stringify(requestData), // Ensure request_data is properly stringified
                   msg.payload.status || "Pending", // status
                   ${index + 1}, // current_level
                   ${managers.length}  // total_levels
-              ];
-
-               // Prepare email content
-      msg.request_id = msg.payload?.requestId || "UnknownID";
-      msg.topic = \`Workflow ${msg.request_id}\`;
-      msg.to = msg.payload.to || "herig68683@cybtric.com";
-      msg.html = \`
-        <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
-          <h2 style="color: #2c3e50;">Workflow Request Update</h2>
-          <p style="font-size: 16px;">Workflow ${msg.request_id} has been created, to approve or reject please click on the link <a href="http://www.google.com"> Google</a> </p>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-            <tr>
-              <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Request ID:</strong></td>
-              <td style="padding: 10px; border: 1px solid #ddd;">${msg.request_id}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Status:</strong></td>
-              <td style="padding: 10px; border: 1px solid #ddd; color: ${msg.payload.status === 'Completed' ? 'green' : 'red'};">
-                <strong>${msg.payload.status}</strong>
-              </td>
-            </tr>
-          </table>
-          <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">This is an automated message. Please do not reply.</p>
-        </div>\`;
-      msg.payload = msg.html;
-  
-              return [msg, null]; // Send msg to the first output (for true case)
+                ];
+          
+                // Prepare email content
+                msg.request_id = msg.payload?.requestId || "UnknownID";
+                msg.topic = \`Workflow ${msg.request_id}\`;
+                msg.to = msg.payload.to || "herig68683@cybtric.com";
+                msg.html = \`
+                  <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                    <h2 style="color: #2c3e50;">Workflow Request Update</h2>
+                    <p style="font-size: 16px;">Workflow ${msg.request_id} has been created, to approve or reject please click on the link <a href="http://www.google.com"> Google</a> </p>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                      <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Request ID:</strong></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">${msg.request_id}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Status:</strong></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; color: ${msg.payload.status === 'Completed' ? 'green' : 'red'};">
+                          <strong>${msg.payload.status}</strong>
+                        </td>
+                      </tr>
+                    </table>
+                    <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">This is an automated message. Please do not reply.</p>
+                  </div>\`;
+                msg.payload = msg.html;
+          
+                return [msg, null]; // Send msg to the first output (for true case)
               } else {
-              return [null, msg]; // Send msg to the second output (for false case)
+                return [null, msg]; // Send msg to the second output (for false case)
               }
-  
-          `,
+            `,
             outputs: 2,
             x: 220,
             y: 160 + index * 80,
@@ -281,7 +280,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 : [`postgres_insert_reject_${index}`, "http_response"] // Not last manager (rejection)
             ]
           });
-
       // Approval email node
       workflow.push({
         id: `send_email`,
@@ -347,86 +345,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
         });
 
-    // Manager approval nodes
-    // managers.forEach((manager, index) => {
-    //   workflow.push({
-    //     id: `manager_${index}`,
-    //     type: "function",
-    //     z: tabId,
-    //     name: `${manager.name} Approval`,
-    //     func: `msg.payload = {}; msg.payload.approval = Math.random() > 0.5 ? \"Approved\" : \"Rejected\";\nmsg.payload.manager = \"${manager.name}\";\nreturn msg;`,
-    //     outputs: 1,
-    //     x: 300,
-    //     y: 120 + index * 80,
-    //     wires: [[`decision_${index}`]],
-    //   });
-      
-    //   workflow.push({
-    //     id: `decision_${index}`,
-    //     type: "switch",
-    //     z: tabId,
-    //     name: `Check ${manager.name} Decision`,
-    //     property: "payload.approval",
-    //     propertyType: "msg",
-    //     rules: [
-    //       { t: "eq", v: "Approved", vt: "str" },
-    //       { t: "eq", v: "Rejected", vt: "str" },
-    //     ],
-    //     outputs: 2,
-    //     x: 220,
-    //     y: 160 + index * 80,
-    //     wires: [
-    //       [index === managers.length - 1 ? "set_completed_status" : `manager_${index + 1}`],
-    //       ["reject_notification"],
-    //     ],
-    //   });
-    // });
-  
-    // // Set completed status node
-    // workflow.push({
-    //   id: "set_completed_status",
-    //   type: "function",
-    //   z: tabId,
-    //   name: "Set status to completed",
-    //   func: `msg.payload.status = \"Completed\";\nmsg.payload.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = \`Workflow \${msg.payload.request_id}\`;\nmsg.payload.html = \`<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\"><h2 style=\"color: #2c3e50;\">Workflow Request Update</h2><p style=\"font-size: 16px;\">Your request has been processed.</p><table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\"><tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td><td style=\"padding: 10px; border: 1px solid #ddd;\">\${msg.payload.request_id}</td></tr><tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td><td style=\"padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};\"><strong>\${msg.payload.status}</strong></td></tr></table><p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p></div>\`;\nreturn msg;`,
-    //   outputs: 1,
-    //   x: 550,
-    //   y: 180,
-    //   wires: [["approval_email"]],
-    // });
-  
-    // // Approval email node
-    // workflow.push({
-    //   id: "approval_email",
-    //   type: "e-mail",
-    //   z: tabId,
-    //   name: "Send Approval Email",
-    //   server: "sandbox.smtp.mailtrap.io",
-    //   port: "2525",
-    //   to: userEmail,
-    //   subject: "Workflow Completed",
-    //   body: "{{payload.html}}",
-    //   x: 770,
-    //   y: 150,
-    //   wires: [],
-    // });
-
-    // //Reject notification email node
-    // workflow.push({
-    //   id: "reject_notification",
-    //   type: "e-mail",
-    //   z: tabId,
-    //   name: "Send Rejection Email",
-    //   server: "sandbox.smtp.mailtrap.io",
-    //   port: "2525",
-    //   to: userEmail,
-    //   subject: "Workflow Rejected",
-    //   body: "Your workflow request has been rejected by {{payload.manager}}.",
-    //   x: 770,
-    //   y: 300,
-    //   wires: [],
-    // });
-  
+    
     return workflow; // Return a plain JavaScript object
   };
 
