@@ -63,12 +63,12 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const rootElem = createRef<HTMLDivElement>();
 
   const [workflowName, setWorkflowName] = useState(`Workflow-${Math.floor(Math.random() * 1000)}`);
-  const [nodes, setNodes] = useState<Array<{ type: string; email: string }>>([]);
+  const [nodes, setNodes] = useState<Array<{ type: string }>>([]);
   const [selectedNodeType, setSelectedNodeType] = useState<string>('');
 
   const handleAddNode = () => {
     if (selectedNodeType) {
-      setNodes([...nodes, { type: selectedNodeType, email: '' }]);
+      setNodes([...nodes, { type: selectedNodeType }]);
       setSelectedNodeType(''); // Reset the selected node type
     }
   };
@@ -76,12 +76,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const handleRemoveNode = (index: number) => {
     const newNodes = [...nodes];
     newNodes.splice(index, 1);
-    setNodes(newNodes);
-  };
-
-  const handleNodeEmailChange = (index: number, email: string) => {
-    const newNodes = [...nodes];
-    newNodes[index].email = email;
     setNodes(newNodes);
   };
 
@@ -112,7 +106,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     }
   };
 
-  const generateWorkflowJson = (workflowName: string, nodes: Array<{ type: string; email: string }>) => {
+  const generateWorkflowJson = (workflowName: string, nodes: Array<{ type: string }>) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c";
 
@@ -212,8 +206,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         name: node.type,
         func: `
           msg.workflowName = "${workflowName}";
-          msg.${nodeType}Email = "${node.email}";
-          msg.payload.${nodeType} = "${node.email}";
+          msg.${nodeType} = "${node.type}";
           msg.payload.formCompleted = true;
           return msg;
         `,
@@ -337,12 +330,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         {nodes.map((node, index) => (
           <div key={index} className="node-item">
             <span>{node.type}</span>
-            <input
-              type="text"
-              value={node.email}
-              onChange={(e) => handleNodeEmailChange(index, e.target.value)}
-              placeholder={`Enter ${node.type} email`}
-            />
             <button onClick={() => handleRemoveNode(index)}>Remove</button>
           </div>
         ))}
