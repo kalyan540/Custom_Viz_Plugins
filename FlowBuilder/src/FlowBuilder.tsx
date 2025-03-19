@@ -241,11 +241,11 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         y: 160 + index * 80,
         wires: [
             index === managers.length - 1
-              ? ["postgres_insert_candidate_approve", "http_response", "prepare_email"]
-              : ["postgres_insert_candidate_approve", "prepare_email", `manager_${index + 1}`],
+              ? ["postgres_insert_approve", "http_response", "prepare_email"]
+              : ["postgres_insert_approve", "prepare_email", `manager_${index + 1}`],
             index === managers.length - 1
-              ? ["postgres_insert_candidate_reject", "prepare_email"]
-              : ["postgres_insert_candidate_reject"]
+              ? ["postgres_insert_reject", "prepare_email"]
+              : ["postgres_insert_reject"]
           ],
 
         //   wires: [
@@ -272,6 +272,36 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         "y": 150,
         "wires": []
         });
+
+        workflow.push({
+            id: `postgres_insert_approve_${index}`,
+            type: "postgresql",
+            z: tabId,
+            name: `Insert into PostgreSQL(Approve) - ${manager.name}`,
+            query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+            postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+            split: false,
+            rowsPerMsg: 1,
+            outputs: 1,
+            x: 1100 + index * 200, // Adjust positioning dynamically
+            y: 120,
+            wires: [], // No further connections needed
+          });
+
+          workflow.push({
+            id: `postgres_insert_reject_${index}`,
+            type: "postgresql",
+            z: tabId,
+            name: `Insert into PostgreSQL(Reject) - ${manager.name}`,
+            query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+            postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+            split: false,
+            rowsPerMsg: 1,
+            outputs: 1,
+            x: 1100 + index * 200, // Adjust positioning dynamically
+            y: 240,
+            wires: [], // No further connections needed
+          });
 
 
       
