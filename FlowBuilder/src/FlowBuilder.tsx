@@ -249,6 +249,19 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         //         ],
       });
 
+      workflow.push({
+      
+        "id": "http_response",
+        "type": "http response",
+        z: tabId,
+        "name": "HTTP Response",
+        "statusCode": "200",
+        "headers": {},
+        "x": 500,
+        "y": 100,
+        "wires": []
+    })
+
     });
 
     // Manager approval nodes
