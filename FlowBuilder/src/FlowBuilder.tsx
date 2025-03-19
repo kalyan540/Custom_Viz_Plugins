@@ -153,7 +153,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           "swaggerDoc": "",
           "x": 100,
           "y": 100,
-          "wires": [[`manager_0`]]
+          "wires": [[`prepare_email_0`]]
         });
 
         managers.forEach((manager, index) => {
@@ -175,18 +175,18 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     });
 
     // Manager approval nodes
-    // managers.forEach((manager, index) => {
-    //   workflow.push({
-    //     id: `manager_${index}`,
-    //     type: "function",
-    //     z: tabId,
-    //     name: `${manager.name} Approval`,
-    //     func: `msg.payload = {}; msg.payload.approval = Math.random() > 0.5 ? \"Approved\" : \"Rejected\";\nmsg.payload.manager = \"${manager.name}\";\nreturn msg;`,
-    //     outputs: 1,
-    //     x: 300,
-    //     y: 120 + index * 80,
-    //     wires: [[`decision_${index}`]],
-    //   });
+    managers.forEach((manager, index) => {
+      workflow.push({
+        id: `manager_${index}`,
+        type: "function",
+        z: tabId,
+        name: `${manager.name} Approval`,
+        func: `msg.payload = {}; msg.payload.approval = Math.random() > 0.5 ? \"Approved\" : \"Rejected\";\nmsg.payload.manager = \"${manager.name}\";\nreturn msg;`,
+        outputs: 1,
+        x: 300,
+        y: 120 + index * 80,
+        wires: [[`decision_${index}`]],
+      });
       
     //   workflow.push({
     //     id: `decision_${index}`,
