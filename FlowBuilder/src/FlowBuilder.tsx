@@ -241,11 +241,11 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         y: 160 + index * 80,
         wires: [
             index === managers.length - 1
-              ? ["postgres_insert_approve", "http_response", "prepare_email"]
-              : ["postgres_insert_approve", "prepare_email", `manager_${index + 1}`],
+              ? [`postgres_insert_approve_${index}`, "http_response", "prepare_email"]
+              : [`postgres_insert_approve_${index}`, "prepare_email", `manager_${index + 1}`],
             index === managers.length - 1
-              ? ["postgres_insert_reject", "prepare_email"]
-              : ["postgres_insert_reject"]
+              ? [`postgres_insert_reject_${index}`, "prepare_email"]
+              : [`postgres_insert_reject_${index}`]
           ],
 
         //   wires: [
