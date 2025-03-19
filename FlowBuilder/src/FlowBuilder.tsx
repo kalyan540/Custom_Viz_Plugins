@@ -153,7 +153,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           "swaggerDoc": "",
           "x": 100,
           "y": 100,
-          "wires": [[`prepare_email_0`]]
+          "wires": [[`prepare_email_0`,'manager_0']]
         });
 
         managers.forEach((manager, index) => {
@@ -190,6 +190,64 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         "y": 150,
         "wires": []
         });
+
+        workflow.push({
+            id: `manager_${index}`,
+            type: "function",
+            z: tabId,
+            name: "Candidate",
+            func: `
+              // Add workflowName and candidateEmail to the msg object
+              msg.workflowName = "${workflowName}";
+              msg.candidateEmail = "${currentUserEmail}";
+              msg.payload.candidate = "${currentUserEmail}";
+          
+              // Set formCompleted here
+              msg.payload.formCompleted = true; // Replace with your logic if needed
+          
+              return msg;
+            `,
+            outputs: 1,
+            x: 300,
+            y: 180,
+            wires: [[`decision_${index}`]],
+          });
+
+
+          // Check Form Completed Node (Function Node)
+    workflow.push({
+        id: `decision_${index}`,
+        type: "function",
+        z: tabId,
+        name: `Check ${manager.name} Decision`,
+        func: `
+          // Check if the form is completed
+          if (msg.payload.formCompleted === true) {
+            // Prepare the parameters for the PostgreSQL query
+            msg.params = [
+              2, // user_id
+              JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
+              "Completed", // status
+              1, // current_level
+              5 // total_levels
+            ];
+            return [msg, null]; // Send msg to the first output (for true case)
+          } else {
+            return [null, msg]; // Send msg to the second output (for false case)
+          }
+        `,
+        outputs: 2,
+        x: 220,
+        y: 160 + index * 80,
+        wires: [
+          ["postgres_insert_candidate_approve","http_response",index === managers.length - 1 ? "set_completed_status" : `prepare_email_${index}`], // True case
+          ["postgres_insert_candidate_reject","http_response"] // False case
+        ],
+        // wires: [
+        //           [index === managers.length - 1 ? "set_completed_status" : `manager_${index + 1}`],
+        //           ["reject_notification"],
+        //         ],
+      });
 
     });
 
