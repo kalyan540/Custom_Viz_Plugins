@@ -172,6 +172,25 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 ]
             }
         );
+
+        // Approval email node
+        workflow.push({
+        id: `send_email${index}`,
+        "type": "e-mail",
+        "z": "e0ba68613f04424c",
+        //"name": "wameya7577@excederm.com",
+        "server": "sandbox.smtp.mailtrap.io",
+        "port": "2525",
+        "username": "62753aa9883bbc",
+        "password": "a249d24a02ce4f",
+        //"to": "wameya7577@excederm.com",
+        "subject": "Workflow Completed",
+        "body": "{{payload.html}}",
+        "x": 770,
+        "y": 150,
+        "wires": []
+        });
+
     });
 
     // Manager approval nodes
