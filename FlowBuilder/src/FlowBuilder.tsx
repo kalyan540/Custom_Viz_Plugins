@@ -236,8 +236,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 2,  // user_id
                 JSON.stringify(requestData), // Ensure request_data is properly stringified
                 msg.payload.status || "Pending", // status
-                1, // current_level
-                1  // total_levels
+                ${index + 1}, // current_level
+                ${managers.length}  // total_levels
             ];
 
             return [msg, null]; // Send msg to the first output (for true case)
