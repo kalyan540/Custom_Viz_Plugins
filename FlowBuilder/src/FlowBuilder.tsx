@@ -186,8 +186,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
               // Add workflowName and candidateEmail to the msg object
               msg.workflowName = "${workflowName}";
               msg.candidateEmail = "${currentUserEmail}";
-              msg.payload.candidate = "${currentUserEmail}";
-          
+              
               // Set formCompleted here
               //msg.payload.formCompleted = true; // Replace with your logic if needed
           
@@ -249,19 +248,15 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         outputs: 2,
         x: 220,
         y: 160 + index * 80,
-        wires: [
-            index === managers.length - 1
-              ? [`postgres_insert_approve_${index}`, "prepare_email"]
-              : [`postgres_insert_approve_${index}`, "prepare_email", `manager_${index + 1}`],
-            index === managers.length - 1
-              ? [`postgres_insert_reject_${index}`, "prepare_email"]
-              : [`postgres_insert_reject_${index}`]
-          ],
 
-        //   wires: [
-        //     [index === managers.length - 1 ? "postgres_insert_candidate_approve","http_response",'prepare_email' : "postgres_insert_candidate_approve","http_response",'prepare_email',`manager_${index + 1}`], // True case
-        //     [index === managers.length - 1 ? "postgres_insert_candidate_reject",`prepare_email` : "postgres_insert_candidate_reject"] // False case
-        //   ],
+          wires: [
+            index === managers.length - 1
+              ? [`postgres_insert_approve_${index}`, "send_email", "http_response"] // Last manager (approval)
+              : [`postgres_insert_approve_${index}`, "send_email", "http_response", `manager_${index + 1}`], // Not last manager (approval)
+            index === managers.length - 1
+              ? [`postgres_insert_reject_${index}`, "http_response"] // Last manager (rejection)
+              : [`postgres_insert_reject_${index}`, "http_response"] // Not last manager (rejection)
+          ]
 
       });
 
