@@ -189,14 +189,14 @@ export default function FlowBuilder(props: FlowBuilderProps) {
               msg.payload.candidate = "${currentUserEmail}";
           
               // Set formCompleted here
-             // msg.payload.formCompleted = true; // Replace with your logic if needed
+              //msg.payload.formCompleted = true; // Replace with your logic if needed
           
               return msg;
             `,
             outputs: 1,
             x: 300,
             y: 180,
-            wires: [[`decision_${index}`]],
+            wires: [[`decision_${index}`],index === 0 ?"http_response":""],
           });
 
           workflow.push({
@@ -248,7 +248,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         x: 220,
         y: 160 + index * 80,
         wires: [
-            index === 0
+            index === managers.length - 1
               ? [`postgres_insert_approve_${index}`, "http_response", "prepare_email"]
               : [`postgres_insert_approve_${index}`, "prepare_email", `manager_${index + 1}`],
             index === managers.length - 1
