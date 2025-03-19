@@ -195,7 +195,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             id: `manager_${index}`,
             type: "function",
             z: tabId,
-            name: "Candidate",
+            name: `${manager.name} Approval`,
             func: `
               // Add workflowName and candidateEmail to the msg object
               msg.workflowName = "${workflowName}";
