@@ -156,6 +156,36 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           "wires": [[`prepare_email`,'manager_0']]
         });
 
+
+        workflow.push({
+            "id": "http_in_create",
+            "type": "http in",
+            z: tabId,
+            "name": "Manager1 Decision",
+            "url": "/api/manager1Decision",
+            "method": "post",
+            "upload": false,
+            "swaggerDoc": "",
+            "x": 100,
+            "y": 100,
+            "wires": [['manager_0']]
+          });
+
+
+          workflow.push({
+            "id": "http_in_create",
+            "type": "http in",
+            z: tabId,
+            "name": "Manager2 Decision",
+            "url": "/api/manager2Decision",
+            "method": "post",
+            "upload": false,
+            "swaggerDoc": "",
+            "x": 100,
+            "y": 100,
+            "wires": [['manager_1']]
+          });
+
         workflow.push(
             {
                 id: `prepare_email`,
@@ -171,8 +201,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 ]
             }
             );
-    
-            
     
 
         managers.forEach((manager, index) => {
