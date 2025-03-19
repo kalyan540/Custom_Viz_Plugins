@@ -164,7 +164,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 type: "function",
                 z: tabId,
                 name: "prepare_email",
-                func: "\nmsg.payload.status = \"Completed\";\nmsg.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = `Workflow ${msg.request_id}`;\nmsg.to = msg.payload.to || \"herig68683@cybtric.com\";\n//msg.payload = Your request with ID ${msg.request_id} has been processed.;\n\nmsg.html = \n    `<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\">\n        <h2 style=\"color: #2c3e50;\">Workflow Request Update</h2>\n        <p style=\"font-size: 16px;\">Workflow ${msg.request_id} has been created, to approve or reject please click on the link <a href=\"http://www.google.com\"> Google</a> </p>\n        <table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\">\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd;\">${msg.request_id}</td>\n            </tr>\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd; color: ${msg.payload.status === 'Completed' ? 'green' : 'red'};\">\n                    <strong>${msg.payload.status}</strong>\n                </td>\n            </tr>\n        </table>\n        <p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p>\n    </div>`;\nmsg.payload = msg.html;\nreturn msg;",
+                func: "\nmsg.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = `Workflow ${msg.request_id}`;\nmsg.to = msg.payload.to || \"herig68683@cybtric.com\";\n//msg.payload = Your request with ID ${msg.request_id} has been processed.;\n\nmsg.html = \n    `<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\">\n        <h2 style=\"color: #2c3e50;\">Workflow Request Update</h2>\n        <p style=\"font-size: 16px;\">Workflow ${msg.request_id} has been created, to approve or reject please click on the link <a href=\"http://www.google.com\"> Google</a> </p>\n        <table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\">\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd;\">${msg.request_id}</td>\n            </tr>\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd; color: ${msg.payload.status === 'Completed' ? 'green' : 'red'};\">\n                    <strong>${msg.payload.status}</strong>\n                </td>\n            </tr>\n        </table>\n        <p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p>\n    </div>`;\nmsg.payload = msg.html;\nreturn msg;",
                 outputs: 1,
                 x: 310,
                 y: 180,
@@ -186,8 +186,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
               // Add workflowName and candidateEmail to the msg object
               msg.workflowName = "${workflowName}";
               msg.candidateEmail = "${currentUserEmail}";
-              msg.payload.candidate = "${currentUserEmail}";
-          
+              
               // Set formCompleted here
               //msg.payload.formCompleted = true; // Replace with your logic if needed
           
@@ -217,53 +216,47 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
 
           // Check Form Completed Node (Function Node)
-    workflow.push({
-        id: `decision_${index}`,
-        type: "function",
-        z: tabId,
-        name: `Check ${manager.name} Decision`,
-        func: `
-          // Check if the form is completed
-            if (msg.payload.formCompleted === true) {
-            // Ensure proper JSON structure for request_data
-            let requestData = {
-                workflowName: msg.workflowName,
-                candidate: msg.candidateEmail
-            };
-
-            // Prepare the parameters for the PostgreSQL query
-            msg.params = [
-                2,  // user_id
-                JSON.stringify(requestData), // Ensure request_data is properly stringified
-                msg.payload.status || "Pending", // status
-                ${index + 1}, // current_level
-                ${managers.length}  // total_levels
-            ];
-
-            return [msg, null]; // Send msg to the first output (for true case)
-            } else {
-            return [null, msg]; // Send msg to the second output (for false case)
-            }
-
-        `,
-        outputs: 2,
-        x: 220,
-        y: 160 + index * 80,
-        wires: [
-            index === managers.length - 1
-              ? [`postgres_insert_approve_${index}`, "prepare_email"]
-              : [`postgres_insert_approve_${index}`, "prepare_email", `manager_${index + 1}`],
-            index === managers.length - 1
-              ? [`postgres_insert_reject_${index}`, "prepare_email"]
-              : [`postgres_insert_reject_${index}`]
-          ],
-
-        //   wires: [
-        //     [index === managers.length - 1 ? "postgres_insert_candidate_approve","http_response",'prepare_email' : "postgres_insert_candidate_approve","http_response",'prepare_email',`manager_${index + 1}`], // True case
-        //     [index === managers.length - 1 ? "postgres_insert_candidate_reject",`prepare_email` : "postgres_insert_candidate_reject"] // False case
-        //   ],
-
-      });
+          workflow.push({
+            id: `decision_${index}`,
+            type: "function",
+            z: tabId,
+            name: `Check ${manager.name} Decision`,
+            func: `
+            // Check if the form is completed
+              if (msg.payload.formCompleted === true) {
+              // Ensure proper JSON structure for request_data
+              let requestData = {
+                  workflowName: msg.workflowName,
+                  candidate: msg.candidateEmail
+              };
+  
+              // Prepare the parameters for the PostgreSQL query
+              msg.params = [
+                  2,  // user_id
+                  JSON.stringify(requestData), // Ensure request_data is properly stringified
+                  msg.payload.status || "Pending", // status
+                  ${index + 1}, // current_level
+                  ${managers.length}  // total_levels
+              ];
+  
+              return [msg, null]; // Send msg to the first output (for true case)
+              } else {
+              return [null, msg]; // Send msg to the second output (for false case)
+              }
+  
+          `,
+            outputs: 2,
+            x: 220,
+            y: 160 + index * 80,
+            wires: [
+              index === managers.length - 1
+                ? [`postgres_insert_approve_${index}`, "send_email", "http_response"] // Last manager (approval)
+                : [`postgres_insert_approve_${index}`, "send_email", "http_response", `manager_${index + 1}`], // Not last manager (approval)
+              index === managers.length - 1
+                ? [`postgres_insert_reject_${index}`, "http_response"] // Last manager (rejection)
+                : [`postgres_insert_reject_${index}`, "http_response"] // Not last manager (rejection)
+            ]
+          });
 
       // Approval email node
       workflow.push({
