@@ -157,34 +157,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         });
 
 
-        workflow.push({
-            "id": "http_in_create",
-            "type": "http in",
-            z: tabId,
-            "name": "Manager1 Decision",
-            "url": "/api/manager1Decision",
-            "method": "post",
-            "upload": false,
-            "swaggerDoc": "",
-            "x": 100,
-            "y": 100,
-            "wires": [['manager_0']]
-          });
-
-
-          workflow.push({
-            "id": "http_in_create",
-            "type": "http in",
-            z: tabId,
-            "name": "Manager2 Decision",
-            "url": "/api/manager2Decision",
-            "method": "post",
-            "upload": false,
-            "swaggerDoc": "",
-            "x": 100,
-            "y": 100,
-            "wires": [['manager_1']]
-          });
 
         workflow.push(
             {
@@ -225,6 +197,20 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             x: 300,
             y: 180,
             wires: [[`decision_${index}`]],
+          });
+
+          workflow.push({
+            id: `http_in_manager_${index}`,
+            type: "http in",
+            z: tabId,
+            name: `${manager.name} Decision`,
+            url: `/api/manager${index + 1}Decision`, // Dynamic URL
+            method: "post",
+            upload: false,
+            swaggerDoc: "",
+            x: 100 + index * 200, // Adjust positioning dynamically
+            y: 100,
+            wires: [[`decision_${index}`]], // Connect to the corresponding manager node
           });
 
 
