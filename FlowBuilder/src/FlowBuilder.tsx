@@ -196,7 +196,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             outputs: 1,
             x: 300,
             y: 180,
-            wires: [[`decision_${index}`],index === 0 ?"http_response":""],
+            wires: index === 0 
+                ? [[`decision_${index}`, "http_response"]]  // Connect http_response only for the first manager
+                : [[`decision_${index}`]]
           });
 
           workflow.push({
