@@ -228,11 +228,16 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         wires: [
             index === managers.length - 1
               ? ["postgres_insert_candidate_approve", "http_response", "prepare_email"]
-              : ["postgres_insert_candidate_approve", "http_response", "prepare_email", `manager_${index + 1}`],
+              : ["postgres_insert_candidate_approve", "prepare_email", `manager_${index + 1}`],
             index === managers.length - 1
               ? ["postgres_insert_candidate_reject", "prepare_email"]
               : ["postgres_insert_candidate_reject"]
           ],
+
+        //   wires: [
+        //     [index === managers.length - 1 ? "postgres_insert_candidate_approve","http_response",'prepare_email' : "postgres_insert_candidate_approve","http_response",'prepare_email',`manager_${index + 1}`], // True case
+        //     [index === managers.length - 1 ? "postgres_insert_candidate_reject",`prepare_email` : "postgres_insert_candidate_reject"] // False case
+        //   ],
 
       });
 
@@ -380,6 +385,36 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           }}
         >
           Jane Smith (jane.smith@example.com)
+        </div>
+
+        <div
+          style={{ padding: '8px', cursor: 'pointer' }}
+          onClick={() => {
+            addManager({ name: 'Vikram Kumar', email: 'vikram.kumar@example.com' });
+            setPopoverVisible(false);
+          }}
+        >
+          Vikram Kumar (vikram.kumar@example.com)
+        </div>
+
+        <div
+          style={{ padding: '8px', cursor: 'pointer' }}
+          onClick={() => {
+            addManager({ name: 'Anand Varma', email: 'anand.varma@example.com' });
+            setPopoverVisible(false);
+          }}
+        >
+          Anand Varma (anand.varma@example.com)
+        </div>
+
+        <div
+          style={{ padding: '8px', cursor: 'pointer' }}
+          onClick={() => {
+            addManager({ name: 'Sanjay', email: 'sanjay@example.com' });
+            setPopoverVisible(false);
+          }}
+        >
+          Sanjay (sanjay@example.com)
         </div>
       </div>
     </div>
