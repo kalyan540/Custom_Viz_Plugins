@@ -70,6 +70,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const [workflowName, setWorkflowName] = useState(
     `Workflow-${Math.floor(Math.random() * 1000)}`, // Auto-generate workflow name
   );
+  const [userId, setUserId] = useState(Math.floor(Math.random() * 1000)); // Random user_id
   const [managers, setManagers] = useState<{ name: string; email: string }[]>(
     [],
   );
@@ -82,7 +83,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
   // Handle form submission
   const handleSubmit = async () => {
-    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail);
+    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, userId);
     console.log('Workflow JSON:', workflowJson);
 
     try {
@@ -118,6 +119,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     workflowName: string,
     managers: { name: string; email: string }[],
     userEmail: string,
+    userId: number,
   ) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
@@ -232,7 +234,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
     // Prepare the parameters for the PostgreSQL query
     msg.params = [
-      2,  // user_id
+      ${userId}, // user_id
       JSON.stringify(requestData), // Ensure request_data is properly stringified
       msg.payload.status || "Pending", // status
       ${index + 1}, // current_level
@@ -288,8 +290,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         //"name": "wameya7577@excederm.com",
         "server": "sandbox.smtp.mailtrap.io",
         "port": "2525",
-        "username": "8b030bf3015bd8",
-        "password": "d7af2304ab2d5a",
+        "username": "0c0c506fbb7ae6",
+        "password": "ca118f69d090af",
         //"to": "wameya7577@excederm.com",
         "subject": "Workflow Completed",
         "body": "{{payload.html}}",
