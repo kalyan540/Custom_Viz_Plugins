@@ -227,7 +227,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             msg.params = [
               2, // user_id
               JSON.stringify({ workflowName: msg.workflowName, candidate: msg.candidateEmail }), // request_data
-              "Completed" // status
+              msg.payload.status || "Pending", // status
               ${index + 1}, // current_level
               ${managers.length} // total_levels
             ];
