@@ -153,43 +153,29 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           "swaggerDoc": "",
           "x": 100,
           "y": 100,
-          "wires": [[`prepare_email_0`,'manager_0']]
+          "wires": [[`prepare_email`,'manager_0']]
         });
 
-        managers.forEach((manager, index) => {
         workflow.push(
             {
-                id: `prepare_email_${index}`,
+                id: `prepare_email`,
                 type: "function",
                 z: tabId,
                 name: "prepare_email",
                 func: "\nmsg.payload.status = \"Completed\";\nmsg.request_id = msg.payload?.requestId || \"UnknownID\";\nmsg.topic = `Workflow ${msg.request_id}`;\nmsg.to = msg.payload.to || \"herig68683@cybtric.com\";\n//msg.payload = Your request with ID ${msg.request_id} has been processed.;\n\nmsg.html = \n    `<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\">\n        <h2 style=\"color: #2c3e50;\">Workflow Request Update</h2>\n        <p style=\"font-size: 16px;\">Workflow ${msg.request_id} has been created, to approve or reject please click on the link <a href=\"http://www.google.com\"> Google</a> </p>\n        <table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\">\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd;\">${msg.request_id}</td>\n            </tr>\n            <tr>\n                <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td>\n                <td style=\"padding: 10px; border: 1px solid #ddd; color: ${msg.payload.status === 'Completed' ? 'green' : 'red'};\">\n                    <strong>${msg.payload.status}</strong>\n                </td>\n            </tr>\n        </table>\n        <p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p>\n    </div>`;\nmsg.payload = msg.html;\nreturn msg;",
                 outputs: 1,
                 x: 310,
-                y: 120 + index * 80,
+                y: 180,
                 "wires": [
-                    [`send_email${index}`]
+                    [`send_email`]
                 ]
             }
-        );
+            );
+    
+            
+    
 
-        // Approval email node
-        workflow.push({
-        id: `send_email${index}`,
-        "type": "e-mail",
-        "z": "e0ba68613f04424c",
-        //"name": "wameya7577@excederm.com",
-        "server": "sandbox.smtp.mailtrap.io",
-        "port": "2525",
-        "username": "62753aa9883bbc",
-        "password": "a249d24a02ce4f",
-        //"to": "wameya7577@excederm.com",
-        "subject": "Workflow Completed",
-        "body": "{{payload.html}}",
-        "x": 770,
-        "y": 150,
-        "wires": []
-        });
+        managers.forEach((manager, index) => {
 
         workflow.push({
             id: `manager_${index}`,
@@ -240,29 +226,50 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         x: 220,
         y: 160 + index * 80,
         wires: [
-          ["postgres_insert_candidate_approve","http_response",index === managers.length - 1 ? "set_completed_status" : `prepare_email_${index}`], // True case
-          ["postgres_insert_candidate_reject","http_response"] // False case
-        ],
-        // wires: [
-        //           [index === managers.length - 1 ? "set_completed_status" : `manager_${index + 1}`],
-        //           ["reject_notification"],
-        //         ],
+            index === managers.length - 1
+              ? ["postgres_insert_candidate_approve", "http_response", "prepare_email"]
+              : ["postgres_insert_candidate_approve", "http_response", "prepare_email", `manager_${index + 1}`],
+            index === managers.length - 1
+              ? ["postgres_insert_candidate_reject", "prepare_email"]
+              : ["postgres_insert_candidate_reject"]
+          ],
+
       });
 
+      // Approval email node
       workflow.push({
-      
-        "id": "http_response",
-        "type": "http response",
-        z: tabId,
-        "name": "HTTP Response",
-        "statusCode": "200",
-        "headers": {},
-        "x": 500,
-        "y": 100,
+        id: `send_email`,
+        "type": "e-mail",
+        "z": "e0ba68613f04424c",
+        //"name": "wameya7577@excederm.com",
+        "server": "sandbox.smtp.mailtrap.io",
+        "port": "2525",
+        "username": "62753aa9883bbc",
+        "password": "a249d24a02ce4f",
+        //"to": "wameya7577@excederm.com",
+        "subject": "Workflow Completed",
+        "body": "{{payload.html}}",
+        "x": 770,
+        "y": 150,
         "wires": []
-    })
+        });
 
-    });
+
+      
+        workflow.push({
+        
+            "id": "http_response",
+            "type": "http response",
+            z: tabId,
+            "name": "HTTP Response",
+            "statusCode": "200",
+            "headers": {},
+            "x": 500,
+            "y": 100,
+            "wires": []
+        })
+
+        });
 
     // Manager approval nodes
     // managers.forEach((manager, index) => {
