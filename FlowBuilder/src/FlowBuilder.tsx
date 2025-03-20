@@ -71,7 +71,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     `Workflow-${Math.floor(Math.random() * 1000)}`, // Auto-generate workflow name
   );
   const [userId, setUserId] = useState(Math.floor(Math.random() * 1000)); // Random user_id
-  const [managers, setManagers] = useState<{ name: string; email: string }[]>(
+  const [managers, setManagers] = useState<{ name: string; field1: string; field2: string }[]>(
     [],
   );
   const [currentUserEmail, setCurrentUserEmail] = useState(
@@ -110,8 +110,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   };
 
   // Add a manager to the list
-  const addManager = (manager: { name: string; email: string }) => {
-    setManagers([...managers, manager]);
+  const addManager = (manager: { name: string }) => {
+    setManagers([...managers, { ...manager, field1: '', field2: '' }]);
   };
 
   // Generate JSON for Node-Red
@@ -388,60 +388,30 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         <div
           style={{ padding: '8px', cursor: 'pointer' }}
           onClick={() => {
-            addManager({ name: 'John Doe', email: 'john.doe@example.com' });
+            addManager({ name: 'Level1' });
             setPopoverVisible(false);
           }}
         >
-          John Doe (john.doe@example.com)
+          Level2
         </div>
         <div
           style={{ padding: '8px', cursor: 'pointer' }}
           onClick={() => {
-            addManager({ name: 'Jane Smith', email: 'jane.smith@example.com' });
+            addManager({ name: 'Level2' });
             setPopoverVisible(false);
           }}
         >
-          Jane Smith (jane.smith@example.com)
-        </div>
-
-        <div
-          style={{ padding: '8px', cursor: 'pointer' }}
-          onClick={() => {
-            addManager({ name: 'Vikram Kumar', email: 'vikram.kumar@example.com' });
-            setPopoverVisible(false);
-          }}
-        >
-          Vikram Kumar (vikram.kumar@example.com)
-        </div>
-
-        <div
-          style={{ padding: '8px', cursor: 'pointer' }}
-          onClick={() => {
-            addManager({ name: 'Anand Varma', email: 'anand.varma@example.com' });
-            setPopoverVisible(false);
-          }}
-        >
-          Anand Varma (anand.varma@example.com)
-        </div>
-
-        <div
-          style={{ padding: '8px', cursor: 'pointer' }}
-          onClick={() => {
-            addManager({ name: 'Sanjay', email: 'sanjay@example.com' });
-            setPopoverVisible(false);
-          }}
-        >
-          Sanjay (sanjay@example.com)
+          Level2
         </div>
       </div>
     </div>
   );
-
+  
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);
   }, []);
-
+  
   return (
     <Styles
       ref={rootElem}
@@ -459,21 +429,32 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           placeholder="Enter workflow name"
         />
       </div>
-      <div className="form-group">
-        <label>Current User Email</label>
-        <input
-          type="text"
-          value={currentUserEmail}
-          onChange={(e) => setCurrentUserEmail(e.target.value)}
-          placeholder="Enter your email"
-        />
-      </div>
       <div className="manager-list">
         {managers.map((manager, index) => (
           <div key={index} className="manager-item">
-            <span>
-              {manager.name} ({manager.email})
-            </span>
+            {/* Manager Name Button */}
+            <button
+              style={{ marginRight: '8px' }}
+              onClick={() => alert(`Selected manager: ${manager.name}`)}
+            >
+              {manager.name}
+            </button>
+  
+            {/* Input Field 1 (Uncontrolled) */}
+            <input
+              type="text"
+              placeholder="Field 1"
+              style={{ marginRight: '8px' }}
+            />
+  
+            {/* Input Field 2 (Uncontrolled) */}
+            <input
+              type="text"
+              placeholder="Field 2"
+              style={{ marginRight: '8px' }}
+            />
+  
+            {/* Remove Button */}
             <button
               onClick={() =>
                 setManagers(managers.filter((_, i) => i !== index))
