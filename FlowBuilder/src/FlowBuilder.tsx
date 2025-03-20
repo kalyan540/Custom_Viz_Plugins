@@ -106,6 +106,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const [currentUserEmail, setCurrentUserEmail] = useState(
     'user@example.com', // Replace with dynamic value if available
   );
+  const generateRequestId = () => {
+    return `req_${Math.floor(Math.random() * 10000)}`; // Generate a random number between 0 and 999999
+  };
   
 
   // State to track the current level count
@@ -113,7 +116,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
   // Handle form submission
   const handleSubmit = async () => {
-    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id);
+    const requestId = generateRequestId(); // Generate a random requestId
+    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id,, requestId);
     console.log('Workflow JSON:', workflowJson);
 
     try {
@@ -152,6 +156,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     managers: { name: string; email: string }[],
     userEmail: string,
     workflow_id: number,
+    requestId: string
   ) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
@@ -199,7 +204,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 func: `
           
                 // Prepare email content
-                msg.request_id = msg.payload?.requestId || "UnknownID";
+                msg.request_id = "${requestId}"; // Use the dynamic requestId
                 msg.topic = "Workflow " + msg.request_id; // Use string concatenation instead of template literals
                 msg.to = msg.payload.to || "herig68683@cybtric.com";
           
