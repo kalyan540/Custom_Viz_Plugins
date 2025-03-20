@@ -13,6 +13,14 @@ const Styles = styled.div<FlowBuilderStylesProps>`
   .form-group {
     margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
   }
+    .form-group input {
+    width: 100%;
+    padding: ${({ theme }) => theme.gridUnit * 3}px; /* Increased padding */
+    font-size: 16px; /* Larger font size */
+    border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
+    border-radius: ${({ theme }) => theme.gridUnit}px;
+  }
+
 
   label {
     display: block;
@@ -47,6 +55,8 @@ const Styles = styled.div<FlowBuilderStylesProps>`
 
   button.submit {
     background-color: #2ecc71; /* Green color for Submit button */
+    adding: ${({ theme }) => theme.gridUnit * 3}px ${({ theme }) => theme.gridUnit * 6}px; /* Increased padding */
+    font-size: 16px; /* Larger font size */
   }
 
   .manager-list {
@@ -407,6 +417,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           value={workflowName}
           onChange={(e) => setWorkflowName(e.target.value)}
           placeholder="Enter workflow name"
+          style={{ fontSize: '16px', padding: '12px' }}
         />
       </div>
       <div className="manager-list">
@@ -446,7 +457,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           Add Level
         </button>
       </div>
-      <button className="submit" onClick={handleSubmit}>Submit</button>
+      <button className="submit" onClick={handleSubmit} style={{ fontSize: '16px', padding: '12px 24px' }}>
+    Submit
+    </button>
     </Styles>
   );
 }
