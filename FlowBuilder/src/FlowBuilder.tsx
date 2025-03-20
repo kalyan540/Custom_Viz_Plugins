@@ -290,8 +290,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         //"name": "wameya7577@excederm.com",
         "server": "sandbox.smtp.mailtrap.io",
         "port": "2525",
-        "username": "0c0c506fbb7ae6",
-        "password": "ca118f69d090af",
+        "username": "7183c7c17743bf",
+        "password": "f04dbabecfff83",
         //"to": "wameya7577@excederm.com",
         "subject": "Workflow Completed",
         "body": "{{payload.html}}",
@@ -305,7 +305,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             type: "postgresql",
             z: tabId,
             name: `Insert into PostgreSQL(Approve) - ${manager.name}`,
-            query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+            
+            query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now()) ON CONFLICT (user_id, current_level) DO NOTHING;",
             postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
             split: false,
             rowsPerMsg: 1,
