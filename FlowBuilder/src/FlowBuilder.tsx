@@ -224,76 +224,76 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             z: tabId,
             name: `Check ${manager.name} Decision`,
             func: `
-  // Check if the form is completed
-  if (msg.payload.formCompleted === true) {
-    // Ensure proper JSON structure for request_data
-    let requestData = {
-      workflowName: msg.payload.workflowName || "Unknown Workflow",
-      candidate: msg.payload.candidateEmail || "Unknown Candidate"
-    };
-
-    // Prepare the parameters for the PostgreSQL query
-    msg.params = [
-      ${userId}, // user_id
-      JSON.stringify(requestData), // Ensure request_data is properly stringified
-      msg.payload.status || "Pending", // status
-      ${index + 1}, // current_level
-      ${managers.length}  // total_levels
-    ];
-
-    // Prepare email content
-    msg.request_id = msg.payload?.requestId || "UnknownID";
-    msg.topic = "Workflow " + msg.request_id; // Use string concatenation instead of template literals
-    msg.to = msg.payload.to || "herig68683@cybtric.com";
-    msg.html = 
-    `<div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
-        <h2 style="color: #2c3e50;">Workflow Request Update</h2>
-        <p style="font-size: 16px;">Workflow ${msg.request_id} has been created. To approve or reject, please click the link below:</p>
-
-        <a href="#" onclick="callAPI()" style="display: inline-block; padding: 10px 15px; background-color: #3498db; color: #fff; text-decoration: none; border-radius: 5px; margin-top: 10px;">
-            Click to Approve/Reject
-        </a>
-
-        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-            <tr>
-                <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Request ID:</strong></td>
-                <td style="padding: 10px; border: 1px solid #ddd;">${msg.request_id}</td>
-            </tr>
-            <tr>
-                <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Status:</strong></td>
-                <td style="padding: 10px; border: 1px solid #ddd; color: ${msg.payload.status === 'Completed' ? 'green' : 'red'};">
-                    <strong>${msg.payload.status}</strong>
-                </td>
-            </tr>
-        </table>
-
-        <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">This is an automated message. Please do not reply.</p>
-    </div>
-
-    <script>
-    function callAPI() {
-        fetch("http://localhost:1880/api/test", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ manager: "John Doe", requestId: "${msg.request_id}" })
-        })
-        .then(response => response.json())
-        .then(data => alert("Response: " + JSON.stringify(data)))
-        .catch(error => console.error("Error:", error));
-    }
-    </script>`;
-
-msg.payload = msg.html;
-return msg;
-
-
-    return [msg, null]; // Send msg to the first output (for true case)
-  } else {
-    return [null, msg]; // Send msg to the second output (for false case)
-  }
-`,
+              // Check if the form is completed
+              if (msg.payload.formCompleted === true) {
+                // Ensure proper JSON structure for request_data
+                let requestData = {
+                  workflowName: msg.payload.workflowName || "Unknown Workflow",
+                  candidate: msg.payload.candidateEmail || "Unknown Candidate"
+                };
+          
+                // Prepare the parameters for the PostgreSQL query
+                msg.params = [
+                  ${userId}, // user_id
+                  JSON.stringify(requestData), // Ensure request_data is properly stringified
+                  msg.payload.status || "Pending", // status
+                  ${index + 1}, // current_level
+                  ${managers.length}  // total_levels
+                ];
+          
+                // Prepare email content
+                msg.request_id = msg.payload?.requestId || "UnknownID";
+                msg.topic = "Workflow " + msg.request_id; // Use string concatenation instead of template literals
+                msg.to = msg.payload.to || "herig68683@cybtric.com";
+          
+                msg.html = \`
+                  <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                    <h2 style="color: #2c3e50;">Workflow Request Update</h2>
+                    <p style="font-size: 16px;">Workflow \${msg.request_id} has been created. To approve or reject, please click the link below:</p>
+          
+                    <a href="#" onclick="callAPI()" style="display: inline-block; padding: 10px 15px; background-color: #3498db; color: #fff; text-decoration: none; border-radius: 5px; margin-top: 10px;">
+                      Click to Approve/Reject
+                    </a>
+          
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                      <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Request ID:</strong></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">\${msg.request_id}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Status:</strong></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};">
+                          <strong>\${msg.payload.status}</strong>
+                        </td>
+                      </tr>
+                    </table>
+          
+                    <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">This is an automated message. Please do not reply.</p>
+                  </div>
+          
+                  <script>
+                  function callAPI() {
+                    fetch("http://localhost:1880/api/test", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify({ manager: "John Doe", requestId: "\${msg.request_id}" })
+                    })
+                    .then(response => response.json())
+                    .then(data => alert("Response: " + JSON.stringify(data)))
+                    .catch(error => console.error("Error:", error));
+                  }
+                  </script>
+                \`;
+          
+                msg.payload = msg.html;
+          
+                return [msg, null]; // Send msg to the first output (for true case)
+              } else {
+                return [null, msg]; // Send msg to the second output (for false case)
+              }
+            `,
             outputs: 2,
             x: 220,
             y: 160 + index * 80,
