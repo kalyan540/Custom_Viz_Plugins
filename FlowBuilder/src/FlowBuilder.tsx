@@ -21,6 +21,13 @@ const Styles = styled.div<FlowBuilderStylesProps>`
     border-radius: ${({ theme }) => theme.gridUnit}px;
   }
 
+  .form-group label {
+    display: block;
+    margin-bottom: ${({ theme }) => theme.gridUnit}px;
+    font-weight: bold;
+    font-size: 18px; /* Increased font size for the label */
+  }
+
 
   label {
     display: block;
@@ -411,7 +418,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       width={width}
     >
       <div className="form-group">
-        <label>Workflow Name</label>
+        <label style={{ fontSize: '18px' }}>Workflow Name</label>
         <input
           type="text"
           value={workflowName}
