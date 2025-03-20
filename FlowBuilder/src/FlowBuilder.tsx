@@ -119,6 +119,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const handleSubmit = async () => {
     const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id);
     console.log('Workflow JSON:', workflowJson);
+    console.log("Generated Workflow JSON:", JSON.stringify(workflowJson, null, 2));
 
     try {
       const response = await fetch(apiEndpoint, {
@@ -158,6 +159,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     workflow_id: number,
   ) => {
     const requestId = generateUniqueRequestId(); // Generate a unique requestId
+    console.log("Generated requestId:", requestId); // Debugging line
     const workflow = [];
     const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
 
@@ -201,7 +203,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             name: "prepare_email",
             func: `
               // Ensure msg.payload exists
+              console.log("Initial msg object:", msg); // Debugging line
               msg.payload = msg.payload || {};
+              console.log("msg.payload after initialization:", msg.payload); // Debugging line
           
               // Set the requestId dynamically
               msg.request_id = "${requestId}"; // Use the dynamically generated requestId
