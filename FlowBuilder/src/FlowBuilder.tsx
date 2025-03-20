@@ -99,7 +99,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const [workflowName, setWorkflowName] = useState(
     `Workflow-${Math.floor(Math.random() * 1000)}`, // Auto-generate workflow name
   );
-  const [userId, setUserId] = useState(Math.floor(Math.random() * 1000)); // Random user_id
+  const [workflow_id, setworkflow_id] = useState(Math.floor(Math.random() * 1000)); // Random workflow_id
   const [managers, setManagers] = useState<{ name: string; field1: string; field2: string }[]>(
     [],
   );
@@ -262,7 +262,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           
                 // Prepare the parameters for the PostgreSQL query
                 msg.params = [
-                  ${userId}, // user_id
+                  ${workflow_id}, // workflow_id
                   JSON.stringify(requestData), // Ensure request_data is properly stringified
                   msg.payload.status || "Pending", // status
                   ${index + 1}, // current_level
@@ -279,9 +279,13 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                     <h2 style="color: #2c3e50;">Workflow Request Update</h2>
                     <p style="font-size: 16px;">Workflow \${msg.request_id} has been created. To approve or reject, please click the link below:</p>
           
-                    <a href="#" onclick="callAPI()" style="display: inline-block; padding: 10px 15px; background-color: #3498db; color: #fff; text-decoration: none; border-radius: 5px; margin-top: 10px;">
-                      Click to Approve/Reject
-                    </a>
+                    <button onclick="callAPI('Approved')" style="background-color: green; color: white; padding: 10px 20px; border: none; cursor: pointer; font-size: 16px; margin-right: 10px;">
+                        Approve
+                    </button>
+
+                    <button onclick="callAPI('Rejected')" style="background-color: red; color: white; padding: 10px 20px; border: none; cursor: pointer; font-size: 16px;">
+                        Reject
+                    </button>
           
                     <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                       <tr>
@@ -301,12 +305,18 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           
                   <script>
                   function callAPI() {
-                    fetch("http://localhost:1880/api/test", {
+                    fetch("http://ec2-52-91-38-126.compute-1.amazonaws.com:1880/api/manager2Decision", {
                       method: "POST",
                       headers: {
                         "Content-Type": "application/json"
                       },
-                      body: JSON.stringify({ manager: "John Doe", requestId: "\${msg.request_id}" })
+                      body: JSON.stringify({
+                    "requestId": "12345",
+                    "workflowName": "Workflow-999",
+                    "candidateEmail": "user1@example.com",
+                    "formCompleted": true,
+                    "status": "Approved"
+                    })
                     })
                     .then(response => response.json())
                     .then(data => alert("Response: " + JSON.stringify(data)))
@@ -358,7 +368,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             z: tabId,
             name: `Insert into PostgreSQL(Approve) - ${manager.name}`,
             
-            query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now()) ON CONFLICT (user_id, current_level) DO NOTHING;",
+            query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now()) ON CONFLICT (workflow_id, current_level) DO NOTHING;",
             postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
             split: false,
             rowsPerMsg: 1,
@@ -373,7 +383,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             type: "postgresql",
             z: tabId,
             name: `Insert into PostgreSQL(Reject) - ${manager.name}`,
-            query: "INSERT INTO approval_request (user_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
+            query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, created_at) VALUES ($1, $2, $3, $4, $5, now());",
             postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
             split: false,
             rowsPerMsg: 1,
