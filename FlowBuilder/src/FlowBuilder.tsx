@@ -30,7 +30,6 @@ const Styles = styled.div<FlowBuilderStylesProps>`
   button {
     padding: ${({ theme }) => theme.gridUnit * 2}px ${({ theme }) =>
   theme.gridUnit * 4}px;
-    background-color: ${({ theme }) => theme.colors.primary.base};
     color: white;
     border: none;
     border-radius: ${({ theme }) => theme.gridUnit}px;
@@ -38,13 +37,21 @@ const Styles = styled.div<FlowBuilderStylesProps>`
     margin-right: ${({ theme }) => theme.gridUnit * 2}px;
   }
 
-  button:hover {
-    background-color: ${({ theme }) => theme.colors.primary.dark1};
+  button.add-level {
+    background-color: #3498db; /* Blue color for Add Level button */
+  }
+
+  button.remove-level {
+    background-color: #e74c3c; /* Red color for Remove button */
+  }
+
+  button.submit {
+    background-color: #2ecc71; /* Green color for Submit button */
   }
 
   .manager-list {
     margin-top: ${({ theme }) => theme.gridUnit * 3}px;
-    max-height: 200px; /* Increased max height for the scrollable area */
+    max-height: 300px; /* Increased max height for the scrollable area */
     overflow-y: auto; /* Enable vertical scrolling */
     border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
     border-radius: ${({ theme }) => theme.gridUnit}px;
@@ -59,6 +66,11 @@ const Styles = styled.div<FlowBuilderStylesProps>`
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+
+  .level-label {
+    font-weight: bold;
+    margin-right: 8px;
   }
 `;
 
@@ -80,9 +92,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
   // State to track the current level count
   const [levelCount, setLevelCount] = useState(1);
-
-  // Popover visibility state
-  const [popoverVisible, setPopoverVisible] = useState(false);
 
   // Handle form submission
   const handleSubmit = async () => {
@@ -117,7 +126,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     const newManager = { name: `Level${levelCount}`, field1: '', field2: '' };
     setManagers([...managers, newManager]);
     setLevelCount(levelCount + 1); // Increment the level count
-    setPopoverVisible(false); // Close the popover
   };
 
   // Generate JSON for Node-Red
@@ -378,13 +386,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     
     return workflow; // Return a plain JavaScript object
   };
-
-  // Popover content for selecting a manager
-  const managerPopoverContent = (
-    <div>
-      <button onClick={addManager}>Add Level {levelCount}</button>
-    </div>
-  );
   
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
@@ -411,13 +412,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       <div className="manager-list">
         {managers.map((manager, index) => (
           <div key={index} className="manager-item">
-            {/* Manager Name Button */}
-            <button
-              style={{ marginRight: '8px' }}
-              onClick={() => alert(`Selected manager: ${manager.name}`)}
-            >
-              {manager.name}
-            </button>
+            {/* Manager Name as Label */}
+            <span className="level-label">{manager.name}</span>
   
             {/* Input Field 1 (Uncontrolled) */}
             <input
@@ -435,6 +431,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   
             {/* Remove Button */}
             <button
+              className="remove-level"
               onClick={() =>
                 setManagers(managers.filter((_, i) => i !== index))
               }
@@ -445,16 +442,11 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         ))}
       </div>
       <div className="form-group">
-        <Popover
-          content={managerPopoverContent}
-          trigger="click"
-          visible={popoverVisible}
-          onVisibleChange={(visible) => setPopoverVisible(visible)}
-        >
-          <button>Add Level</button>
-        </Popover>
+        <button className="add-level" onClick={addManager}>
+          Add Level
+        </button>
       </div>
-      <button onClick={handleSubmit}>Submit</button>
+      <button className="submit" onClick={handleSubmit}>Submit</button>
     </Styles>
   );
 }
