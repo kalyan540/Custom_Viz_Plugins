@@ -44,7 +44,7 @@ const Styles = styled.div<FlowBuilderStylesProps>`
 
   .manager-list {
     margin-top: ${({ theme }) => theme.gridUnit * 3}px;
-    max-height: 75px; /* Set a max height for the scrollable area */
+    max-height: 200px; /* Increased max height for the scrollable area */
     overflow-y: auto; /* Enable vertical scrolling */
     border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
     border-radius: ${({ theme }) => theme.gridUnit}px;
@@ -78,6 +78,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     'user@example.com', // Replace with dynamic value if available
   );
 
+  // State to track the current level count
+  const [levelCount, setLevelCount] = useState(1);
+
   // Popover visibility state
   const [popoverVisible, setPopoverVisible] = useState(false);
 
@@ -110,8 +113,11 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   };
 
   // Add a manager to the list
-  const addManager = (manager: { name: string }) => {
-    setManagers([...managers, { ...manager, field1: '', field2: '' }]);
+  const addManager = () => {
+    const newManager = { name: `Level${levelCount}`, field1: '', field2: '' };
+    setManagers([...managers, newManager]);
+    setLevelCount(levelCount + 1); // Increment the level count
+    setPopoverVisible(false); // Close the popover
   };
 
   // Generate JSON for Node-Red
@@ -123,7 +129,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   ) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
-
 
     // PostgreSQL Config Node
     workflow.push({
@@ -157,8 +162,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           "y": 100,
           "wires": [[`prepare_email`,'manager_0']]
         });
-
-
 
         workflow.push(
             {
@@ -379,31 +382,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   // Popover content for selecting a manager
   const managerPopoverContent = (
     <div>
-      <input
-        type="text"
-        placeholder="Search manager..."
-        style={{ marginBottom: '8px' }}
-      />
-      <div>
-        <div
-          style={{ padding: '8px', cursor: 'pointer' }}
-          onClick={() => {
-            addManager({ name: 'Level1' });
-            setPopoverVisible(false);
-          }}
-        >
-          Level2
-        </div>
-        <div
-          style={{ padding: '8px', cursor: 'pointer' }}
-          onClick={() => {
-            addManager({ name: 'Level2' });
-            setPopoverVisible(false);
-          }}
-        >
-          Level2
-        </div>
-      </div>
+      <button onClick={addManager}>Add Level {levelCount}</button>
     </div>
   );
   
@@ -472,7 +451,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           visible={popoverVisible}
           onVisibleChange={(visible) => setPopoverVisible(visible)}
         >
-          <button>Add Manager/Approver</button>
+          <button>Add Level</button>
         </Popover>
       </div>
       <button onClick={handleSubmit}>Submit</button>
