@@ -112,7 +112,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
   // Handle form submission
   const handleSubmit = async () => {
-    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, userId);
+    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id);
     console.log('Workflow JSON:', workflowJson);
 
     try {
@@ -150,7 +150,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     workflowName: string,
     managers: { name: string; email: string }[],
     userEmail: string,
-    userId: number,
+    workflow_id: number,
   ) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
