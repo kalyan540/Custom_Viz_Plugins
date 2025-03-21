@@ -305,13 +305,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 msg.params = [
                   ${workflow_id}, // workflow_id
                   JSON.stringify(requestData), // Ensure request_data is properly stringified
+                  msg.payload.status = index === managers.length - 1 ? "Completed" : "Pending";
 
-                  if(index === managers.length - 1){
-                  if(msg.payload.status=="Approved"){
-                  msg.payload.status = "Completed", // status
-                    }  
-                  }
-                  
+                  //msg.payload.status || "Pending", // status
                   ${index + 1}, // current_level
                   ${managers.length}, // total_levels
                   msg.payload.requestid// requestid
