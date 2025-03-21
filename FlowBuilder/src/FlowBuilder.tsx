@@ -237,26 +237,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                     <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">This is an automated message. Please do not reply.</p>
                   </div>
           
-                  <script>
-                    function callAPI(status) {
-                        fetch("http://ec2-52-91-38-126.compute-1.amazonaws.com:1880/api/manager1Decision", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                            "requestId": "12345",
-                            "workflowName": "Workflow-999",
-                            "candidateEmail": "user1@example.com",
-                            "formCompleted": true,
-                            "status": "Approved"
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => alert("Response: " + JSON.stringify(data)))
-                        .catch(error => console.error("Error:", error));
-                    }
-                    </script>
                 \`;
           
                 msg.payload = msg.html;
@@ -374,26 +354,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                     <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">This is an automated message. Please do not reply.</p>
                   </div>
           
-                  <script>
-                    function callAPI(status) {
-                        fetch("http://ec2-52-91-38-126.compute-1.amazonaws.com:1880/api/manager${index + 2}Decision", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                            "requestId": "12345",
-                            "workflowName": "Workflow-999",
-                            "candidateEmail": "user1@example.com",
-                            "formCompleted": true,
-                            "status": "Approved"
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => alert("Response: " + JSON.stringify(data)))
-                        .catch(error => console.error("Error:", error));
-                    }
-                    </script>
                 \`;
           
                 msg.payload = msg.html;
