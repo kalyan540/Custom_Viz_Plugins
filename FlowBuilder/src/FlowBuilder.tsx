@@ -303,13 +303,13 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           
                 // Prepare the parameters for the PostgreSQL query
 
-                msg.payload.status = index === managers.length - 1 ? "Completed" : "Pending";
+                //msg.payload.status = index === managers.length - 1 ? "Completed" : "Pending";
                 msg.params = [
                   workflow_id, // workflow_id
                   JSON.stringify(requestData), // Ensure request_data is properly stringified
-                  msg.payload.status,
+                  //msg.payload.status,
 
-                  //msg.payload.status || "Pending", // status
+                  msg.payload.status || "Pending", // status
                   index + 1, // current_level
                   managers.length, // total_levels
                   msg.payload.requestid// requestid
