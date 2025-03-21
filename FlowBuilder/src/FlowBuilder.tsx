@@ -300,12 +300,14 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                   workflowName: msg.payload.workflowName || "Unknown Workflow",
                   candidate: msg.payload.candidateEmail || "Unknown Candidate"
                 };
+
+                msg.payload.status = index === managers.length - 1 ? "Completed" : "Pending";
           
                 // Prepare the parameters for the PostgreSQL query
                 msg.params = [
                   ${workflow_id}, // workflow_id
                   JSON.stringify(requestData), // Ensure request_data is properly stringified
-                  msg.payload.status || "Pending", // status
+                  msg.payload.status,
                   ${index + 1}, // current_level
                   ${managers.length}, // total_levels
                   msg.payload.requestid// requestid
