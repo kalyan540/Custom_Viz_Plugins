@@ -338,7 +338,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 ];
           
                 // Prepare email content
-                msg.request_id = msg.payload?.requestId || "UnknownID";
+                msg.request_id = "${requestId}"; // Use the dynamic requestId
+                //msg.request_id = msg.payload?.requestId || "UnknownID";
                 msg.topic = "Workflow " + msg.request_id; // Use string concatenation instead of template literals
                 msg.to = msg.payload.to || "herig68683@cybtric.com";
           
