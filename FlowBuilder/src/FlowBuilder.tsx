@@ -117,7 +117,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   // Handle form submission
   const handleSubmit = async () => {
     const requestId = generateRequestId(); // Generate a random requestId
-    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id, requestId);
+    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id,, requestId);
     console.log('Workflow JSON:', workflowJson);
 
     try {
@@ -144,13 +144,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   };
 
   // Add a manager to the list
-//   const addManager = () => {
-//     const newManager = { name: `Level${levelCount}`, field1: '', field2: '' };
-//     setManagers([...managers, newManager]);
-//     setLevelCount(levelCount + 1); // Increment the level count
-//   };
-
-const addManager = () => {
+  const addManager = () => {
     // Find the maximum level number in the existing managers
     const maxLevel = managers.reduce((max, manager) => {
       const levelNumber = parseInt(manager.name.replace("Level", ""), 10);
@@ -164,6 +158,7 @@ const addManager = () => {
     const newManager = { name: `Level${nextLevel}`, field1: '', field2: '' };
     setManagers([...managers, newManager]);
   };
+
   const removeLevel = (indexToRemove: number) => {
     // Remove the level at the specified index
     const updatedManagers = managers.filter((_, index) => index !== indexToRemove);
@@ -177,7 +172,6 @@ const addManager = () => {
     // Update the state with the renumbered managers
     setManagers(renumberedManagers);
   };
-  
 
   // Generate JSON for Node-Red
   const generateWorkflowJson = (
@@ -315,6 +309,7 @@ const addManager = () => {
           });
 
 
+          // Check Form Completed Node (Function Node)
           workflow.push({
             id: `decision_${index}`,
             type: "function",
@@ -412,7 +407,7 @@ const addManager = () => {
             z: tabId,
             name: `Insert into PostgreSQL(Approve) - ${manager.name}`,
             
-            query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
+            query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now()) ON CONFLICT (workflow_id, current_level) DO NOTHING;",
             postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
             split: false,
             rowsPerMsg: 1,
