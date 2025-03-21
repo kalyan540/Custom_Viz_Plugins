@@ -332,7 +332,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                       <tr>
                         <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Status:</strong></td>
                         <td style="padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};">
-                          <strong>\${msg.payload.status}</strong>
+                          <strong>\${msg.payload.status === 'Completed' ? msg.payload.status : 'Pending'}</strong>
                         </td>
                       </tr>
                     </table>
