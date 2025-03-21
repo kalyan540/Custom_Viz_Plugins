@@ -164,7 +164,6 @@ const addManager = () => {
     const newManager = { name: `Level${nextLevel}`, field1: '', field2: '' };
     setManagers([...managers, newManager]);
   };
-
   const removeLevel = (indexToRemove: number) => {
     // Remove the level at the specified index
     const updatedManagers = managers.filter((_, index) => index !== indexToRemove);
@@ -178,6 +177,7 @@ const addManager = () => {
     // Update the state with the renumbered managers
     setManagers(renumberedManagers);
   };
+  
 
   // Generate JSON for Node-Red
   const generateWorkflowJson = (
@@ -412,7 +412,7 @@ const addManager = () => {
             z: tabId,
             name: `Insert into PostgreSQL(Approve) - ${manager.name}`,
             
-            query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, created_at) SELECT $1, $2, $3, $4, $5, $6, now() WHERE NOT EXISTS (SELECT 1 FROM approval_request WHERE requestid = $6 AND current_level = $4 - 1) ON CONFLICT (workflow_id, current_level) DO NOTHING;",
+            query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now()) ON CONFLICT (workflow_id, current_level) DO NOTHING;",
             postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
             split: false,
             rowsPerMsg: 1,
@@ -428,7 +428,6 @@ const addManager = () => {
             z: tabId,
             name: `Insert into PostgreSQL(Reject) - ${manager.name}`,
             query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
-            
             postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
             split: false,
             rowsPerMsg: 1,
