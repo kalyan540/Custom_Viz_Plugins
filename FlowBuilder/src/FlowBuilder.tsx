@@ -211,15 +211,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 msg.html = \`
                   <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
                     <h2 style="color: #2c3e50;">Workflow Request Update</h2>
-                    <p style="font-size: 16px;">Workflow \${msg.request_id} has been created. To approve or reject, please click the link below:</p>
+                    <p style="font-size: 16px;">Workflow \${msg.request_id} is \${msg.payload.status}. Please click the <a href ="#"> Link </a> to approve or reject </p>
           
-                    <button onclick="callAPI('Approved')" style="background-color: green; color: white; padding: 10px 20px; border: none; cursor: pointer; font-size: 16px; margin-right: 10px;">
-                        Approve
-                    </button>
-
-                    <button onclick="callAPI('Rejected')" style="background-color: red; color: white; padding: 10px 20px; border: none; cursor: pointer; font-size: 16px;">
-                        Reject
-                    </button>
           
                     <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                       <tr>
@@ -315,7 +308,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                   msg.payload.status || "Pending", // status
                   ${index + 1}, // current_level
                   ${managers.length}, // total_levels
-                  ${requestId}// requestid
+                  msg.payload.requestid// requestid
 
                 ];
           
@@ -328,15 +321,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 msg.html = \`
                   <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
                     <h2 style="color: #2c3e50;">Workflow Request Update</h2>
-                    <p style="font-size: 16px;">Workflow \${msg.request_id} has been created. To approve or reject, please click the link below:</p>
+                    <p style="font-size: 16px;">Workflow \${msg.request_id} is \${msg.payload.status}. Please click the <a href ="#"> Link </a> to approve or reject </p>
           
-                    <button onclick="callAPI('Approved')" style="background-color: green; color: white; padding: 10px 20px; border: none; cursor: pointer; font-size: 16px; margin-right: 10px;">
-                        Approve
-                    </button>
-
-                    <button onclick="callAPI('Rejected')" style="background-color: red; color: white; padding: 10px 20px; border: none; cursor: pointer; font-size: 16px;">
-                        Reject
-                    </button>
           
                     <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                       <tr>
