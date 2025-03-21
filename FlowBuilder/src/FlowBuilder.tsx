@@ -302,14 +302,16 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 };
           
                 // Prepare the parameters for the PostgreSQL query
+
+                msg.payload.status = index === managers.length - 1 ? "Completed" : "Pending";
                 msg.params = [
-                  ${workflow_id}, // workflow_id
+                  workflow_id, // workflow_id
                   JSON.stringify(requestData), // Ensure request_data is properly stringified
-                  msg.payload.status = index === managers.length - 1 ? "Completed" : "Pending",
+                  msg.payload.status,
 
                   //msg.payload.status || "Pending", // status
-                  ${index + 1}, // current_level
-                  ${managers.length}, // total_levels
+                  index + 1, // current_level
+                  managers.length, // total_levels
                   msg.payload.requestid// requestid
 
                 ];
@@ -335,6 +337,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                         <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Status:</strong></td>
                         <td style="padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};">
                           <strong>\${msg.payload.status === 'Completed' ? msg.payload.status : 'Pending'}</strong>
+                          
                         </td>
                       </tr>
                     </table>
