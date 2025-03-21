@@ -165,6 +165,20 @@ const addManager = () => {
     setManagers([...managers, newManager]);
   };
 
+  const removeLevel = (indexToRemove: number) => {
+    // Remove the level at the specified index
+    const updatedManagers = managers.filter((_, index) => index !== indexToRemove);
+
+    // Renumber the remaining levels
+    const renumberedManagers = updatedManagers.map((manager, index) => ({
+      ...manager,
+      name: `Level${index + 1}`, // Renumber levels starting from 1
+    }));
+
+    // Update the state with the renumbered managers
+    setManagers(renumberedManagers);
+  };
+
   // Generate JSON for Node-Red
   const generateWorkflowJson = (
     workflowName: string,
@@ -490,9 +504,7 @@ const addManager = () => {
             {/* Remove Button */}
             <button
               className="remove-level"
-              onClick={() =>
-                setManagers(managers.filter((_, i) => i !== index))
-              }
+              onClick={() => removeLevel(index)}
             >
               Remove
             </button>
