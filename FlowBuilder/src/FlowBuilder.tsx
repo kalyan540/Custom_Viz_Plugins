@@ -286,7 +286,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           });
 
 
-          // Check Form Completed Node (Function Node)
           workflow.push({
             id: `decision_${index}`,
             type: "function",
@@ -300,23 +299,22 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                   workflowName: msg.payload.workflowName || "Unknown Workflow",
                   candidate: msg.payload.candidateEmail || "Unknown Candidate"
                 };
-
-                msg.payload.status = index === managers.length - 1 ? "Completed" : "Pending";
+          
+                // Set status based on whether it's the last level
+                msg.payload.status = ${index === managers.length - 1 ? '"Completed"' : '"Pending"'};
           
                 // Prepare the parameters for the PostgreSQL query
                 msg.params = [
                   ${workflow_id}, // workflow_id
                   JSON.stringify(requestData), // Ensure request_data is properly stringified
-                  msg.payload.status,
+                  msg.payload.status, // status (either "Completed" or "Pending")
                   ${index + 1}, // current_level
                   ${managers.length}, // total_levels
-                  msg.payload.requestid// requestid
-
+                  msg.payload.requestid // requestid
                 ];
           
                 // Prepare email content
                 msg.request_id = msg.payload.requestid; // Use the dynamic requestId
-                //msg.request_id = msg.payload?.requestId || "UnknownID";
                 msg.topic = "Workflow " + msg.request_id; // Use string concatenation instead of template literals
                 msg.to = msg.payload.candidateEmail; // || "herig68683@cybtric.com";
           
@@ -324,7 +322,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                   <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
                     <h2 style="color: #2c3e50;">Workflow Request Update</h2>
                     <p style="font-size: 16px;">Workflow \${msg.request_id} is \${msg.payload.status}. Please click the <a href ="#"> Link </a> to approve or reject </p>
-          
           
                     <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                       <tr>
@@ -341,7 +338,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           
                     <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">This is an automated message. Please do not reply.</p>
                   </div>
-          
                 \`;
           
                 msg.payload = msg.html;
