@@ -372,19 +372,25 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                   </div>
           
                   <script>
-function callAPI(status) {
-    fetch("http://localhost:1880/api/test", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ manager: "John Doe", status: status })
-    })
-    .then(response => response.json())
-    .then(data => alert("Response: " + JSON.stringify(data)))
-    .catch(error => console.error("Error:", error));
-}
-</script>
+                    function callAPI(status) {
+                        fetch("http://ec2-52-91-38-126.compute-1.amazonaws.com:1880/api/manager${index + 1}Decision", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                            "requestId": "12345",
+                            "workflowName": "Workflow-999",
+                            "candidateEmail": "user1@example.com",
+                            "formCompleted": true,
+                            "status": "Approved"
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => alert("Response: " + JSON.stringify(data)))
+                        .catch(error => console.error("Error:", error));
+                    }
+                    </script>
                 \`;
           
                 msg.payload = msg.html;
