@@ -373,7 +373,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           
                   <script>
                     function callAPI(status) {
-                        fetch("http://ec2-52-91-38-126.compute-1.amazonaws.com:1880/api/manager${index + 1}Decision", {
+                        fetch("http://ec2-52-91-38-126.compute-1.amazonaws.com:1880/api/manager${index + 2}Decision", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json"
