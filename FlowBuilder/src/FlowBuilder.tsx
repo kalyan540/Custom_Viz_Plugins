@@ -107,7 +107,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     'user@example.com', // Replace with dynamic value if available
   );
   const generateRequestId = () => {
-    return `req_${Math.floor(Math.random() * 10000)}`; // Generate a random number between 0 and 999999
+    return `${Math.floor(Math.random() * 10000)}`; // Generate a random number between 0 and 999999
   };
   
 
@@ -156,7 +156,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     managers: { name: string; email: string }[],
     userEmail: string,
     workflow_id: number,
-    requestId: string
+    requestId: number
   ) => {
     const workflow = [];
     const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
