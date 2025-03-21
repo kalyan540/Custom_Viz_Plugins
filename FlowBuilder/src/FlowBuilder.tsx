@@ -204,9 +204,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 func: `
           
                 // Prepare email content
-                msg.request_id = "${requestId}"; // Use the dynamic requestId
+                msg.request_id = msg.payload.requestid; // Use the dynamic requestId
                 msg.topic = "Workflow " + msg.request_id; // Use string concatenation instead of template literals
-                msg.to = msg.payload.to || "herig68683@cybtric.com";
+                msg.to = msg.payload.candidateEmail; // || "herig68683@cybtric.com";
           
                 msg.html = \`
                   <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
@@ -262,8 +262,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             name: `${manager.name} Approval`,
             func: `
               // Add workflowName and candidateEmail to the msg object
-              msg.workflowName = "${workflowName}";
-              msg.candidateEmail = "${currentUserEmail}";
+              msg.workflowName = msg.payload.workflowName;
+              msg.candidateEmail = msg.payload.candidateEmail;
               
               // Set formCompleted here
               //msg.payload.formCompleted = true; // Replace with your logic if needed
