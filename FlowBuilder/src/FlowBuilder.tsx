@@ -117,7 +117,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   // Handle form submission
   const handleSubmit = async () => {
     const requestId = generateRequestId(); // Generate a random requestId
-    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id,, requestId);
+    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id, requestId);
     console.log('Workflow JSON:', workflowJson);
 
     try {
@@ -144,10 +144,25 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   };
 
   // Add a manager to the list
-  const addManager = () => {
-    const newManager = { name: `Level${levelCount}`, field1: '', field2: '' };
+//   const addManager = () => {
+//     const newManager = { name: `Level${levelCount}`, field1: '', field2: '' };
+//     setManagers([...managers, newManager]);
+//     setLevelCount(levelCount + 1); // Increment the level count
+//   };
+
+const addManager = () => {
+    // Find the maximum level number in the existing managers
+    const maxLevel = managers.reduce((max, manager) => {
+      const levelNumber = parseInt(manager.name.replace("Level", ""), 10);
+      return levelNumber > max ? levelNumber : max;
+    }, 0);
+
+    // Calculate the next level number
+    const nextLevel = maxLevel + 1;
+
+    // Add the new manager with the correct level number
+    const newManager = { name: `Level${nextLevel}`, field1: '', field2: '' };
     setManagers([...managers, newManager]);
-    setLevelCount(levelCount + 1); // Increment the level count
   };
 
   // Generate JSON for Node-Red
