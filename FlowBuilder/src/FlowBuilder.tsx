@@ -412,7 +412,7 @@ const addManager = () => {
             z: tabId,
             name: `Insert into PostgreSQL(Approve) - ${manager.name}`,
             
-            query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now()) ON CONFLICT (workflow_id, current_level) DO NOTHING;",
+            query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, created_at) SELECT $1, $2, $3, $4, $5, $6, now() WHERE NOT EXISTS (SELECT 1 FROM approval_request ap WHERE ap.requestid = $6 AND ap.current_level = $4) AND EXISTS (SELECT 1 FROM approval_request ap_prev WHERE ap_prev.requestid = $6 AND ap_prev.current_level = $4 - 1 UNION SELECT 1 WHERE $4 = 1) ON CONFLICT (workflow_id, current_level) DO NOTHING;",
             postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
             split: false,
             rowsPerMsg: 1,
@@ -427,7 +427,7 @@ const addManager = () => {
             type: "postgresql",
             z: tabId,
             name: `Insert into PostgreSQL(Reject) - ${manager.name}`,
-            query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
+            query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, created_at) SELECT $1, $2, $3, $4, $5, $6, now() WHERE NOT EXISTS (SELECT 1 FROM approval_request ap WHERE ap.requestid = $6 AND ap.current_level = $4) AND EXISTS (SELECT 1 FROM approval_request ap_prev WHERE ap_prev.requestid = $6 AND ap_prev.current_level = $4 - 1 UNION SELECT 1 WHERE $4 = 1) ON CONFLICT (workflow_id, current_level) DO NOTHING;",
             postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
             split: false,
             rowsPerMsg: 1,
