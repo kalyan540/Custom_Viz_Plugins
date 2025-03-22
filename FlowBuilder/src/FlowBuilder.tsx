@@ -407,7 +407,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             z: tabId,
             name: `Insert into PostgreSQL(Approve) - ${manager.name}`,
             
-            query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now()) ON CONFLICT (workflow_id, current_level) DO NOTHING;",
+            query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
             postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
             split: false,
             rowsPerMsg: 1,
