@@ -117,42 +117,27 @@ interface Request {
   id: string;
   status: string;
   rejectReason: string;
+  selected?: boolean;
 }
 
 export default function UserAction1(props: UserAction1Props) {
-  const { data, height, width, datasource } = props;
+  const { data, height, width } = props;
   const rootElem = useRef<HTMLDivElement>(null);
-  const [requests, setRequests] = useState<Request[]>([
-    { id: '1001', status: 'Pending', rejectReason: '' },
-    { id: '1002', status: 'Pending', rejectReason: '' }
-  ]);
   const [selectAll, setSelectAll] = useState(false);
-  const [DBName, setDBName] = useState<string | null>(null);
-  const [tableName, settableName] = useState<string | null>(null);
-  
-  console.log(data, DBName, tableName);
-  useEffect(() => {
-    async function fetchExploreData() {
-      try {
-        const [datasource_id, datasource_type] = datasource.split('__');
-        const response = await SupersetClient.get({
-          endpoint: `/api/v1/explore/?datasource_type=${datasource_type}&datasource_id=${datasource_id}`,
-        });
+  const [requests, setRequests] = useState<Request[]>([]);
 
-        const dbName = response.json?.result?.dataset?.database?.name;
-        const TableName = response.json?.result?.dataset?.datasource_name;
-        if (dbName) {
-          setDBName(dbName);
-          settableName(TableName);
-        } else {
-          console.warn('Database name not found in response');
-        }
-      } catch (error) {
-        console.error('Error fetching explore API:', error);
-      }
+  // Initialize and update requests when data changes
+  useEffect(() => {
+    if (data && Array.isArray(data)) {
+      const mappedRequests = data.map(item => ({
+        id: item.requestid.toString(),
+        status: item.status,
+        rejectReason: '',
+        selected: false
+      }));
+      setRequests(mappedRequests);
     }
-    fetchExploreData();
-  }, [datasource]);
+  }, [data]);
 
   useEffect(() => {
     console.log('Plugin element', rootElem.current);
@@ -160,6 +145,11 @@ export default function UserAction1(props: UserAction1Props) {
   }, []);
 
   const toggleAll = (checked: boolean) => {
+    const updatedRequests = requests.map(request => ({
+      ...request,
+      selected: checked
+    }));
+    setRequests(updatedRequests);
     setSelectAll(checked);
   };
 
@@ -167,6 +157,10 @@ export default function UserAction1(props: UserAction1Props) {
     const newRequests = [...requests];
     newRequests[index].selected = !newRequests[index].selected;
     setRequests(newRequests);
+    
+    // Update selectAll checkbox if needed
+    const allSelected = newRequests.every(request => request.selected);
+    setSelectAll(allSelected);
   };
 
   const updateRejectReason = (index: number, reason: string) => {
@@ -213,30 +207,39 @@ export default function UserAction1(props: UserAction1Props) {
   };
 
   const bulkApprove = () => {
-    requests.forEach((request, index) => {
-      if (request.selected) {
-        processRequest(index, 'Approved');
+    const selectedRequests = requests.filter(request => request.selected);
+    
+    if (selectedRequests.length === 0) {
+      alert('Please select at least one request to approve');
+      return;
+    }
+
+    selectedRequests.forEach((_, index) => {
+      const originalIndex = requests.findIndex(req => req.id === selectedRequests[index].id);
+      if (originalIndex !== -1) {
+        processRequest(originalIndex, 'Approved');
       }
     });
   };
 
   const bulkReject = () => {
-    let valid = true;
+    const selectedRequests = requests.filter(request => request.selected);
     
-    requests.forEach((request, index) => {
-      if (request.selected && !request.rejectReason.trim()) {
-        valid = false;
-      }
-    });
+    if (selectedRequests.length === 0) {
+      alert('Please select at least one request to reject');
+      return;
+    }
 
-    if (!valid) {
+    const invalidRequests = selectedRequests.filter(request => !request.rejectReason.trim());
+    if (invalidRequests.length > 0) {
       alert('Please enter reject reasons for all selected requests');
       return;
     }
 
-    requests.forEach((request, index) => {
-      if (request.selected) {
-        processRequest(index, 'Rejected');
+    selectedRequests.forEach((_, index) => {
+      const originalIndex = requests.findIndex(req => req.id === selectedRequests[index].id);
+      if (originalIndex !== -1) {
+        processRequest(originalIndex, 'Rejected');
       }
     });
   };
@@ -285,20 +288,23 @@ export default function UserAction1(props: UserAction1Props) {
                   <button 
                     className="btn approve" 
                     onClick={() => processRequest(index, 'Approved')}
+                    disabled={request.status !== 'Pending'}
                   >
                     Approve
                   </button>
-                  <div className={`reject-container ${request.status === 'Rejected' && !request.rejectReason.trim() ? 'highlight' : ''}`}>
+                  <div className={`reject-container ${request.status === 'Pending' && request.selected && !request.rejectReason.trim() ? 'highlight' : ''}`}>
                     <input 
                       type="text" 
                       className="rejectReason" 
                       placeholder="Enter reason"
                       value={request.rejectReason}
                       onChange={(e) => updateRejectReason(index, e.target.value)}
+                      disabled={request.status !== 'Pending'}
                     />
                     <button 
                       className="btn reject" 
                       onClick={() => processRequest(index, 'Rejected')}
+                      disabled={request.status !== 'Pending'}
                     >
                       Reject
                     </button>
