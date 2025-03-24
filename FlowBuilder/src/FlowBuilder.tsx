@@ -124,7 +124,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
     try {
       // Step 2: Fetch the existing flows from Node-RED (oldWF)
-      const flowsResponse = await fetch('/flows', {
+      const flowsResponse = await fetch('http://ec2-52-91-38-126.compute-1.amazonaws.com:1880/flows', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
