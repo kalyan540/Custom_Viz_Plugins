@@ -226,12 +226,21 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 name: "prepare_email",
                 func: `
 
-
+                // Check if the form is completed
+              if (msg.payload.formCreated === true) {
+                // Ensure proper JSON structure for request_data
+                let requestData = {
+                  workflowName: msg.payload.workflowName || "Unknown Workflow",
+                  approver: msg.payload.approverEmail || "Unknown approver"
+                };
+          
+                // Set status based on whether it's the last level
+                
                 // Prepare the parameters for the PostgreSQL query
                 msg.params = [
                   ${workflow_id}, // workflow_id
                   JSON.stringify(requestData), // Ensure request_data is properly stringified
-                  msg.payload.status, // status (either "Completed" or "Pending")
+                  "Pending", // status (either "Completed" or "Pending")
                   0, // current_level
                   ${managers.length}, // total_levels
                   msg.payload.requestid // requestid
