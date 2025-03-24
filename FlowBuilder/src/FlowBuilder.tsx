@@ -225,11 +225,22 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 z: tabId,
                 name: "prepare_email",
                 func: `
+
+
+                // Prepare the parameters for the PostgreSQL query
+                msg.params = [
+                  ${workflow_id}, // workflow_id
+                  JSON.stringify(requestData), // Ensure request_data is properly stringified
+                  msg.payload.status, // status (either "Completed" or "Pending")
+                  0, // current_level
+                  ${managers.length}, // total_levels
+                  msg.payload.requestid // requestid
+                ];
           
                 // Prepare email content
                 msg.request_id = msg.payload.requestid; // Use the dynamic requestId
                 msg.topic = "Workflow " + msg.request_id; // Use string concatenation instead of template literals
-                msg.to = msg.payload.candidateEmail; // || "herig68683@cybtric.com";
+                msg.to = msg.payload.approverEmail; // || "herig68683@cybtric.com";
           
                 msg.html = \`
                   <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
@@ -263,10 +274,41 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 x: 310,
                 y: 180,
                 "wires": [
-                    [`send_email`]
+                    [`send_email`,'postgres_insert'],['postgres_reject'] // Send to the next node
                 ]
             }
             );
+
+            workflow.push({
+              id: `postgres_insert`,
+              type: "postgresql",
+              z: tabId,
+              name: `PostgreSQL(Approve)`,              
+              query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
+              postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+              split: false,
+              rowsPerMsg: 1,
+              outputs: 1,
+              x: 110, // Adjust positioning dynamically
+              y: 120,
+              wires: [], // No further connections needed
+            });
+
+
+            workflow.push({
+              id: `postgres_reject`,
+              type: "postgresql",
+              z: tabId,
+              name: `PostgreSQL(Reject)`,
+              query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
+              postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+              split: false,
+              rowsPerMsg: 1,
+              outputs: 1,
+              x: 120, // Adjust positioning dynamically
+              y: 240,
+              wires: [], // No further connections needed
+            });
 
 
         managers.forEach((manager, index) => {
@@ -277,9 +319,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             z: tabId,
             name: `${manager.name} Approval`,
             func: `
-              // Add workflowName and candidateEmail to the msg object
+              // Add workflowName and approverEmail to the msg object
               msg.workflowName = msg.payload.workflowName;
-              msg.candidateEmail = msg.payload.candidateEmail;
+              msg.approverEmail = msg.payload.approverEmail;
               
               // Set formCompleted here
               //msg.payload.formCompleted = true; // Replace with your logic if needed
@@ -293,6 +335,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 ? [[`decision_${index}`, "http_response"]]  // Connect http_response only for the first manager
                 : [[`decision_${index}`]]
           });
+
+
 
           workflow.push({
             id: `http_in_manager_${index}`,
@@ -321,7 +365,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 // Ensure proper JSON structure for request_data
                 let requestData = {
                   workflowName: msg.payload.workflowName || "Unknown Workflow",
-                  candidate: msg.payload.candidateEmail || "Unknown Candidate"
+                  approver: msg.payload.approverEmail || "Unknown approver"
                 };
           
                 // Set status based on whether it's the last level
@@ -340,7 +384,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 // Prepare email content
                 msg.request_id = msg.payload.requestid; // Use the dynamic requestId
                 msg.topic = "Workflow " + msg.request_id; // Use string concatenation instead of template literals
-                msg.to = msg.payload.candidateEmail; // || "herig68683@cybtric.com";
+                msg.to = msg.payload.approverEmail; // || "herig68683@cybtric.com";
           
                 msg.html = \`
                   <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
