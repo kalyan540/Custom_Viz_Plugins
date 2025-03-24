@@ -270,7 +270,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           
                 return msg;
             `,
-                outputs: 1,
+                outputs: 2,
                 x: 310,
                 y: 180,
                 "wires": [
