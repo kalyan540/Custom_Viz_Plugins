@@ -274,8 +274,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 x: 310,
                 y: 180,
                 "wires": [
-                    [`send_email`,'postgres_insert'],['postgres_reject'] // Send to the next node
-                ]
+                ["send_email", "postgres_insert"],  // First output point
+                ["postgres_reject"]                 // Second output point
+  ]
             }
             );
 
