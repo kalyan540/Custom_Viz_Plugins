@@ -243,7 +243,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                   "Pending", // status (either "Completed" or "Pending")
                   0, // current_level
                   ${managers.length}, // total_levels
-                  msg.payload.requestid // requestid
+                  msg.payload.requestid, // requestid
+                  "NA", // remarks
+                  msg.payload.manager_email
                 ];
           
                 // Prepare email content
@@ -294,7 +296,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
               type: "postgresql",
               z: tabId,
               name: `PostgreSQL(Approve)`,              
-              query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
+              query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, remarks,manager_email, created_at) VALUES ($1, $2, $3, $4, $5,$6,$7,$8, now());",
               postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
               split: false,
               rowsPerMsg: 1,
@@ -310,7 +312,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
               type: "postgresql",
               z: tabId,
               name: `PostgreSQL(Reject)`,
-              query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
+              query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid,remarks, manager_email,created_at) VALUES ($1, $2, $3, $4, $5,$6, $7,$8,now());",
               postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
               split: false,
               rowsPerMsg: 1,
