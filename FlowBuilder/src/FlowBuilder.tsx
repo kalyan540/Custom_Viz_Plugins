@@ -280,6 +280,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 msg.payload = msg.html;
           
                 return msg;
+            }
             `,
                 outputs: 2,
                 x: 310,
