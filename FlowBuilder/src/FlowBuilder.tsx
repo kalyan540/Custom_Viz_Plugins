@@ -117,11 +117,11 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   // Handle form submission
   const handleSubmit = async () => {
     const requestId = generateRequestId(); // Generate a random requestId
-
+  
     // Step 1: Generate the new workflow JSON (newWF)
     const newWF = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id, requestId);
     console.log('New Workflow JSON:', newWF);
-
+  
     try {
       // Step 2: Fetch the existing flows from Node-RED (oldWF)
       const flowsResponse = await fetch('http://ec2-52-91-38-126.compute-1.amazonaws.com:1880/flows', {
@@ -130,18 +130,17 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           'Content-Type': 'application/json',
         },
       });
-
       if (!flowsResponse.ok) {
         throw new Error('Failed to fetch existing flows from Node-RED');
       }
-
+  
       const oldWF = await flowsResponse.json();
       console.log('Existing Flows (oldWF):', oldWF);
-
+  
       // Step 3: Combine oldWF and newWF into finalJson
       const finalJson = [...oldWF, ...newWF];
       console.log('Final JSON:', finalJson);
-
+  
       // Step 4: Send the finalJson to the API endpoint
       const response = await fetch(apiEndpoint, {
         method: 'POST',
@@ -150,7 +149,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         },
         body: JSON.stringify(finalJson),
       });
-
       if (response.status === 204) {
         console.log('Workflow created successfully!');
         alert('Workflow created successfully!');
@@ -160,11 +158,10 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         alert('Workflow created successfully!');
       }
     } catch (error) {
-        console.error('Error submitting workflow:', error);
-        alert('Failed to create workflow. Please try again.');
-      }
-    };
-  
+      console.error('Error submitting workflow:', error);
+      alert('Failed to create workflow. Please try again.');
+    }
+  };
 
   // Add a manager to the list
   const addManager = () => {
