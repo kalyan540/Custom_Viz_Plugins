@@ -120,13 +120,39 @@ interface Request {
 }
 
 export default function UserAction1(props: UserAction1Props) {
-  const { height, width } = props;
+  const { data, height, width, datasource } = props;
   const rootElem = useRef<HTMLDivElement>(null);
   const [requests, setRequests] = useState<Request[]>([
     { id: '1001', status: 'Pending', rejectReason: '' },
     { id: '1002', status: 'Pending', rejectReason: '' }
   ]);
   const [selectAll, setSelectAll] = useState(false);
+  const [DBName, setDBName] = useState<string | null>(null);
+  const [tableName, settableName] = useState<string | null>(null);
+  
+  console.log(data, DBName, tableName);
+  useEffect(() => {
+    async function fetchExploreData() {
+      try {
+        const [datasource_id, datasource_type] = datasource.split('__');
+        const response = await SupersetClient.get({
+          endpoint: `/api/v1/explore/?datasource_type=${datasource_type}&datasource_id=${datasource_id}`,
+        });
+
+        const dbName = response.json?.result?.dataset?.database?.name;
+        const TableName = response.json?.result?.dataset?.datasource_name;
+        if (dbName) {
+          setDBName(dbName);
+          settableName(TableName);
+        } else {
+          console.warn('Database name not found in response');
+        }
+      } catch (error) {
+        console.error('Error fetching explore API:', error);
+      }
+    }
+    fetchExploreData();
+  }, [datasource]);
 
   useEffect(() => {
     console.log('Plugin element', rootElem.current);
