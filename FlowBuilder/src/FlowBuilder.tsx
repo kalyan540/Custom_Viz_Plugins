@@ -459,6 +459,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         });
 
         workflow.push({
+          
             id: `postgres_insert_approve_${index}`,
             type: "postgresql",
             z: tabId,
