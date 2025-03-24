@@ -229,7 +229,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 // Prepare email content
                 msg.request_id = msg.payload.requestid; // Use the dynamic requestId
                 msg.topic = "Workflow " + msg.request_id; // Use string concatenation instead of template literals
-                msg.to = msg.payload.candidateEmail; // || "herig68683@cybtric.com";
+                msg.to = msg.payload.approverEmail; // || "herig68683@cybtric.com";
           
                 msg.html = \`
                   <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
@@ -277,9 +277,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             z: tabId,
             name: `${manager.name} Approval`,
             func: `
-              // Add workflowName and candidateEmail to the msg object
+              // Add workflowName and approverEmail to the msg object
               msg.workflowName = msg.payload.workflowName;
-              msg.candidateEmail = msg.payload.candidateEmail;
+              msg.approverEmail = msg.payload.approverEmail;
               
               // Set formCompleted here
               //msg.payload.formCompleted = true; // Replace with your logic if needed
@@ -321,7 +321,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 // Ensure proper JSON structure for request_data
                 let requestData = {
                   workflowName: msg.payload.workflowName || "Unknown Workflow",
-                  candidate: msg.payload.candidateEmail || "Unknown Candidate"
+                  approver: msg.payload.approverEmail || "Unknown approver"
                 };
           
                 // Set status based on whether it's the last level
@@ -340,7 +340,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 // Prepare email content
                 msg.request_id = msg.payload.requestid; // Use the dynamic requestId
                 msg.topic = "Workflow " + msg.request_id; // Use string concatenation instead of template literals
-                msg.to = msg.payload.candidateEmail; // || "herig68683@cybtric.com";
+                msg.to = msg.payload.approverEmail; // || "herig68683@cybtric.com";
           
                 msg.html = \`
                   <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
