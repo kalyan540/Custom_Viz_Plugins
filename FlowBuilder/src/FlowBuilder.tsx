@@ -240,7 +240,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 msg.params = [
                   ${workflow_id}, // workflow_id
                   JSON.stringify(requestData), // Ensure request_data is properly stringified
-                  "Pending", // status (either "Completed" or "Pending")
+                  msg.payload.status, // status (either "Completed" or "Pending")
                   0, // current_level
                   ${managers.length}, // total_levels
                   msg.payload.requestid, // requestid
@@ -355,7 +355,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             type: "http in",
             z: tabId,
             name: `${manager.name} Decision`,
-            url: `/api/manager${index + 1}Decision`, // Dynamic URL
+            url: `/api/level${index + 1}Decision`, // Dynamic URL
             method: "post",
             upload: false,
             swaggerDoc: "",
@@ -385,11 +385,11 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           
                 // Prepare the parameters for the PostgreSQL query
                 msg.params = [
-                  ${workflow_id}, // workflow_id
-                  JSON.stringify(requestData), // Ensure request_data is properly stringified
+                  //${workflow_id}, // workflow_id
+                  //JSON.stringify(requestData), // Ensure request_data is properly stringified
                   msg.payload.status, // status (either "Completed" or "Pending")
                   ${index + 1}, // current_level
-                  ${managers.length}, // total_levels
+                  //${managers.length}, // total_levels
                   msg.payload.requestid // requestid
                 ];
           
@@ -462,8 +462,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             type: "postgresql",
             z: tabId,
             name: `Insert into PostgreSQL(Approve) - ${manager.name}`,
-            
-            query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
+            //query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
+
+            query: "UPDATE approval_request SET current_level = $2, status = $1, created_at = NOW() WHERE requestid = $3;",
             postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
             split: false,
             rowsPerMsg: 1,
@@ -478,7 +479,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             type: "postgresql",
             z: tabId,
             name: `Insert into PostgreSQL(Reject) - ${manager.name}`,
-            query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
+            query: "UPDATE approval_request SET current_level = $2, status = $1, created_at = NOW() WHERE requestid = $3;",
             postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
             split: false,
             rowsPerMsg: 1,
