@@ -16,63 +16,204 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, createRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { styled } from '@superset-ui/core';
 import { UserAction1Props, UserAction1StylesProps } from './types';
 
-// The following Styles component is a <div> element, which has been styled using Emotion
-// For docs, visit https://emotion.sh/docs/styled
-
-// Theming variables are provided for your use via a ThemeProvider
-// imported from @superset-ui/core. For variables available, please visit
-// https://github.com/apache-superset/superset-ui/blob/master/packages/superset-ui-core/src/style/index.ts
-
 const Styles = styled.div<UserAction1StylesProps>`
-  background-color: ${({ theme }) => theme.colors.secondary.light2};
-  padding: ${({ theme }) => theme.gridUnit * 4}px;
-  border-radius: ${({ theme }) => theme.gridUnit * 2}px;
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background-color: #f4f4f4;
   height: ${({ height }) => height}px;
   width: ${({ width }) => width}px;
+  padding: ${({ theme }) => theme.gridUnit * 4}px;
+  border-radius: ${({ theme }) => theme.gridUnit * 2}px;
 
-  h3 {
-    /* You can use your props to control CSS! */
-    margin-top: 0;
-    margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
-    font-size: ${({ theme, headerFontSize }) =>
-      theme.typography.sizes[headerFontSize]}px;
-    font-weight: ${({ theme, boldText }) =>
-      theme.typography.weights[boldText ? 'bold' : 'normal']};
+  .container {
+    text-align: center;
+    border: 1px solid #ddd;
+    padding: 20px;
+    max-width: 800px;
+    margin: auto;
+    background-color: white;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
   }
 
-  pre {
-    height: ${({ theme, headerFontSize, height }) =>
-      height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
+  .btn {
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    margin: 5px;
+    border-radius: 5px;
+  }
+
+  .approve {
+    background-color: green;
+  }
+
+  .reject {
+    background-color: red;
+  }
+
+  .bulk-btn {
+    padding: 12px 18px;
+    font-size: 16px;
+    margin: 10px;
+  }
+
+  table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+  }
+
+  th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+
+  .status {
+    font-weight: bold;
+  }
+
+  .approved {
+    color: green;
+  }
+
+  .rejected {
+    color: red;
+  }
+
+  .reject-container {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: #fff;
+    justify-content: space-between;
+  }
+
+  .rejectReason {
+    border: none;
+    outline: none;
+    flex-grow: 1;
+    padding: 5px;
+  }
+
+  .highlight {
+    border: 2px solid red;
+    background-color: #ffcccc;
   }
 `;
 
-/**
- * ******************* WHAT YOU CAN BUILD HERE *******************
- *  In essence, a chart is given a few key ingredients to work with:
- *  * Data: provided via `props.data`
- *  * A DOM element
- *  * FormData (your controls!) provided as props by transformProps.ts
- */
+interface Request {
+  id: string;
+  status: string;
+  rejectReason: string;
+}
 
 export default function UserAction1(props: UserAction1Props) {
-  // height and width are the height and width of the DOM element as it exists in the dashboard.
-  // There is also a `data` prop, which is, of course, your DATA 🎉
-  const { data, height, width } = props;
+  const { height, width } = props;
+  const rootElem = useRef<HTMLDivElement>(null);
+  const [requests, setRequests] = useState<Request[]>([
+    { id: '1001', status: 'Pending', rejectReason: '' },
+    { id: '1002', status: 'Pending', rejectReason: '' }
+  ]);
+  const [selectAll, setSelectAll] = useState(false);
 
-  const rootElem = createRef<HTMLDivElement>();
-
-  // Often, you just want to access the DOM and do whatever you want.
-  // Here, you can do that with createRef, and the useEffect hook.
   useEffect(() => {
-    const root = rootElem.current as HTMLElement;
-    console.log('Plugin element', root);
-  });
+    console.log('Plugin element', rootElem.current);
+    console.log('Plugin props', props);
+  }, []);
 
-  console.log('Plugin props', props);
+  const toggleAll = (checked: boolean) => {
+    setSelectAll(checked);
+  };
+
+  const toggleRowSelection = (index: number) => {
+    const newRequests = [...requests];
+    newRequests[index].selected = !newRequests[index].selected;
+    setRequests(newRequests);
+  };
+
+  const updateRejectReason = (index: number, reason: string) => {
+    const newRequests = [...requests];
+    newRequests[index].rejectReason = reason;
+    setRequests(newRequests);
+  };
+
+  const processRequest = async (index: number, status: string) => {
+    const request = requests[index];
+    
+    if (status === "Rejected" && !request.rejectReason.trim()) {
+      return;
+    }
+
+    const requestBody = {
+      requestid: request.id,
+      workflowName: "Workflow-" + request.id,
+      candidateEmail: "nishanth@example.com",
+      formCompleted: true,
+      status: status
+    };
+
+    try {
+      const response = await fetch("http://ec2-52-91-38-126.compute-1.amazonaws.com:1880/api/manager1Decision", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (response.ok) {
+        const newRequests = [...requests];
+        newRequests[index].status = status;
+        setRequests(newRequests);
+        alert(`Request ${request.id} has been successfully ${status.toLowerCase()}!`);
+      } else {
+        alert(`Failed to update request ${request.id}. Please try again.`);
+      }
+    } catch (error) {
+      alert("An error occurred while processing the request.");
+    }
+  };
+
+  const bulkApprove = () => {
+    requests.forEach((request, index) => {
+      if (request.selected) {
+        processRequest(index, 'Approved');
+      }
+    });
+  };
+
+  const bulkReject = () => {
+    let valid = true;
+    
+    requests.forEach((request, index) => {
+      if (request.selected && !request.rejectReason.trim()) {
+        valid = false;
+      }
+    });
+
+    if (!valid) {
+      alert('Please enter reject reasons for all selected requests');
+      return;
+    }
+
+    requests.forEach((request, index) => {
+      if (request.selected) {
+        processRequest(index, 'Rejected');
+      }
+    });
+  };
 
   return (
     <Styles
@@ -82,8 +223,73 @@ export default function UserAction1(props: UserAction1Props) {
       height={height}
       width={width}
     >
-      <h3>{props.headerText}</h3>
-      <pre>${JSON.stringify(data, null, 2)}</pre>
+      <div className="container">
+        <h2>Workflow's Need Your Attention</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>
+                <input 
+                  type="checkbox" 
+                  checked={selectAll}
+                  onChange={(e) => toggleAll(e.target.checked)}
+                />
+              </th>
+              <th>Request ID</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {requests.map((request, index) => (
+              <tr key={request.id}>
+                <td>
+                  <input 
+                    type="checkbox" 
+                    checked={request.selected || false}
+                    onChange={() => toggleRowSelection(index)}
+                  />
+                </td>
+                <td>{request.id}</td>
+                <td className={`status ${request.status === 'Approved' ? 'approved' : request.status === 'Rejected' ? 'rejected' : ''}`}>
+                  {request.status}
+                </td>
+                <td>
+                  <button 
+                    className="btn approve" 
+                    onClick={() => processRequest(index, 'Approved')}
+                  >
+                    Approve
+                  </button>
+                  <div className={`reject-container ${request.status === 'Rejected' && !request.rejectReason.trim() ? 'highlight' : ''}`}>
+                    <input 
+                      type="text" 
+                      className="rejectReason" 
+                      placeholder="Enter reason"
+                      value={request.rejectReason}
+                      onChange={(e) => updateRejectReason(index, e.target.value)}
+                    />
+                    <button 
+                      className="btn reject" 
+                      onClick={() => processRequest(index, 'Rejected')}
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <button className="btn approve bulk-btn" onClick={bulkApprove}>
+          Bulk Approve
+        </button>
+        <button className="btn reject bulk-btn" onClick={bulkReject}>
+          Bulk Reject
+        </button>
+      </div>
     </Styles>
   );
 }
