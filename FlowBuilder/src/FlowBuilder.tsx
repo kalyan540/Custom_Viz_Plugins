@@ -110,25 +110,33 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
   const fetchExistingFlows = async () => {
     try {
-      // Note: You'll need to adjust this URL to match your Node-RED API endpoint for getting flows
       const response = await fetch(`${apiEndpoint}/flows`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to fetch existing flows');
       }
-
-      return await response.json();
+  
+      const data = await response.json();
+      
+      // Handle different possible response structures
+      if (Array.isArray(data)) {
+        return data; // If the response is already an array
+      } else if (data.flows && Array.isArray(data.flows)) {
+        return data.flows; // If the response has a flows property that's an array
+      } else {
+        return []; // Default to empty array if structure is unexpected
+      }
     } catch (error) {
       console.error('Error fetching existing flows:', error);
-      return []; // Return empty array if there's an error
+      return [];
     }
   };
-
+  
   const handleSubmit = async () => {
     setIsSubmitting(true);
     const requestId = generateRequestId();
@@ -141,11 +149,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       const existingFlows = await fetchExistingFlows();
       
       // Step 3: Combine the existing flows with the new workflow
-      // Note: The structure of existingFlows depends on your Node-RED API response
-      // This is a common structure, but you may need to adjust it
       const finalJson = {
-        ...existingFlows,
-        flows: [...(existingFlows.flows || []), ...newWorkflow]
+        flows: [...existingFlows, ...newWorkflow]
       };
       
       // Step 4: Send the final JSON to the API
@@ -156,7 +161,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         },
         body: JSON.stringify(finalJson),
       });
-
+  
       if (response.status === 204 || response.ok) {
         console.log('Workflow created successfully!');
         alert('Workflow created successfully!');
@@ -172,6 +177,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       setIsSubmitting(false);
     }
   };
+
+
+ 
 
   const addManager = () => {
     const maxLevel = managers.reduce((max, manager) => {
