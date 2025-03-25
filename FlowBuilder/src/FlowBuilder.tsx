@@ -1,7 +1,7 @@
 import React, { useEffect, createRef, useState } from 'react';
 import { styled } from '@superset-ui/core';
 import { FlowBuilderProps, FlowBuilderStylesProps } from './types';
-import { Popover } from 'antd';
+import { Popover } from 'antd'; // Assuming you're using Ant Design for the popover
 
 const Styles = styled.div<FlowBuilderStylesProps>`
   background-color: ${({ theme }) => theme.colors.secondary.light2};
@@ -15,8 +15,8 @@ const Styles = styled.div<FlowBuilderStylesProps>`
   }
     .form-group input {
     width: 100%;
-    padding: ${({ theme }) => theme.gridUnit * 3}px;
-    font-size: 16px;
+    padding: ${({ theme }) => theme.gridUnit * 3}px; /* Increased padding */
+    font-size: 16px; /* Larger font size */
     border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
     border-radius: ${({ theme }) => theme.gridUnit}px;
   }
@@ -25,8 +25,9 @@ const Styles = styled.div<FlowBuilderStylesProps>`
     display: block;
     margin-bottom: ${({ theme }) => theme.gridUnit}px;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 18px; /* Increased font size for the label */
   }
+
 
   label {
     display: block;
@@ -52,23 +53,23 @@ const Styles = styled.div<FlowBuilderStylesProps>`
   }
 
   button.add-level {
-    background-color: #3498db;
+    background-color: #3498db; /* Blue color for Add Level button */
   }
 
   button.remove-level {
-    background-color: #e74c3c;
+    background-color: #e74c3c; /* Red color for Remove button */
   }
 
   button.submit {
-    background-color: #2ecc71;
-    padding: ${({ theme }) => theme.gridUnit * 3}px ${({ theme }) => theme.gridUnit * 6}px;
-    font-size: 16px;
+    background-color: #2ecc71; /* Green color for Submit button */
+    adding: ${({ theme }) => theme.gridUnit * 3}px ${({ theme }) => theme.gridUnit * 6}px; /* Increased padding */
+    font-size: 16px; /* Larger font size */
   }
 
   .manager-list {
     margin-top: ${({ theme }) => theme.gridUnit * 3}px;
-    max-height: 300px;
-    overflow-y: auto;
+    max-height: 300px; /* Increased max height for the scrollable area */
+    overflow-y: auto; /* Enable vertical scrolling */
     border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
     border-radius: ${({ theme }) => theme.gridUnit}px;
     padding: ${({ theme }) => theme.gridUnit * 2}px;
@@ -94,113 +95,85 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const { height, width, apiEndpoint } = props;
   const rootElem = createRef<HTMLDivElement>();
 
+  // State for form inputs
   const [workflowName, setWorkflowName] = useState(
-    `Workflow-${Math.floor(Math.random() * 1000)}`,
+    `Workflow-${Math.floor(Math.random() * 1000)}`, // Auto-generate workflow name
   );
-  const [workflow_id, setworkflow_id] = useState(Math.floor(Math.random() * 1000));
-  const [managers, setManagers] = useState<{ name: string; field1: string; field2: string }[]>([]);
-  const [currentUserEmail, setCurrentUserEmail] = useState('user@example.com');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [workflow_id, setworkflow_id] = useState(Math.floor(Math.random() * 1000)); // Random workflow_id
+  const [managers, setManagers] = useState<{ name: string; field1: string; field2: string }[]>(
+    [],
+  );
+  const [currentUserEmail, setCurrentUserEmail] = useState(
+    'user@example.com', // Replace with dynamic value if available
+  );
   const generateRequestId = () => {
-    return `${Math.floor(Math.random() * 10000)}`;
+    return `${Math.floor(Math.random() * 10000)}`; // Generate a random number between 0 and 999999
   };
+  
 
+  // State to track the current level count
   const [levelCount, setLevelCount] = useState(1);
 
-  const fetchExistingFlows = async () => {
-    try {
-      const response = await fetch(`${apiEndpoint}/flows`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to fetch existing flows');
-      }
-  
-      const data = await response.json();
-      
-      // Handle different possible response structures
-      if (Array.isArray(data)) {
-        return data; // If the response is already an array
-      } else if (data.flows && Array.isArray(data.flows)) {
-        return data.flows; // If the response has a flows property that's an array
-      } else {
-        return []; // Default to empty array if structure is unexpected
-      }
-    } catch (error) {
-      console.error('Error fetching existing flows:', error);
-      return [];
-    }
-  };
-  
+  // Handle form submission
   const handleSubmit = async () => {
-    setIsSubmitting(true);
-    const requestId = generateRequestId();
-    
+    const requestId = generateRequestId(); // Generate a random requestId
+    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id,, requestId);
+    console.log('Workflow JSON:', workflowJson);
+
     try {
-      // Step 1: Create the new workflow JSON
-      const newWorkflow = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id, requestId);
-      
-      // Step 2: Get existing flows from Node-RED
-      const existingFlows = await fetchExistingFlows();
-      
-      // Step 3: Combine the existing flows with the new workflow
-      const finalJson = {
-        flows: [...existingFlows, ...newWorkflow]
-      };
-      
-      // Step 4: Send the final JSON to the API
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(finalJson),
+        body: JSON.stringify(workflowJson),
       });
-  
-      if (response.status === 204 || response.ok) {
+
+      if (response.status === 204) {
         console.log('Workflow created successfully!');
         alert('Workflow created successfully!');
       } else {
-        const result = await response.json();
+        const result = await response.json(); // Handle other success responses (if any)
         console.log('API Response:', result);
         alert('Workflow created successfully!');
       }
     } catch (error) {
       console.error('Error submitting workflow:', error);
       alert('Failed to create workflow. Please try again.');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-
- 
-
+  // Add a manager to the list
   const addManager = () => {
+    // Find the maximum level number in the existing managers
     const maxLevel = managers.reduce((max, manager) => {
       const levelNumber = parseInt(manager.name.replace("Level", ""), 10);
       return levelNumber > max ? levelNumber : max;
     }, 0);
 
+    // Calculate the next level number
     const nextLevel = maxLevel + 1;
+
+    // Add the new manager with the correct level number
     const newManager = { name: `Level${nextLevel}`, field1: '', field2: '' };
     setManagers([...managers, newManager]);
   };
 
   const removeLevel = (indexToRemove: number) => {
+    // Remove the level at the specified index
     const updatedManagers = managers.filter((_, index) => index !== indexToRemove);
+
+    // Renumber the remaining levels
     const renumberedManagers = updatedManagers.map((manager, index) => ({
       ...manager,
-      name: `Level${index + 1}`,
+      name: `Level${index + 1}`, // Renumber levels starting from 1
     }));
+
+    // Update the state with the renumbered managers
     setManagers(renumberedManagers);
   };
 
+  // Generate JSON for Node-Red
   const generateWorkflowJson = (
     workflowName: string,
     managers: { name: string; email: string }[],
@@ -209,292 +182,351 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     requestId: number
   ) => {
     const workflow = [];
-    const tabId = "e0ba68613f04424c";
+    const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
 
     // PostgreSQL Config Node
     workflow.push({
-      id: "7b9ec91590d534cc",
-      type: "postgreSQLConfig",
-      z: tabId,
-      name: "PostgreSQL Config",
-      host: "52.91.38.126",
-      port: 5433,
-      database: "nodered_db",
-      ssl: false,
-      user: "nodered_user",
-      password: "nodered_password",
-      max: 10,
-      idleTimeoutMillis: 1000,
-      connectionTimeoutMillis: 10000,
-      x: 320,
-      y: 60,
-    });
-  
-    workflow.push({
-      "id": "http_in_create",
-      "type": "http in",
-      z: tabId,
-      "name": "Initiate Workflow",
-      "url": "/api/initiateWorkflow",
-      "method": "post",
-      "upload": false,
-      "swaggerDoc": "",
-      "x": 100,
-      "y": 100,
-      "wires": [[`prepare_email`,'manager_0']]
-    });
-
-    workflow.push({
-      id: `prepare_email`,
-      type: "function",
-      z: tabId,
-      name: "prepare_email",
-      func: `
-        if (msg.payload.formCreated === true) {
-          let requestData = {
-            workflowName: msg.payload.workflowName || "Unknown Workflow",
-            approver: msg.payload.approverEmail || "Unknown approver"
-          };
-    
-          msg.params = [
-            ${workflow_id},
-            JSON.stringify(requestData),
-            msg.payload.status,
-            0,
-            ${managers.length},
-            msg.payload.requestid,
-            "NA",
-            msg.payload.manager_email
-          ];
-    
-          msg.request_id = msg.payload.requestid;
-          msg.topic = "Workflow " + msg.request_id;
-          msg.to = msg.payload.approverEmail;
-    
-          msg.html = \`
-            <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
-              <h2 style="color: #2c3e50;">Workflow Request Update</h2>
-              <p style="font-size: 16px;">Workflow \${msg.request_id} is \${msg.payload.status}. Please click the <a href ="#"> Link </a> to approve or reject </p>
-    
-              <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                <tr>
-                  <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Request ID:</strong></td>
-                  <td style="padding: 10px; border: 1px solid #ddd;">\${msg.request_id}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Status:</strong></td>
-                  <td style="padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};">
-                    <strong>\${msg.payload.status}</strong>
-                  </td>
-                </tr>
-              </table>
-    
-              <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">This is an automated message. Please do not reply.</p>
-            </div>
-          \`;
-    
-          msg.payload = msg.html;
-    
-          return msg;
-        }
-      `,
-      outputs: 2,
-      x: 310,
-      y: 180,
-      "wires": [
-        ["send_email", "postgres_insert"],
-        ["postgres_reject"]
-      ]
-    });
-
-    workflow.push({
-      id: `postgres_insert`,
-      type: "postgresql",
-      z: tabId,
-      name: `PostgreSQL(Approve)`,              
-      query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, remarks,manager_email, created_at) VALUES ($1, $2, $3, $4, $5,$6,$7,$8, now());",
-      postgreSQLConfig: "7b9ec91590d534cc",
-      split: false,
-      rowsPerMsg: 1,
-      outputs: 1,
-      x: 110,
-      y: 120,
-      wires: [],
-    });
-
-    workflow.push({
-      id: `postgres_reject`,
-      type: "postgresql",
-      z: tabId,
-      name: `PostgreSQL(Reject)`,
-      query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid,remarks, manager_email,created_at) VALUES ($1, $2, $3, $4, $5,$6, $7,$8,now());",
-      postgreSQLConfig: "7b9ec91590d534cc",
-      split: false,
-      rowsPerMsg: 1,
-      outputs: 1,
-      x: 120,
-      y: 240,
-      wires: [],
-    });
-
-    managers.forEach((manager, index) => {
-      workflow.push({
-        id: `manager_${index}`,
-        type: "function",
+        id: "7b9ec91590d534cc",
+        type: "postgreSQLConfig",
         z: tabId,
-        name: `${manager.name} Approval`,
-        func: `
-          msg.workflowName = msg.payload.workflowName;
-          msg.approverEmail = msg.payload.approverEmail;
-          return msg;
-        `,
-        outputs: 1,
-        x: 300,
-        y: 180,
-        wires: index === 0 
-            ? [[`decision_${index}`, "http_response"]]
-            : [[`decision_${index}`]]
+        name: "PostgreSQL Config",
+        host: "52.91.38.126", // Replace with your PostgreSQL host
+        port: 5433, // Replace with your PostgreSQL port
+        database: "nodered_db", // Replace with your database name
+        ssl: false, // Set to true if using SSL
+        user: "nodered_user", // Replace with your PostgreSQL username
+        password: "nodered_password", // Replace with your PostgreSQL password
+        max: 10, // Maximum number of connections in the pool
+        idleTimeoutMillis: 1000, // Idle connection timeout
+        connectionTimeoutMillis: 10000, // Connection timeout
+        x: 320, // X position in the Node-RED editor
+        y: 60, // Y position in the Node-RED editor
       });
 
       workflow.push({
-        id: `http_in_manager_${index}`,
-        type: "http in",
-        z: tabId,
-        name: `${manager.name} Decision`,
-        url: `/api/level${index + 1}Decision`,
-        method: "post",
-        upload: false,
-        swaggerDoc: "",
-        x: 100 + index * 200,
-        y: 100,
-        wires: [[`decision_${index}`]],
-      });
+          "id": "workflow_approval",
+          "type": "tab",
+          "label": " `Workflow-${Math.floor(Math.random() * 1000)}'"
 
+      });
+    
       workflow.push({
-        id: `decision_${index}`,
-        type: "function",
-        z: tabId,
-        name: `Check ${manager.name} Decision`,
-        func: `
-          if (msg.payload.formCompleted === true) {
-            let requestData = {
-              workflowName: msg.payload.workflowName || "Unknown Workflow",
-              approver: msg.payload.approverEmail || "Unknown approver"
-            };
-      
-            msg.payload.status = ${index === managers.length - 1 ? '"Completed"' : '"Pending"'};
-      
-            msg.params = [
-              msg.payload.status,
-              ${index + 1},
-              msg.payload.requestid
-            ];
-      
-            msg.request_id = msg.payload.requestid;
-            msg.topic = "Workflow " + msg.request_id;
-            msg.to = msg.payload.approverEmail;
-      
-            msg.html = \`
-              <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
-                <h2 style="color: #2c3e50;">Workflow Request Update</h2>
-                <p style="font-size: 16px;">Workflow \${msg.request_id} is \${msg.payload.status}. Please click the <a href ="#"> Link </a> to approve or reject </p>
-      
-                <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                  <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Request ID:</strong></td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">\${msg.request_id}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Status:</strong></td>
-                    <td style="padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};">
-                      <strong>\${msg.payload.status}</strong>
-                    </td>
-                  </tr>
-                </table>
-      
-                <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">This is an automated message. Please do not reply.</p>
-              </div>
-            \`;
-      
-            msg.payload = msg.html;
-      
-            return [msg, null];
-          } else {
-            return [null, msg];
-          }
-        `,
-        outputs: 2,
-        x: 220,
-        y: 160 + index * 80,
-        wires: [
-          index === managers.length - 1
-            ? [`postgres_insert_approve_${index}`, "send_email", "http_response"]
-            : [`postgres_insert_approve_${index}`, "send_email", "http_response", `manager_${index + 1}`],
-          index === managers.length - 1
-            ? [`postgres_insert_reject_${index}`, "http_response"]
-            : [`postgres_insert_reject_${index}`, "http_response"]
-        ]
-      });
+        
+          "id": "http_in_create",
+          "type": "http in",
+          z: tabId,
+          "name": "Initiate Workflow",
+          "url": "/api/initiateWorkflow",
+          "method": "post",
+          "upload": false,
+          "swaggerDoc": "",
+          "x": 100,
+          "y": 100,
+          "wires": [[`prepare_email`,'manager_0']]
+        });
 
+        
+        workflow.push(
+            {
+                id: `prepare_email`,
+                type: "function",
+                z: tabId,
+                name: "prepare_email",
+                func: `
+
+                // Check if the form is completed
+              if (msg.payload.formCreated === true) {
+                // Ensure proper JSON structure for request_data
+                let requestData = {
+                  workflowName: msg.payload.workflowName || "Unknown Workflow",
+                  approver: msg.payload.approverEmail || "Unknown approver"
+                };
+          
+                // Set status based on whether it's the last level
+                
+                // Prepare the parameters for the PostgreSQL query
+                msg.params = [
+                  ${workflow_id}, // workflow_id
+                  JSON.stringify(requestData), // Ensure request_data is properly stringified
+                  msg.payload.status, // status (either "Completed" or "Pending")
+                  0, // current_level
+                  ${managers.length}, // total_levels
+                  msg.payload.requestid, // requestid
+                  "NA", // remarks
+                  msg.payload.manager_email
+                ];
+          
+                // Prepare email content
+                msg.request_id = msg.payload.requestid; // Use the dynamic requestId
+                msg.topic = "Workflow " + msg.request_id; // Use string concatenation instead of template literals
+                msg.to = msg.payload.approverEmail; // || "herig68683@cybtric.com";
+          
+                msg.html = \`
+                  <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                    <h2 style="color: #2c3e50;">Workflow Request Update</h2>
+                    <p style="font-size: 16px;">Workflow \${msg.request_id} is \${msg.payload.status}. Please click the <a href ="#"> Link </a> to approve or reject </p>
+          
+          
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                      <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Request ID:</strong></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">\${msg.request_id}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Status:</strong></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};">
+                          <strong>\${msg.payload.status}</strong>
+                        </td>
+                      </tr>
+                    </table>
+          
+                    <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">This is an automated message. Please do not reply.</p>
+                  </div>
+          
+                \`;
+          
+                msg.payload = msg.html;
+          
+                return msg;
+            }
+            `,
+                outputs: 2,
+                x: 310,
+                y: 180,
+                "wires": [
+                ["send_email", "postgres_insert"],  // First output point
+                ["postgres_reject"]                 // Second output point
+  ]
+            }
+            );
+
+            workflow.push({
+              id: `postgres_insert`,
+              type: "postgresql",
+              z: tabId,
+              name: `PostgreSQL(Approve)`,              
+              query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, remarks,manager_email, created_at) VALUES ($1, $2, $3, $4, $5,$6,$7,$8, now());",
+              postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+              split: false,
+              rowsPerMsg: 1,
+              outputs: 1,
+              x: 110, // Adjust positioning dynamically
+              y: 120,
+              wires: [], // No further connections needed
+            });
+
+
+            workflow.push({
+              id: `postgres_reject`,
+              type: "postgresql",
+              z: tabId,
+              name: `PostgreSQL(Reject)`,
+              query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid,remarks, manager_email,created_at) VALUES ($1, $2, $3, $4, $5,$6, $7,$8,now());",
+              postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+              split: false,
+              rowsPerMsg: 1,
+              outputs: 1,
+              x: 120, // Adjust positioning dynamically
+              y: 240,
+              wires: [], // No further connections needed
+            });
+
+
+        managers.forEach((manager, index) => {
+
+        workflow.push({
+            id: `manager_${index}`,
+            type: "function",
+            z: tabId,
+            name: `${manager.name} Approval`,
+            func: `
+              // Add workflowName and approverEmail to the msg object
+              msg.workflowName = msg.payload.workflowName;
+              msg.approverEmail = msg.payload.approverEmail;
+              
+              // Set formCompleted here
+              //msg.payload.formCompleted = true; // Replace with your logic if needed
+          
+              return msg;
+            `,
+            outputs: 1,
+            x: 300,
+            y: 180,
+            wires: index === 0 
+                ? [[`decision_${index}`, "http_response"]]  // Connect http_response only for the first manager
+                : [[`decision_${index}`]]
+          });
+
+
+
+          workflow.push({
+            id: `http_in_manager_${index}`,
+            type: "http in",
+            z: tabId,
+            name: `${manager.name} Decision`,
+            url: `/api/level${index + 1}Decision`, // Dynamic URL
+            method: "post",
+            upload: false,
+            swaggerDoc: "",
+            x: 100 + index * 200, // Adjust positioning dynamically
+            y: 100,
+            wires: [[`decision_${index}`]], // Connect to the corresponding manager node
+          });
+
+
+          // Check Form Completed Node (Function Node)
+          workflow.push({
+            id: `decision_${index}`,
+            type: "function",
+            z: tabId,
+            name: `Check ${manager.name} Decision`,
+            func: `
+              // Check if the form is completed
+              if (msg.payload.formCompleted === true) {
+                // Ensure proper JSON structure for request_data
+                let requestData = {
+                  workflowName: msg.payload.workflowName || "Unknown Workflow",
+                  approver: msg.payload.approverEmail || "Unknown approver"
+                };
+          
+                // Set status based on whether it's the last level
+                msg.payload.status = ${index === managers.length - 1 ? '"Completed"' : '"Pending"'};
+                //test
+          
+                // Prepare the parameters for the PostgreSQL query
+                msg.params = [
+
+                  msg.payload.status,     // $1 - status
+                  ${index + 1},          // $2 - current_level
+                  msg.payload.requestid  // $3 - requestid (must match the WHERE clause)
+
+
+                  // ${workflow_id}, // workflow_id
+                  // JSON.stringify(requestData), // Ensure request_data is properly stringified
+                  // msg.payload.status, // status (either "Completed" or "Pending")
+                  // ${index + 1}, // current_level
+                  // ${managers.length}, // total_levels
+                  // msg.payload.requestid // requestid
+
+                ];
+          
+
+                // Prepare email content
+                msg.request_id = msg.payload.requestid; // Use the dynamic requestId
+                msg.topic = "Workflow " + msg.request_id; // Use string concatenation instead of template literals
+                msg.to = msg.payload.approverEmail; // || "herig68683@cybtric.com";
+          
+                msg.html = \`
+                  <div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+                    <h2 style="color: #2c3e50;">Workflow Request Update</h2>
+                    <p style="font-size: 16px;">Workflow \${msg.request_id} is \${msg.payload.status}. Please click the <a href ="#"> Link </a> to approve or reject </p>
+          
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                      <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Request ID:</strong></td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">\${msg.request_id}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Status:</strong></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; color: \${msg.payload.status === 'Completed' ? 'green' : 'red'};">
+                          <strong>\${msg.payload.status}</strong>
+                        </td>
+                      </tr>
+                    </table>
+          
+                    <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">This is an automated message. Please do not reply.</p>
+                  </div>
+                \`;
+          
+                msg.payload = msg.html;
+          
+                return [msg, null]; // Send msg to the first output (for true case)
+              } else {
+                return [null, msg]; // Send msg to the second output (for false case)
+              }
+            `,
+            outputs: 2,
+            x: 220,
+            y: 160 + index * 80,
+            wires: [
+              index === managers.length - 1
+                ? [`postgres_insert_approve_${index}`, "send_email", "http_response"] // Last manager (approval)
+                : [`postgres_insert_approve_${index}`, "send_email", "http_response", `manager_${index + 1}`], // Not last manager (approval)
+              index === managers.length - 1
+                ? [`postgres_insert_reject_${index}`, "http_response"] // Last manager (rejection)
+                : [`postgres_insert_reject_${index}`, "http_response"] // Not last manager (rejection)
+            ]
+          });
+      // Approval email node
       workflow.push({
         id: `send_email`,
         "type": "e-mail",
         "z": "e0ba68613f04424c",
+        //"name": "wameya7577@excederm.com",
         "server": "sandbox.smtp.mailtrap.io",
         "port": "2525",
         "username": "7e1bc8ac65b174",
         "password": "efdb981370c2dc",
+        //"to": "wameya7577@excederm.com",
         "subject": "Workflow Completed",
         "body": "{{payload.html}}",
         "x": 770,
         "y": 150,
         "wires": []
-      });
+        });
 
-      workflow.push({
-        id: `postgres_insert_approve_${index}`,
-        type: "postgresql",
-        z: tabId,
-        name: `Insert into PostgreSQL(Approve) - ${manager.name}`,
-        query: "UPDATE approval_request SET status = $1, current_level = $2, created_at = NOW() WHERE requestid = $3;",
-        postgreSQLConfig: "7b9ec91590d534cc",
-        split: false,
-        rowsPerMsg: 1,
-        outputs: 1,
-        x: 1100 + index * 200,
-        y: 120,
-        wires: [],
-      });
+        workflow.push({
 
-      workflow.push({
-        id: `postgres_insert_reject_${index}`,
-        type: "postgresql",
-        z: tabId,
-        name: `Insert into PostgreSQL(Reject) - ${manager.name}`,
-        query: "UPDATE approval_request SET status = $1, current_level = $2, updated_at = NOW() WHERE requestid = $3;",
-        postgreSQLConfig: "7b9ec91590d534cc",
-        split: false,
-        rowsPerMsg: 1,
-        outputs: 1,
-        x: 1100 + index * 200,
-        y: 240,
-        wires: [],
-      });
+            id: `postgres_insert_approve_${index}`,
+            type: "postgresql",
+            z: tabId,
+            name: `Insert into PostgreSQL(Approve) - ${manager.name}`,
+            //query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
 
-      workflow.push({
-        "id": "http_response",
-        "type": "http response",
-        z: tabId,
-        "name": "HTTP Response",
-        "statusCode": "200",
-        "headers": {},
-        "x": 500,
-        "y": 100,
-        "wires": []
-      });
-    });
+            query: "UPDATE approval_request SET status = $1, current_level = $2, created_at = NOW() WHERE requestid = $3;",
+            postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+            split: false,
+            rowsPerMsg: 1,
+            outputs: 1,
+            x: 1100 + index * 200, // Adjust positioning dynamically
+            y: 120,
+            wires: [], // No further connections needed
+          });
 
-    return workflow;
+          workflow.push({
+            id: `postgres_insert_reject_${index}`,
+            type: "postgresql",
+            z: tabId,
+            name: `Insert into PostgreSQL(Reject) - ${manager.name}`,
+            query: "UPDATE approval_request SET status = $1, current_level = $2, updated_at = NOW() WHERE requestid = $3;",
+            postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+            split: false,
+            rowsPerMsg: 1,
+            outputs: 1,
+            x: 1100 + index * 200, // Adjust positioning dynamically
+            y: 240,
+            wires: [], // No further connections needed
+          });
+
+
+      
+        workflow.push({
+        
+            "id": "http_response",
+            "type": "http response",
+            z: tabId,
+            "name": "HTTP Response",
+            "statusCode": "200",
+            "headers": {},
+            "x": 500,
+            "y": 100,
+            "wires": []
+        })
+
+        });
+
+    
+    return workflow; // Return a plain JavaScript object
   };
   
   useEffect(() => {
@@ -523,17 +555,24 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       <div className="manager-list">
         {managers.map((manager, index) => (
           <div key={index} className="manager-item">
+            {/* Manager Name as Label */}
             <span className="level-label">{manager.name}</span>
+  
+            {/* Input Field 1 (Uncontrolled) */}
             <input
               type="text"
               placeholder="Field 1"
               style={{ marginRight: '8px' }}
             />
+  
+            {/* Input Field 2 (Uncontrolled) */}
             <input
               type="text"
               placeholder="Field 2"
               style={{ marginRight: '8px' }}
             />
+  
+            {/* Remove Button */}
             <button
               className="remove-level"
               onClick={() => removeLevel(index)}
@@ -548,14 +587,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           Add Level
         </button>
       </div>
-      <button 
-        className="submit" 
-        onClick={handleSubmit} 
-        style={{ fontSize: '16px', padding: '12px 24px' }}
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? 'Submitting...' : 'Submit'}
-      </button>
+      <button className="submit" onClick={handleSubmit} style={{ fontSize: '16px', padding: '12px 24px' }}>
+    Submit
+    </button>
     </Styles>
   );
 }
