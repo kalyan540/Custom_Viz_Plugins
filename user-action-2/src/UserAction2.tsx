@@ -21,25 +21,26 @@ import { styled } from '@superset-ui/core';
 import { UserAction2Props, UserAction2StylesProps } from './types';
 
 const Styles = styled.div<UserAction2StylesProps>`
-  background-color: ${({ theme }) => theme.colors.secondary.light2};
-  padding: ${({ theme }) => theme.gridUnit * 4}px;
-  border-radius: ${({ theme }) => theme.gridUnit * 2}px;
-  height: ${({ height }) => height}px;
-  width: ${({ width }) => width}px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Arial, sans-serif;
 
   h3 {
-    margin-top: 0;
-    margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
-    font-size: ${({ theme, headerFontSize }) =>
-      theme.typography.sizes[headerFontSize]}px;
-    font-weight: ${({ theme, boldText }) =>
-      theme.typography.weights[boldText ? 'bold' : 'normal']};
+    text-align: center;
+    color: #333;
   }
 
   label {
     font-weight: bold;
     display: block;
     margin-top: 10px;
+    width: 100%;
   }
 
   input {
@@ -58,6 +59,7 @@ const Styles = styled.div<UserAction2StylesProps>`
     color: red;
     font-size: 14px;
     margin-top: 5px;
+    width: 100%;
   }
 
   button {
@@ -143,7 +145,7 @@ export default function UserAction2(props: UserAction2Props) {
 
   return (
     <Styles ref={rootElem} boldText={props.boldText} headerFontSize={props.headerFontSize} height={height} width={width}>
-      <h3>{props.headerText}</h3>
+      <h3>Initiate Workflow</h3>
       <label>Request ID:</label>
       <input type="number" name="requestId" value={formData.requestId} onChange={handleChange} className={errors.requestId ? 'error' : ''} />
       <div className="error-message">{errors.requestId}</div>
