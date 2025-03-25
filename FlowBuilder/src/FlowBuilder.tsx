@@ -121,6 +121,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     console.log("Generated Workflow JSON:", workflowJson);
   
     try {
+
+      
       // Step 1: Call the GET API
       const getResponse = await fetch(apiEndpoint, {
         method: "GET",
@@ -133,8 +135,19 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         throw new Error("Failed to fetch data from GET API");
       }
   
+      // const getData = await getResponse.json();
+      // console.log("GET API Response:", getData);
+
       const getData = await getResponse.json();
       console.log("GET API Response:", getData);
+
+      // Ensure it's an array before using forEach
+      if (Array.isArray(getData.config)) {
+        getData.config.forEach(item => console.log(item));
+      } else {
+        console.error("config is not an array:", getData.config);
+      }
+
   
       // Step 2: Append GET API response to workflowJson
       const combinedData = { ...workflowJson, additionalData: getData };
