@@ -152,7 +152,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: finalJson, // Send as JSON
+        body: JSON.stringify(finalJson), // Send as JSON
       });
     
       if (response.status === 204) {
