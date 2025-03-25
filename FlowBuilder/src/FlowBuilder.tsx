@@ -172,6 +172,15 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       const finalJson = getData1 + ',' + workflowData;
       console.log('Final Combined JSON:', JSON.stringify(finalJson));
 
+
+      // Step 1: Fetch existing workflows
+      let response = await fetch(apiEndpoint);
+      let existingFlows = await response.json();
+
+      // Step 3: Merge existing and new workflows
+      let updatedFlows = [...existingFlows, ...workflowJson];
+
+
     try {
       
   
@@ -180,7 +189,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(workflowJson),
+        //body: JSON.stringify(workflowJson),
+         body: JSON.stringify(updatedFlows, null, 4)
       });
 
       if (response.status === 204) {
