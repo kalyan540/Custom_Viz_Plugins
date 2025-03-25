@@ -117,66 +117,40 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   // Handle form submission
   const handleSubmit = async () => {
     const requestId = generateRequestId(); // Generate a random requestId
-    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id, requestId);
-    console.log("Generated Workflow JSON:", workflowJson);
-  
+    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id,, requestId);
+    console.log('Workflow JSON:', workflowJson);
+
     try {
 
-      
-      // Step 1: Call the GET API
-      const getResponse = await fetch(apiEndpoint, {
-        method: "GET",
+       // First GET request
+  const getResponse = await fetch(apiEndpoint);
+  const getData = await getResponse.text(); // Assuming response is text, change to .json() if it's JSON
+
+  // Combine responses
+  const finalJson = getData + ',' + JSON.stringify(workflowJson);
+    
+
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify(finalJson),
       });
-  
-      if (!getResponse.ok) {
-        throw new Error("Failed to fetch data from GET API");
-      }
-  
-      // const getData = await getResponse.json();
-      // console.log("GET API Response:", getData);
 
-      const getData = await getResponse.json();
-      console.log("GET API Response:", getData);
-
-      // Ensure it's an array before using forEach
-      if (Array.isArray(getData.config)) {
-        getData.config.forEach(item => console.log(item));
+      if (response.status === 204) {
+        console.log('Workflow created successfully!');
+        alert('Workflow created successfully!');
       } else {
-        console.error("config is not an array:", getData.config);
-      }
-
-  
-      // Step 2: Append GET API response to workflowJson
-      const combinedData = { ...workflowJson, additionalData: getData };
-      
-      console.log("Final Combined JSON:", combinedData);
-  
-      // Step 3: Send the updated JSON to Node-RED API
-      const postResponse = await fetch(apiEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(combinedData),
-      });
-  
-      if (postResponse.status === 204) {
-        console.log("Workflow created successfully!");
-        alert("Workflow created successfully!");
-      } else {
-        const result = await postResponse.json();
-        console.log("API Response:", result);
-        alert("Workflow created successfully!");
+        const result = await response.json(); // Handle other success responses (if any)
+        console.log('API Response:', result);
+        alert('Workflow created successfully!');
       }
     } catch (error) {
-      console.error("Error submitting workflow:", error);
-      alert("Failed to create workflow. Please try again.");
+      console.error('Error submitting workflow:', error);
+      alert('Failed to create workflow. Please try again.');
     }
   };
-  
 
   // Add a manager to the list
   const addManager = () => {
