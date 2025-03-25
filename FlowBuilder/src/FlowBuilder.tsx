@@ -121,28 +121,33 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     console.log('Workflow JSON:', workflowJson);
 
     try {
-
-       // First GET request
-  const getResponse = await fetch(apiEndpoint);
-  const getData = await getResponse.json(); // Assuming response is text, change to .json() if it's JSON
-
-  // Combine responses
-  const finalJson = getData + ',' + JSON.stringify(workflowJson);
+      // First GET request
+      const getResponse = await fetch(apiEndpoint);
+      const getData = await getResponse.json(); // Ensure response is JSON
     
-
+      // Ensure workflowJson is an object
+      const workflowData = typeof workflowJson === 'string' ? JSON.parse(workflowJson) : workflowJson;
+    
+      // Combine responses into a valid JSON object
+      const finalJson = JSON.stringify({
+        externalData: getData, 
+        workflow: workflowData
+      });
+    
+      // POST request with finalJson
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(finalJson),
+        body: finalJson, // Send as JSON
       });
-
+    
       if (response.status === 204) {
         console.log('Workflow created successfully!');
         alert('Workflow created successfully!');
       } else {
-        const result = await response.json(); // Handle other success responses (if any)
+        const result = await response.json();
         console.log('API Response:', result);
         alert('Workflow created successfully!');
       }
@@ -150,6 +155,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       console.error('Error submitting workflow:', error);
       alert('Failed to create workflow. Please try again.');
     }
+    
+
   };
 
   // Add a manager to the list
