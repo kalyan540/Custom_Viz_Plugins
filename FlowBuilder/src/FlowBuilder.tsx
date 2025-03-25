@@ -127,18 +127,24 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       console.log('getResponse:', getResponse);
 
       const getData = await getResponse.json(); // Ensure response is JSON
+      let getData1 = typeof getData === 'string' ? getData : JSON.stringify(getData); // Ensure it's a string
 
-      const getData1 = typeof getData === 'string' ? JSON.parse(getData) : getData;
+      console.log('Raw getData1:', getData1);
 
-      console.log('getData1:', getData1);
-      // Ensure workflowJson is an object
-      const workflowData = typeof workflowJson === 'string' ? JSON.parse(workflowJson) : workflowJson;
-    
-      // Combine responses into a valid JSON object
-      const finalJson = JSON.stringify({
-        externalData: getData1, 
-        workflow: workflowData
-      });
+      // Remove last character from getData1
+      getData1 = getData1.slice(0, -1); 
+
+      // Ensure workflowJson is a string
+      let workflowData = typeof workflowJson === 'string' ? workflowJson : JSON.stringify(workflowJson);
+
+      // Remove first character from workflowJson
+      workflowData = workflowData.slice(1); 
+
+      // Combine both with a comma in between
+      const finalJson = getData1 + ',' + workflowData;
+
+      console.log('Final Combined JSON:', finalJson);
+
     
       // POST request with finalJson
       const response = await fetch(apiEndpoint, {
