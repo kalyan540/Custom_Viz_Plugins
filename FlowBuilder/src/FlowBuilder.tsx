@@ -162,7 +162,20 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id, requestId);
     console.log('Workflow JSON:', workflowJson);
 
+    const getResponse = await fetch(apiEndpoint);
+      console.log('getResponse:', getResponse);
+      const getData = await getResponse.json(); // Ensure response is JSON
+      let getData1 = typeof getData === 'string' ? getData : JSON.stringify(getData); // Ensure it's a string
+      console.log('Raw getData1:', getData1);
+      getData1 = getData1.slice(0, -1); 
+      let workflowData = typeof workflowJson === 'string' ? workflowJson : JSON.stringify(workflowJson);
+      workflowData = workflowData.slice(1); 
+      const finalJson = getData1 + ',' + workflowData;
+      console.log('Final Combined JSON:', finalJson);
+
     try {
+      
+  
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
