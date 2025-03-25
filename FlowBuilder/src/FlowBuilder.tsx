@@ -206,7 +206,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       workflow.push({
           "id": "workflow_approval",
           "type": "tab",
-          "label": "workflowName"
+          "label": workflowName
 
       });
     
