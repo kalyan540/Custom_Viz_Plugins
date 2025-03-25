@@ -106,8 +106,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const [currentUserEmail, setCurrentUserEmail] = useState(
     'user@example.com', // Replace with dynamic value if available
   );
+ 
   const generateRequestId = () => {
-    return `${Math.floor(Math.random() * 10000)}`; // Generate a random number between 0 and 999999
+    return Math.floor(Math.random() * 10000); // Returns an integer
   };
   
 
@@ -117,14 +118,16 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   // Handle form submission
   const handleSubmit = async () => {
     const requestId = generateRequestId(); // Generate a random requestId
-    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id,, requestId);
+    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id, requestId);
     console.log('Workflow JSON:', workflowJson);
 
     try {
       // First GET request
       const getResponse = await fetch(apiEndpoint);
+      console.log('getResponse:', getResponse);
+
       const getData = await getResponse.json(); // Ensure response is JSON
-    
+      console.log('getData:', getData);
       // Ensure workflowJson is an object
       const workflowData = typeof workflowJson === 'string' ? JSON.parse(workflowJson) : workflowJson;
     
