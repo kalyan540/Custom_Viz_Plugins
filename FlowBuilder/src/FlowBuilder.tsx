@@ -127,13 +127,16 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       console.log('getResponse:', getResponse);
 
       const getData = await getResponse.json(); // Ensure response is JSON
-      console.log('getData:', getData);
+
+      const getData1 = typeof getData === 'string' ? JSON.parse(getData) : getData;
+
+      console.log('getData1:', getData1);
       // Ensure workflowJson is an object
       const workflowData = typeof workflowJson === 'string' ? JSON.parse(workflowJson) : workflowJson;
     
       // Combine responses into a valid JSON object
       const finalJson = JSON.stringify({
-        externalData: getData, 
+        externalData: getData1, 
         workflow: workflowData
       });
     
