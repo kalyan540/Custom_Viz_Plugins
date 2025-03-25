@@ -116,74 +116,12 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const [levelCount, setLevelCount] = useState(1);
 
   // Handle form submission
-  // const handleSubmit = async () => {
-  //   const requestId = generateRequestId(); // Generate a random requestId
-  //   const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id, requestId);
-  //   console.log('Workflow JSON:', workflowJson);
-
-  //   try {
-  //     // First GET request
-  //     const getResponse = await fetch(apiEndpoint);
-  //     console.log('getResponse:', getResponse);
-  //     const getData = await getResponse.json(); // Ensure response is JSON
-  //     let getData1 = typeof getData === 'string' ? getData : JSON.stringify(getData); // Ensure it's a string
-  //     console.log('Raw getData1:', getData1);
-  //     getData1 = getData1.slice(0, -1); 
-  //     let workflowData = typeof workflowJson === 'string' ? workflowJson : JSON.stringify(workflowJson);
-  //     workflowData = workflowData.slice(1); 
-  //     const finalJson = getData1 + ',' + workflowData;
-  //     console.log('Final Combined JSON:', finalJson);
-      
-  //     const response = await fetch(apiEndpoint, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify(finalJson), // Send as JSON
-  //     });
-    
-  //     if (response.status === 204) {
-  //       console.log('Workflow created successfully!');
-  //       alert('Workflow created successfully!');
-  //     } else {
-  //       const result = await response.json();
-  //       console.log('API Response:', result);
-  //       alert('Workflow created successfully!');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error submitting workflow:', error);
-  //     alert('Failed to create workflow. Please try again.');
-  //   }
-  // };
-
-
   const handleSubmit = async () => {
     const requestId = generateRequestId(); // Generate a random requestId
     const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id, requestId);
     console.log('Workflow JSON:', workflowJson);
 
-    // const getResponse = await fetch(apiEndpoint);
-    //   const getData = await getResponse.json(); // Ensure response is JSON
-    //   let getData1 = typeof getData === 'string' ? getData : JSON.stringify(getData); // Ensure it's a string
-    //   console.log('Raw getData1:', JSON.stringify(getData1));
-    //   getData1 = getData1.slice(0, -1); 
-    //   let workflowData = typeof workflowJson === 'string' ? workflowJson : JSON.stringify(workflowJson);
-    //   workflowData = workflowData.slice(1); 
-    //   const finalJson = getData1 + ',' + workflowData;
-    //   console.log('Final Combined JSON:', JSON.stringify(finalJson));
-
-
-      // Step 1: Fetch existing workflows
-      let response = await fetch(apiEndpoint);
-      let existingFlows = await response.json();
-
-      // Step 3: Merge existing and new workflows
-      let updatedFlows = [...existingFlows, ...workflowJson];
-      console.log('Updated Flows:', updatedFlows);
-
-
     try {
-<<<<<<< HEAD
       // First GET request
       const getResponse = await fetch(apiEndpoint);
       console.log('getResponse:', getResponse);
@@ -203,24 +141,19 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       });
 
       // POST request with finalJson
-=======
-      
-  
->>>>>>> 45175468ec4ea80d1be1c52bf9381bc70b102343
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        //body: JSON.stringify(workflowJson),
-         body: JSON.stringify(updatedFlows, null, 4)
+        body: finalJson, // Send as JSON
       });
 
       if (response.status === 204) {
         console.log('Workflow created successfully!');
         alert('Workflow created successfully!');
       } else {
-        const result = await response.json(); // Handle other success responses (if any)
+        const result = await response.json();
         console.log('API Response:', result);
         alert('Workflow created successfully!');
       }
@@ -228,11 +161,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       console.error('Error submitting workflow:', error);
       alert('Failed to create workflow. Please try again.');
     }
-<<<<<<< HEAD
 
 
-=======
->>>>>>> 45175468ec4ea80d1be1c52bf9381bc70b102343
   };
 
   // Add a manager to the list
@@ -323,55 +253,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         id: `prepare_email`,
         type: "function",
         z: tabId,
-<<<<<<< HEAD
         name: "prepare_email",
         func: `
-=======
-        name: "PostgreSQL Config",
-        host: "52.91.38.126", // Replace with your PostgreSQL host
-        port: 5433, // Replace with your PostgreSQL port
-        database: "nodered_db", // Replace with your database name
-        ssl: false, // Set to true if using SSL
-        user: "nodered_user", // Replace with your PostgreSQL username
-        password: "nodered_password", // Replace with your PostgreSQL password
-        max: 10, // Maximum number of connections in the pool
-        idleTimeoutMillis: 1000, // Idle connection timeout
-        connectionTimeoutMillis: 10000, // Connection timeout
-        x: 320, // X position in the Node-RED editor
-        y: 60, // Y position in the Node-RED editor
-      });
-
-      workflow.push({
-          "id": tabId,
-          "type": "tab",
-          "label": tabId
-
-      });
-    
-      workflow.push({
-        
-          "id": "http_in_create",
-          "type": "http in",
-          z: tabId,
-          "name": "Initiate Workflow",
-          "url": "/api/initiateWorkflow",
-          "method": "post",
-          "upload": false,
-          "swaggerDoc": "",
-          "x": 100,
-          "y": 100,
-          "wires": [[`prepare_email`,'manager_0']]
-        });
-
-        
-        workflow.push(
-            {
-                id: `prepare_email`,
-                type: "function",
-                z: tabId,
-                name: "prepare_email",
-                func: `
->>>>>>> 45175468ec4ea80d1be1c52bf9381bc70b102343
 
                 // Check if the form is completed
               if (msg.payload.formCreated === true) {
