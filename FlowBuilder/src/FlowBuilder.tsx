@@ -124,7 +124,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
        // First GET request
   const getResponse = await fetch(apiEndpoint);
-  const getData = await getResponse.text(); // Assuming response is text, change to .json() if it's JSON
+  const getData = await getResponse.json(); // Assuming response is text, change to .json() if it's JSON
 
   // Combine responses
   const finalJson = getData + ',' + JSON.stringify(workflowJson);
