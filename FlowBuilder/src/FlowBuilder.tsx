@@ -44,7 +44,7 @@ const Styles = styled.div<FlowBuilderStylesProps>`
 
   button {
     padding: ${({ theme }) => theme.gridUnit * 2}px ${({ theme }) =>
-  theme.gridUnit * 4}px;
+    theme.gridUnit * 4}px;
     color: white;
     border: none;
     border-radius: ${({ theme }) => theme.gridUnit}px;
@@ -106,11 +106,11 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const [currentUserEmail, setCurrentUserEmail] = useState(
     'user@example.com', // Replace with dynamic value if available
   );
- 
+
   const generateRequestId = () => {
     return Math.floor(Math.random() * 10000); // Returns an integer
   };
-  
+
 
   // State to track the current level count
   const [levelCount, setLevelCount] = useState(1);
@@ -133,13 +133,13 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       console.log('getData1:', getData1);
       // Ensure workflowJson is an object
       const workflowData = typeof workflowJson === 'string' ? JSON.parse(workflowJson) : workflowJson;
-    
+
       // Combine responses into a valid JSON object
       const finalJson = JSON.stringify({
-        externalData: getData1, 
+        externalData: getData1,
         workflow: workflowData
       });
-    
+
       // POST request with finalJson
       const response = await fetch(apiEndpoint, {
         method: 'POST',
@@ -148,7 +148,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         },
         body: finalJson, // Send as JSON
       });
-    
+
       if (response.status === 204) {
         console.log('Workflow created successfully!');
         alert('Workflow created successfully!');
@@ -161,7 +161,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       console.error('Error submitting workflow:', error);
       alert('Failed to create workflow. Please try again.');
     }
-    
+
 
   };
 
@@ -208,53 +208,53 @@ export default function FlowBuilder(props: FlowBuilderProps) {
 
     // PostgreSQL Config Node
     workflow.push({
-        id: "7b9ec91590d534cc",
-        type: "postgreSQLConfig",
+      id: "7b9ec91590d534cc",
+      type: "postgreSQLConfig",
+      z: tabId,
+      name: "PostgreSQL Config",
+      host: "52.91.38.126", // Replace with your PostgreSQL host
+      port: 5433, // Replace with your PostgreSQL port
+      database: "nodered_db", // Replace with your database name
+      ssl: false, // Set to true if using SSL
+      user: "nodered_user", // Replace with your PostgreSQL username
+      password: "nodered_password", // Replace with your PostgreSQL password
+      max: 10, // Maximum number of connections in the pool
+      idleTimeoutMillis: 1000, // Idle connection timeout
+      connectionTimeoutMillis: 10000, // Connection timeout
+      x: 320, // X position in the Node-RED editor
+      y: 60, // Y position in the Node-RED editor
+    });
+
+    workflow.push({
+      "id": "workflow_approval",
+      "type": "tab",
+      "label": workflowName
+
+    });
+
+    workflow.push({
+
+      "id": "http_in_create",
+      "type": "http in",
+      z: tabId,
+      "name": "Initiate Workflow",
+      "url": "/api/initiateWorkflow",
+      "method": "post",
+      "upload": false,
+      "swaggerDoc": "",
+      "x": 100,
+      "y": 100,
+      "wires": [[`prepare_email`, 'manager_0']]
+    });
+
+
+    workflow.push(
+      {
+        id: `prepare_email`,
+        type: "function",
         z: tabId,
-        name: "PostgreSQL Config",
-        host: "52.91.38.126", // Replace with your PostgreSQL host
-        port: 5433, // Replace with your PostgreSQL port
-        database: "nodered_db", // Replace with your database name
-        ssl: false, // Set to true if using SSL
-        user: "nodered_user", // Replace with your PostgreSQL username
-        password: "nodered_password", // Replace with your PostgreSQL password
-        max: 10, // Maximum number of connections in the pool
-        idleTimeoutMillis: 1000, // Idle connection timeout
-        connectionTimeoutMillis: 10000, // Connection timeout
-        x: 320, // X position in the Node-RED editor
-        y: 60, // Y position in the Node-RED editor
-      });
-
-      workflow.push({
-          "id": "workflow_approval",
-          "type": "tab",
-          "label": workflowName
-
-      });
-    
-      workflow.push({
-        
-          "id": "http_in_create",
-          "type": "http in",
-          z: tabId,
-          "name": "Initiate Workflow",
-          "url": "/api/initiateWorkflow",
-          "method": "post",
-          "upload": false,
-          "swaggerDoc": "",
-          "x": 100,
-          "y": 100,
-          "wires": [[`prepare_email`,'manager_0']]
-        });
-
-        
-        workflow.push(
-            {
-                id: `prepare_email`,
-                type: "function",
-                z: tabId,
-                name: "prepare_email",
-                func: `
+        name: "prepare_email",
+        func: `
 
                 // Check if the form is completed
               if (msg.payload.formCreated === true) {
@@ -312,56 +312,56 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 return msg;
             }
             `,
-                outputs: 2,
-                x: 310,
-                y: 180,
-                "wires": [
-                ["send_email", "postgres_insert"],  // First output point
-                ["postgres_reject"]                 // Second output point
-  ]
-            }
-            );
+        outputs: 2,
+        x: 310,
+        y: 180,
+        "wires": [
+          ["send_email", "postgres_insert"],  // First output point
+          ["postgres_reject"]                 // Second output point
+        ]
+      }
+    );
 
-            workflow.push({
-              id: `postgres_insert`,
-              type: "postgresql",
-              z: tabId,
-              name: `PostgreSQL(Approve)`,              
-              query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, remarks,manager_email, created_at) VALUES ($1, $2, $3, $4, $5,$6,$7,$8, now());",
-              postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-              split: false,
-              rowsPerMsg: 1,
-              outputs: 1,
-              x: 110, // Adjust positioning dynamically
-              y: 120,
-              wires: [], // No further connections needed
-            });
-
-
-            workflow.push({
-              id: `postgres_reject`,
-              type: "postgresql",
-              z: tabId,
-              name: `PostgreSQL(Reject)`,
-              query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid,remarks, manager_email,created_at) VALUES ($1, $2, $3, $4, $5,$6, $7,$8,now());",
-              postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-              split: false,
-              rowsPerMsg: 1,
-              outputs: 1,
-              x: 120, // Adjust positioning dynamically
-              y: 240,
-              wires: [], // No further connections needed
-            });
+    workflow.push({
+      id: `postgres_insert`,
+      type: "postgresql",
+      z: tabId,
+      name: `PostgreSQL(Approve)`,
+      query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, remarks,manager_email, created_at) VALUES ($1, $2, $3, $4, $5,$6,$7,$8, now());",
+      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+      split: false,
+      rowsPerMsg: 1,
+      outputs: 1,
+      x: 110, // Adjust positioning dynamically
+      y: 120,
+      wires: [], // No further connections needed
+    });
 
 
-        managers.forEach((manager, index) => {
+    workflow.push({
+      id: `postgres_reject`,
+      type: "postgresql",
+      z: tabId,
+      name: `PostgreSQL(Reject)`,
+      query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid,remarks, manager_email,created_at) VALUES ($1, $2, $3, $4, $5,$6, $7,$8,now());",
+      postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+      split: false,
+      rowsPerMsg: 1,
+      outputs: 1,
+      x: 120, // Adjust positioning dynamically
+      y: 240,
+      wires: [], // No further connections needed
+    });
 
-        workflow.push({
-            id: `manager_${index}`,
-            type: "function",
-            z: tabId,
-            name: `${manager.name} Approval`,
-            func: `
+
+    managers.forEach((manager, index) => {
+
+      workflow.push({
+        id: `manager_${index}`,
+        type: "function",
+        z: tabId,
+        name: `${manager.name} Approval`,
+        func: `
               // Add workflowName and approverEmail to the msg object
               msg.workflowName = msg.payload.workflowName;
               msg.approverEmail = msg.payload.approverEmail;
@@ -371,38 +371,38 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           
               return msg;
             `,
-            outputs: 1,
-            x: 300,
-            y: 180,
-            wires: index === 0 
-                ? [[`decision_${index}`, "http_response"]]  // Connect http_response only for the first manager
-                : [[`decision_${index}`]]
-          });
+        outputs: 1,
+        x: 300,
+        y: 180,
+        wires: index === 0
+          ? [[`decision_${index}`, "http_response"]]  // Connect http_response only for the first manager
+          : [[`decision_${index}`]]
+      });
 
 
 
-          workflow.push({
-            id: `http_in_manager_${index}`,
-            type: "http in",
-            z: tabId,
-            name: `${manager.name} Decision`,
-            url: `/api/level${index + 1}Decision`, // Dynamic URL
-            method: "post",
-            upload: false,
-            swaggerDoc: "",
-            x: 100 + index * 200, // Adjust positioning dynamically
-            y: 100,
-            wires: [[`decision_${index}`]], // Connect to the corresponding manager node
-          });
+      workflow.push({
+        id: `http_in_manager_${index}`,
+        type: "http in",
+        z: tabId,
+        name: `${manager.name} Decision`,
+        url: `/api/level${index + 1}Decision`, // Dynamic URL
+        method: "post",
+        upload: false,
+        swaggerDoc: "",
+        x: 100 + index * 200, // Adjust positioning dynamically
+        y: 100,
+        wires: [[`Logic_${index}`]], // Connect to the corresponding manager node
+      });
 
 
-          // Check Form Completed Node (Function Node)
-          workflow.push({
-            id: `decision_${index}`,
-            type: "function",
-            z: tabId,
-            name: `Check ${manager.name} Decision`,
-            func: `
+      // Check Form Completed Node (Function Node)
+      workflow.push({
+        id: `decision_${index}`,
+        type: "function",
+        z: tabId,
+        name: `Check ${manager.name} Decision`,
+        func: `
               // Check if the form is completed
               if (msg.payload.formCompleted === true) {
                 // Ensure proper JSON structure for request_data
@@ -467,18 +467,18 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 return [null, msg]; // Send msg to the second output (for false case)
               }
             `,
-            outputs: 2,
-            x: 220,
-            y: 160 + index * 80,
-            wires: [
-              index === managers.length - 1
-                ? [`postgres_insert_approve_${index}`, "send_email", "http_response"] // Last manager (approval)
-                : [`postgres_insert_approve_${index}`, "send_email", "http_response", `manager_${index + 1}`], // Not last manager (approval)
-              index === managers.length - 1
-                ? [`postgres_insert_reject_${index}`, "http_response"] // Last manager (rejection)
-                : [`postgres_insert_reject_${index}`, "http_response"] // Not last manager (rejection)
-            ]
-          });
+        outputs: 2,
+        x: 220,
+        y: 160 + index * 80,
+        wires: [
+          index === managers.length - 1
+            ? [`postgres_insert_approve_${index}`, "send_email", "http_response"] // Last manager (approval)
+            : [`postgres_insert_approve_${index}`, "send_email", "http_response", `manager_${index + 1}`], // Not last manager (approval)
+          index === managers.length - 1
+            ? [`postgres_insert_reject_${index}`, "http_response"] // Last manager (rejection)
+            : [`postgres_insert_reject_${index}`, "http_response"] // Not last manager (rejection)
+        ]
+      });
       // Approval email node
       workflow.push({
         id: `send_email`,
@@ -495,67 +495,110 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         "x": 770,
         "y": 150,
         "wires": []
-        });
+      });
 
-        workflow.push({
+      workflow.push({
 
-            id: `postgres_insert_approve_${index}`,
-            type: "postgresql",
-            z: tabId,
-            name: `Insert into PostgreSQL(Approve) - ${manager.name}`,
-            //query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
+        id: `postgres_insert_approve_${index}`,
+        type: "postgresql",
+        z: tabId,
+        name: `Insert into PostgreSQL(Approve) - ${manager.name}`,
+        //query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
 
-            query: "UPDATE approval_request SET status = $1, current_level = $2, created_at = NOW() WHERE requestid = $3;",
-            postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-            split: false,
-            rowsPerMsg: 1,
-            outputs: 1,
-            x: 1100 + index * 200, // Adjust positioning dynamically
-            y: 120,
-            wires: [], // No further connections needed
-          });
+        query: "UPDATE approval_request SET status = $1, current_level = $2, created_at = NOW() WHERE requestid = $3;",
+        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 1100 + index * 200, // Adjust positioning dynamically
+        y: 120,
+        wires: [], // No further connections needed
+      });
 
-          workflow.push({
-            id: `postgres_insert_reject_${index}`,
-            type: "postgresql",
-            z: tabId,
-            name: `Insert into PostgreSQL(Reject) - ${manager.name}`,
-            query: "UPDATE approval_request SET status = $1, current_level = $2, updated_at = NOW() WHERE requestid = $3;",
-            postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
-            split: false,
-            rowsPerMsg: 1,
-            outputs: 1,
-            x: 1100 + index * 200, // Adjust positioning dynamically
-            y: 240,
-            wires: [], // No further connections needed
-          });
+      workflow.push({
+        id: `postgres_insert_reject_${index}`,
+        type: "postgresql",
+        z: tabId,
+        name: `Insert into PostgreSQL(Reject) - ${manager.name}`,
+        query: "UPDATE approval_request SET status = $1, current_level = $2, updated_at = NOW() WHERE requestid = $3;",
+        postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+        split: false,
+        rowsPerMsg: 1,
+        outputs: 1,
+        x: 1100 + index * 200, // Adjust positioning dynamically
+        y: 240,
+        wires: [], // No further connections needed
+      });
 
 
-      
-        workflow.push({
-        
-            "id": "http_response",
-            "type": "http response",
-            z: tabId,
-            "name": "HTTP Response",
-            "statusCode": "200",
-            "headers": {},
-            "x": 500,
-            "y": 100,
-            "wires": []
-        })
 
-        });
+      workflow.push({
 
-    
+        "id": "http_response",
+        "type": "http response",
+        z: tabId,
+        "name": "HTTP Response",
+        "statusCode": "200",
+        "headers": {},
+        "x": 500,
+        "y": 100,
+        "wires": []
+      })
+
+      workflow.push({
+        "id": `Logic_${index}`,
+        "type": "function",
+        z: tabId,
+        "name": `Logic_${index}`,
+        "func": "if (msg.payload.formCompleted != true) {\n    // Ensure we're passing the requestid correctly\n    msg.params = [msg.payload.requestid, msg.payload.workflowName, msg.payload.formCompleted, msg.payload.status];\n    node.warn(msg.params);\n    \n    return msg;\n}\nelse {\n    msg.payload[0]=msg.payload\n}",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 140,
+        "y": 340,
+        "wires": [
+          [
+            `decision_${index}`
+          ],
+          [
+            `postgres_query_${index}`
+          ]
+        ]
+      })
+
+      workflow.push({
+        "id": `postgres_query_${index}`,
+        "type": "postgresql",
+        z: tabId,
+        "name": `postgres_${index}`,
+        "query": "WITH email_data AS (\n  SELECT \n    TRIM(BOTH '\"' FROM (\n      SPLIT_PART(\n        REPLACE(REPLACE(manager_email, '{', ''), '}', ''),\n        ',',\n        current_level+1\n      )\n    )) AS extracted_email\n  FROM approval_request\n  WHERE requestid = $1\n)\nSELECT\n  $1::integer AS \"requestid\",\n  $2::text AS \"workflowName\",\n  COALESCE((SELECT extracted_email FROM email_data), null) AS \"approverEmail\",\n  $3::boolean AS \"formCompleted\",\n  $4::text AS \"status\"",
+        "postgreSQLConfig": "7b9ec91590d534cc",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 250,
+        "y": 400,
+        "wires": [
+            [
+              `decision_${index}`
+            ]
+        ]
+      })
+
+    });
+
+
     return workflow; // Return a plain JavaScript object
   };
-  
+
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);
   }, []);
-  
+
   return (
     <Styles
       ref={rootElem}
@@ -579,21 +622,21 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           <div key={index} className="manager-item">
             {/* Manager Name as Label */}
             <span className="level-label">{manager.name}</span>
-  
+
             {/* Input Field 1 (Uncontrolled) */}
             <input
               type="text"
               placeholder="Field 1"
               style={{ marginRight: '8px' }}
             />
-  
+
             {/* Input Field 2 (Uncontrolled) */}
             <input
               type="text"
               placeholder="Field 2"
               style={{ marginRight: '8px' }}
             />
-  
+
             {/* Remove Button */}
             <button
               className="remove-level"
@@ -610,8 +653,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         </button>
       </div>
       <button className="submit" onClick={handleSubmit} style={{ fontSize: '16px', padding: '12px 24px' }}>
-    Submit
-    </button>
+        Submit
+      </button>
     </Styles>
   );
 }
