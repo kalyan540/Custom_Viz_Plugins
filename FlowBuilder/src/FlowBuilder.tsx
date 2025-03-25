@@ -106,8 +106,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   const [currentUserEmail, setCurrentUserEmail] = useState(
     'user@example.com', // Replace with dynamic value if available
   );
+ 
   const generateRequestId = () => {
-    return `${Math.floor(Math.random() * 10000)}`; // Generate a random number between 0 and 999999
+    return Math.floor(Math.random() * 10000); // Returns an integer
   };
   
 
@@ -117,23 +118,42 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   // Handle form submission
   const handleSubmit = async () => {
     const requestId = generateRequestId(); // Generate a random requestId
-    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id,, requestId);
+    const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id, requestId);
     console.log('Workflow JSON:', workflowJson);
 
     try {
+      // First GET request
+      const getResponse = await fetch(apiEndpoint);
+      console.log('getResponse:', getResponse);
+
+      const getData = await getResponse.json(); // Ensure response is JSON
+
+      const getData1 = typeof getData === 'string' ? JSON.parse(getData) : getData;
+
+      console.log('getData1:', getData1);
+      // Ensure workflowJson is an object
+      const workflowData = typeof workflowJson === 'string' ? JSON.parse(workflowJson) : workflowJson;
+    
+      // Combine responses into a valid JSON object
+      const finalJson = JSON.stringify({
+        externalData: getData1, 
+        workflow: workflowData
+      });
+    
+      // POST request with finalJson
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(workflowJson),
+        body: finalJson, // Send as JSON
       });
-
+    
       if (response.status === 204) {
         console.log('Workflow created successfully!');
         alert('Workflow created successfully!');
       } else {
-        const result = await response.json(); // Handle other success responses (if any)
+        const result = await response.json();
         console.log('API Response:', result);
         alert('Workflow created successfully!');
       }
@@ -141,6 +161,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       console.error('Error submitting workflow:', error);
       alert('Failed to create workflow. Please try again.');
     }
+    
+
   };
 
   // Add a manager to the list
@@ -202,8 +224,16 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         x: 320, // X position in the Node-RED editor
         y: 60, // Y position in the Node-RED editor
       });
+
+      workflow.push({
+          "id": "workflow_approval",
+          "type": "tab",
+          "label": workflowName
+
+      });
     
       workflow.push({
+        
           "id": "http_in_create",
           "type": "http in",
           z: tabId,
@@ -226,7 +256,16 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 name: "prepare_email",
                 func: `
 
-
+                // Check if the form is completed
+              if (msg.payload.formCreated === true) {
+                // Ensure proper JSON structure for request_data
+                let requestData = {
+                  workflowName: msg.payload.workflowName || "Unknown Workflow",
+                  approver: msg.payload.approverEmail || "Unknown approver"
+                };
+          
+                // Set status based on whether it's the last level
+                
                 // Prepare the parameters for the PostgreSQL query
                 msg.params = [
                   ${workflow_id}, // workflow_id
@@ -234,7 +273,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                   msg.payload.status, // status (either "Completed" or "Pending")
                   0, // current_level
                   ${managers.length}, // total_levels
-                  msg.payload.requestid // requestid
+                  msg.payload.requestid, // requestid
+                  "NA", // remarks
+                  msg.payload.manager_email
                 ];
           
                 // Prepare email content
@@ -269,6 +310,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
                 msg.payload = msg.html;
           
                 return msg;
+            }
             `,
                 outputs: 2,
                 x: 310,
@@ -285,7 +327,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
               type: "postgresql",
               z: tabId,
               name: `PostgreSQL(Approve)`,              
-              query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
+              query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, remarks,manager_email, created_at) VALUES ($1, $2, $3, $4, $5,$6,$7,$8, now());",
               postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
               split: false,
               rowsPerMsg: 1,
@@ -301,7 +343,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
               type: "postgresql",
               z: tabId,
               name: `PostgreSQL(Reject)`,
-              query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
+              query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid,remarks, manager_email,created_at) VALUES ($1, $2, $3, $4, $5,$6, $7,$8,now());",
               postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
               split: false,
               rowsPerMsg: 1,
@@ -344,7 +386,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             type: "http in",
             z: tabId,
             name: `${manager.name} Decision`,
-            url: `/api/manager${index + 1}Decision`, // Dynamic URL
+            url: `/api/level${index + 1}Decision`, // Dynamic URL
             method: "post",
             upload: false,
             swaggerDoc: "",
@@ -371,17 +413,26 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           
                 // Set status based on whether it's the last level
                 msg.payload.status = ${index === managers.length - 1 ? '"Completed"' : '"Pending"'};
+                //test
           
                 // Prepare the parameters for the PostgreSQL query
                 msg.params = [
-                  ${workflow_id}, // workflow_id
-                  JSON.stringify(requestData), // Ensure request_data is properly stringified
-                  msg.payload.status, // status (either "Completed" or "Pending")
-                  ${index + 1}, // current_level
-                  ${managers.length}, // total_levels
-                  msg.payload.requestid // requestid
+
+                  msg.payload.status,     // $1 - status
+                  ${index + 1},          // $2 - current_level
+                  msg.payload.requestid  // $3 - requestid (must match the WHERE clause)
+
+
+                  // ${workflow_id}, // workflow_id
+                  // JSON.stringify(requestData), // Ensure request_data is properly stringified
+                  // msg.payload.status, // status (either "Completed" or "Pending")
+                  // ${index + 1}, // current_level
+                  // ${managers.length}, // total_levels
+                  // msg.payload.requestid // requestid
+
                 ];
           
+
                 // Prepare email content
                 msg.request_id = msg.payload.requestid; // Use the dynamic requestId
                 msg.topic = "Workflow " + msg.request_id; // Use string concatenation instead of template literals
@@ -447,12 +498,14 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         });
 
         workflow.push({
+
             id: `postgres_insert_approve_${index}`,
             type: "postgresql",
             z: tabId,
             name: `Insert into PostgreSQL(Approve) - ${manager.name}`,
-            
-            query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
+            //query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
+
+            query: "UPDATE approval_request SET status = $1, current_level = $2, created_at = NOW() WHERE requestid = $3;",
             postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
             split: false,
             rowsPerMsg: 1,
@@ -467,7 +520,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             type: "postgresql",
             z: tabId,
             name: `Insert into PostgreSQL(Reject) - ${manager.name}`,
-            query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
+            query: "UPDATE approval_request SET status = $1, current_level = $2, updated_at = NOW() WHERE requestid = $3;",
             postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
             split: false,
             rowsPerMsg: 1,
