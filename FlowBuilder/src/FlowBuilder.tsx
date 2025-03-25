@@ -269,9 +269,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       });
 
       workflow.push({
-          "id": workflowName,
+          "id": tabId,
           "type": "tab",
-          "label": workflowName
+          "label": tabId
 
       });
     
