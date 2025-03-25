@@ -25,15 +25,19 @@ const Styles = styled.div<UserAction2StylesProps>`
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  width: 350px;
+  width: 100%;
+  max-width: 400px;
   display: flex;
   flex-direction: column;
   align-items: center;
   font-family: Arial, sans-serif;
+  margin: auto;
+  overflow: auto;
 
   h3 {
     text-align: center;
     color: #333;
+    width: 100%;
   }
 
   label {
