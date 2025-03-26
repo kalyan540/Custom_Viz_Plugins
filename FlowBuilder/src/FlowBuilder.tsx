@@ -181,10 +181,8 @@ import React, { useEffect, createRef, useState } from 'react';
        let updatedFlows = [...existingFlows, ...workflowJson];
        console.log('Updated Flows:', updatedFlows);
  
- 
      try {
- 
- 
+
        const response = await fetch(apiEndpoint, {
          method: 'POST',
          headers: {
@@ -247,7 +245,7 @@ import React, { useEffect, createRef, useState } from 'react';
      requestId: number
    ) => {
      const workflow = [];
-     const tabId = "e0ba68613f04424c"; // Static tab ID for Node-Red
+     const tabId = Math.floor(Math.random() * 10000); // Static tab ID for Node-Red
  
      // PostgreSQL Config Node
      workflow.push({
