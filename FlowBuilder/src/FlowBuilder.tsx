@@ -524,7 +524,7 @@ import React, { useEffect, createRef, useState } from 'react';
        workflow.push({
          id: `send_email`,
          "type": "e-mail",
-         "z": "e0ba68613f04424c",
+         "z": tabId,
          //"name": "wameya7577@excederm.com",
          "server": "sandbox.smtp.mailtrap.io",
          "port": "2525",
