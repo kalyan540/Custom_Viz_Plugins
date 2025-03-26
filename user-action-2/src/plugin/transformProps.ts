@@ -58,10 +58,6 @@ export default function transformProps(chartProps: ChartProps) {
     width,
     height,
     data,
-    // and now your control data, manipulated as needed, and passed through as props!
-    boldText,
-    headerFontSize,
-    headerText,
     apiEndpoint
   };
 }
