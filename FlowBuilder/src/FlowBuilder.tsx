@@ -171,18 +171,18 @@ import React, { useEffect, createRef, useState } from 'react';
   
     try {
       // Fetch existing workflows
-      let response = await fetch(apiEndpoint);
-      let existingFlows = await response.json();
+      //let response = await fetch(apiEndpoint);
+      //let existingFlows = await response.json();
   
-      if (!Array.isArray(existingFlows)) {
-        console.warn('Existing flows are not an array. Converting...');
-        existingFlows = [existingFlows];
-      }
+      // if (!Array.isArray(existingFlows)) {
+      //   console.warn('Existing flows are not an array. Converting...');
+      //   existingFlows = [existingFlows];
+      // }
   
-      // Merge existing and new workflows
-      let updatedFlows = [...existingFlows, ...workflowJson];
+      // // Merge existing and new workflows
+      // let updatedFlows = [...existingFlows, ...workflowJson];
   
-      console.log('Updated Flows to be sent:', updatedFlows);
+      // console.log('Updated Flows to be sent:', updatedFlows);
   
       // Send the updated JSON to Node-RED
       const postResponse = await fetch(apiEndpoint, {
@@ -190,7 +190,7 @@ import React, { useEffect, createRef, useState } from 'react';
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(updatedFlows, null, 4),
+        body: JSON.stringify(workflowJson, null, 4),
       });
   
       if (postResponse.status === 204) {
