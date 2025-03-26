@@ -189,7 +189,7 @@ import React, { useEffect, createRef, useState } from 'react';
            'Content-Type': 'application/json',
          },
          //body: JSON.stringify(workflowJson),
-          body: JSON.stringify(workflowJson, null, 4)
+          body: JSON.stringify(updatedFlows, null, 4)
        });
  
        if (response.status === 204) {
