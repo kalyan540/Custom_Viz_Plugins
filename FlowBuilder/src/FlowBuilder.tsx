@@ -245,7 +245,7 @@ import React, { useEffect, createRef, useState } from 'react';
      requestId: number
    ) => {
      const workflow = [];
-     const tabId = Math.floor(Math.random() * 10000); // Static tab ID for Node-Red
+     const tabId = "100"; // Static tab ID for Node-Red
  
      // PostgreSQL Config Node
      workflow.push({
