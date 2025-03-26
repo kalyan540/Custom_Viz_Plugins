@@ -271,7 +271,7 @@ import React, { useEffect, createRef, useState } from 'react';
        workflow.push({
            "id": tabId,
            "type": "tab",
-           "label": tabId
+           "label": workflowName
  
        });
  
