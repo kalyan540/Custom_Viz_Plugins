@@ -87,7 +87,7 @@ export default function UserAction2(props: UserAction2Props) {
   const { apiEndpoint, height, width } = props;
   const rootElem = createRef<HTMLDivElement>();
   const [formData, setFormData] = useState({
-    requestId: '',
+    requestid: '',
     workflowName: '',
     candidate_Email: '',
     manager_email: '',
@@ -114,7 +114,7 @@ export default function UserAction2(props: UserAction2Props) {
 
   const handleSubmit = () => {
     let newErrors: any = {};
-    if (!formData.requestId) newErrors.requestId = 'Request ID is required.';
+    if (!formData.requestid) newErrors.requestid = 'Request ID is required.';
     if (!formData.workflowName) newErrors.workflowName = 'Workflow Name is required.';
     if (!validateEmails(formData.candidate_Email)) newErrors.candidate_Email = 'Invalid email format.';
     if (!validateEmails(formData.manager_email)) newErrors.manager_email = 'Invalid email format.';
@@ -129,7 +129,7 @@ export default function UserAction2(props: UserAction2Props) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        requestId: parseInt(formData.requestId),
+        requestid: parseInt(formData.requestid),
         workflowName: formData.workflowName,
         candidate_Email: formData.candidate_Email,
         status: formData.status,
@@ -151,8 +151,8 @@ export default function UserAction2(props: UserAction2Props) {
     <Styles ref={rootElem} boldText={props.boldText} headerFontSize={props.headerFontSize} height={height} width={width}>
       <h3>Initiate Workflow</h3>
       <label>Request ID:</label>
-      <input type="number" name="requestId" value={formData.requestId} onChange={handleChange} className={errors.requestId ? 'error' : ''} />
-      <div className="error-message">{errors.requestId}</div>
+      <input type="number" name="requestid" value={formData.requestid} onChange={handleChange} className={errors.requestid ? 'error' : ''} />
+      <div className="error-message">{errors.requestid}</div>
 
       <label>Workflow Name:</label>
       <input type="text" name="workflowName" value={formData.workflowName} onChange={handleChange} className={errors.workflowName ? 'error' : ''} />
