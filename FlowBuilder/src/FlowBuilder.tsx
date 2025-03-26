@@ -1,7 +1,6 @@
 import React, { useEffect, createRef, useState } from 'react';
-import { styled, t } from '@superset-ui/core';
+import { styled } from '@superset-ui/core';
 import { FlowBuilderProps, FlowBuilderStylesProps } from './types';
-import { Popover } from 'antd'; // Assuming you're using Ant Design for the popover
 
 const Styles = styled.div<FlowBuilderStylesProps>`
    background-color: ${({ theme }) => theme.colors.secondary.light2};
@@ -100,20 +99,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     `Workflow-${Math.floor(Math.random() * 1000)}`, // Auto-generate workflow name
   );
   const [workflow_id, setworkflow_id] = useState(Math.floor(Math.random() * 1000)); // Random workflow_id
-  const [managers, setManagers] = useState<{ name: string; field1: string; field2: string }[]>(
-    [],
-  );
-  const [currentUserEmail, setCurrentUserEmail] = useState(
-    'user@example.com', // Replace with dynamic value if available
-  );
 
-  const generateRequestId = () => {
-    return Math.floor(Math.random() * 10000); // Returns an integer
-  };
-
-
-  // State to track the current level count
-  const [levelCount, setLevelCount] = useState(1);
 
   // Handle form submission
   // const handleSubmit = async () => {
@@ -204,39 +190,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     }
   };
 
-
-
-
-
-  // Add a manager to the list
-  const addManager = () => {
-    // Find the maximum level number in the existing managers
-    const maxLevel = managers.reduce((max, manager) => {
-      const levelNumber = parseInt(manager.name.replace("Level", ""), 10);
-      return levelNumber > max ? levelNumber : max;
-    }, 0);
-
-    // Calculate the next level number
-    const nextLevel = maxLevel + 1;
-
-    // Add the new manager with the correct level number
-    const newManager = { name: `Level${nextLevel}`, field1: '', field2: '' };
-    setManagers([...managers, newManager]);
-  };
-
-  const removeLevel = (indexToRemove: number) => {
-    // Remove the level at the specified index
-    const updatedManagers = managers.filter((_, index) => index !== indexToRemove);
-
-    // Renumber the remaining levels
-    const renumberedManagers = updatedManagers.map((manager, index) => ({
-      ...manager,
-      name: `Level${index + 1}`, // Renumber levels starting from 1
-    }));
-
-    // Update the state with the renumbered managers
-    setManagers(renumberedManagers);
-  };
 
   // Generate JSON for Node-Red
   const generateWorkflowJson = (
