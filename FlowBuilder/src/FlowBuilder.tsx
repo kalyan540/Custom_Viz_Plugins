@@ -155,56 +155,61 @@ import React, { useEffect, createRef, useState } from 'react';
    //     alert('Failed to create workflow. Please try again.');
    //   }
    // };
- 
- 
-   const handleSubmit = async () => {
-     const requestId = generateRequestId(); // Generate a random requestId
-     const workflowJson = generateWorkflowJson(workflowName, managers, currentUserEmail, workflow_id, requestId);
-     console.log('Workflow JSON:', workflowJson);
- 
-     // const getResponse = await fetch(apiEndpoint);
-     //   const getData = await getResponse.json(); // Ensure response is JSON
-     //   let getData1 = typeof getData === 'string' ? getData : JSON.stringify(getData); // Ensure it's a string
-     //   console.log('Raw getData1:', JSON.stringify(getData1));
-     //   getData1 = getData1.slice(0, -1); 
-     //   let workflowData = typeof workflowJson === 'string' ? workflowJson : JSON.stringify(workflowJson);
-     //   workflowData = workflowData.slice(1); 
-     //   const finalJson = getData1 + ',' + workflowData;
-     //   console.log('Final Combined JSON:', JSON.stringify(finalJson));
- 
- 
-       // Step 1: Fetch existing workflows
-       let response = await fetch(apiEndpoint);
-       let existingFlows = await response.json();
- 
-       // Step 3: Merge existing and new workflows
-       let updatedFlows = [...existingFlows, ...workflowJson];
-       console.log('Updated Flows:', updatedFlows);
- 
-     try {
 
-       const response = await fetch(apiEndpoint, {
-         method: 'POST',
-         headers: {
-           'Content-Type': 'application/json',
-         },
-         //body: JSON.stringify(workflowJson),
-          body: JSON.stringify(updatedFlows, null, 4)
-       });
+
+   const handleSubmit = async () => {
+    const requestId = generateRequestId(); // Generate a random requestId
+    const workflowJson = generateWorkflowJson(
+      workflowName,
+      managers,
+      currentUserEmail,
+      workflow_id,
+      requestId
+    );
+  
+    console.log('Generated Workflow JSON:', workflowJson);
+  
+    try {
+      // Fetch existing workflows
+      let response = await fetch(apiEndpoint);
+      let existingFlows = await response.json();
+  
+      if (!Array.isArray(existingFlows)) {
+        console.warn('Existing flows are not an array. Converting...');
+        existingFlows = [existingFlows];
+      }
+  
+      // Merge existing and new workflows
+      let updatedFlows = [...existingFlows, ...workflowJson];
+  
+      console.log('Updated Flows to be sent:', updatedFlows);
+  
+      // Send the updated JSON to Node-RED
+      const postResponse = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedFlows, null, 4),
+      });
+  
+      if (postResponse.status === 204) {
+        console.log('Workflow created successfully!');
+        alert('Workflow created successfully!');
+      } else {
+        const result = await postResponse.json();
+        console.log('API Response:', result);
+        alert('Workflow created successfully!');
+      }
+    } catch (error) {
+      console.error('Error submitting workflow:', error);
+      alert('Failed to create workflow. Please try again.');
+    }
+  };
+  
  
-       if (response.status === 204) {
-         console.log('Workflow created successfully!');
-         alert('Workflow created successfully!');
-       } else {
-         const result = await response.json(); // Handle other success responses (if any)
-         console.log('API Response:', result);
-         alert('Workflow created successfully!');
-       }
-     } catch (error) {
-       console.error('Error submitting workflow:', error);
-       alert('Failed to create workflow. Please try again.');
-     }
-   };
+ 
+   
  
    // Add a manager to the list
    const addManager = () => {
@@ -387,7 +392,7 @@ import React, { useEffect, createRef, useState } from 'react';
                z: tabId,
                name: `PostgreSQL(Reject)`,
                query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid,remarks, manager_email,created_at) VALUES ($1, $2, $3, $4, $5,$6, $7,$8,now());",
-               postgreSQLConfig: idValue, // Reference the PostgreSQL config node
+               //postgreSQLConfig: idValue, // Reference the PostgreSQL config node
                split: false,
                rowsPerMsg: 1,
                outputs: 1,
