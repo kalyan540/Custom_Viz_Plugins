@@ -40,5 +40,6 @@ export type UserAction2QueryFormData = QueryFormData &
 export type UserAction2Props = UserAction2StylesProps &
   UserAction2CustomizeProps & {
     data: TimeseriesDataRecord[];
+    apiEndpoint: string;
     // add typing here for the props you pass in from transformProps.ts!
   };

@@ -84,13 +84,13 @@ const Styles = styled.div<UserAction2StylesProps>`
 `;
 
 export default function UserAction2(props: UserAction2Props) {
-  const { data, height, width } = props;
+  const { apiEndpoint, height, width } = props;
   const rootElem = createRef<HTMLDivElement>();
   const [formData, setFormData] = useState({
     requestId: '',
     workflowName: '',
-    approverEmail: '',
-    managerEmails: '',
+    candidate_Email: '',
+    manager_email: '',
     status: '',
   });
   const [errors, setErrors] = useState({});
@@ -116,8 +116,8 @@ export default function UserAction2(props: UserAction2Props) {
     let newErrors: any = {};
     if (!formData.requestId) newErrors.requestId = 'Request ID is required.';
     if (!formData.workflowName) newErrors.workflowName = 'Workflow Name is required.';
-    if (!validateEmails(formData.approverEmail)) newErrors.approverEmail = 'Invalid email format.';
-    if (!validateEmails(formData.managerEmails)) newErrors.managerEmails = 'Invalid email format.';
+    if (!validateEmails(formData.candidate_Email)) newErrors.candidate_Email = 'Invalid email format.';
+    if (!validateEmails(formData.manager_email)) newErrors.manager_email = 'Invalid email format.';
     if (!formData.status) newErrors.status = 'Status is required.';
 
     if (Object.keys(newErrors).length > 0) {
@@ -125,15 +125,15 @@ export default function UserAction2(props: UserAction2Props) {
       return;
     }
 
-    fetch(props.apiUrl, {
+    fetch(apiEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         requestId: parseInt(formData.requestId),
         workflowName: formData.workflowName,
-        approverEmail: formData.approverEmail,
+        candidate_Email: formData.candidate_Email,
         status: formData.status,
-        managerEmails: formData.managerEmails.split(',').map(email => email.trim()),
+        manager_email: formData.manager_email.split(',').map(email => email.trim()),
       }),
     })
       .then(response => response.json())
@@ -158,13 +158,13 @@ export default function UserAction2(props: UserAction2Props) {
       <input type="text" name="workflowName" value={formData.workflowName} onChange={handleChange} className={errors.workflowName ? 'error' : ''} />
       <div className="error-message">{errors.workflowName}</div>
 
-      <label>Approver Email:</label>
-      <input type="email" name="approverEmail" value={formData.approverEmail} onChange={handleChange} className={errors.approverEmail ? 'error' : ''} />
-      <div className="error-message">{errors.approverEmail}</div>
+      <label>Candidate Email:</label>
+      <input type="email" name="candidate_Email" value={formData.candidate_Email} onChange={handleChange} className={errors.candidate_Email ? 'error' : ''} />
+      <div className="error-message">{errors.candidate_Email}</div>
 
       <label>Manager Emails (comma separated):</label>
-      <input type="text" name="managerEmails" value={formData.managerEmails} onChange={handleChange} className={errors.managerEmails ? 'error' : ''} />
-      <div className="error-message">{errors.managerEmails}</div>
+      <input type="text" name="manager_email" value={formData.manager_email} onChange={handleChange} className={errors.manager_email ? 'error' : ''} />
+      <div className="error-message">{errors.manager_email}</div>
 
       <label>Status:</label>
       <input type="text" name="status" value={formData.status} onChange={handleChange} className={errors.status ? 'error' : ''} />
