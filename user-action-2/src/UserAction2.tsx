@@ -108,6 +108,18 @@ export default function UserAction2(props: UserAction2Props) {
     return emails.every(email => emailRegex.test(email));
   };
 
+  const validateManagerEmails = (emailArrayString: string) => {
+    try {
+      const emails = JSON.parse(emailArrayString);
+      if (!Array.isArray(emails)) return false;
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emails.every(email => emailRegex.test(email));
+    } catch (e) {
+      return false;
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -117,7 +129,7 @@ export default function UserAction2(props: UserAction2Props) {
     if (!formData.requestid) newErrors.requestid = 'Request ID is required.';
     if (!formData.workflowName) newErrors.workflowName = 'Workflow Name is required.';
     if (!validateEmails(formData.candidate_Email)) newErrors.candidate_Email = 'Invalid email format.';
-    if (!validateEmails(formData.manager_email)) newErrors.manager_email = 'Invalid email format.';
+    if (!validateManagerEmails(formData.manager_email)) newErrors.manager_email = 'Invalid email format.';
     if (!formData.status) newErrors.status = 'Status is required.';
 
     if (Object.keys(newErrors).length > 0) {
@@ -133,7 +145,7 @@ export default function UserAction2(props: UserAction2Props) {
         workflowName: formData.workflowName,
         candidate_Email: formData.candidate_Email,
         status: formData.status,
-        manager_email: formData.manager_email.split(',').map(email => email.trim()),
+        manager_email: JSON.parse(formData.manager_email),
       }),
     })
       .then(response => response.json())
@@ -163,7 +175,7 @@ export default function UserAction2(props: UserAction2Props) {
       <div className="error-message">{errors.candidate_Email}</div>
 
       <label>Manager Emails (comma separated):</label>
-      <input type="text" name="manager_email" value={formData.manager_email} onChange={handleChange} className={errors.manager_email ? 'error' : ''} />
+      <input type="text" name="manager_email" value={formData.manager_email} onChange={handleChange} className={errors.manager_email ? 'error' : ''} placeholder='["email1@example.com","email2@example.com"]'/>
       <div className="error-message">{errors.manager_email}</div>
 
       <label>Status:</label>
