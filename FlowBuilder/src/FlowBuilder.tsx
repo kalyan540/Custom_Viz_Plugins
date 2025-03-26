@@ -246,10 +246,12 @@ import React, { useEffect, createRef, useState } from 'react';
    ) => {
      const workflow = [];
      const tabId = Math.floor(Math.random() * 10000).toString(); // Static tab ID for Node-Red
+
+     const idValue = Math.floor(Math.random() * 10000).toString();
  
      // PostgreSQL Config Node
      workflow.push({
-         id: "7b9ec91590d534cc",
+         id: idValue,
          type: "postgreSQLConfig",
          z: tabId,
          name: "PostgreSQL Config",
@@ -369,7 +371,7 @@ import React, { useEffect, createRef, useState } from 'react';
                z: tabId,
                name: `PostgreSQL(Approve)`,              
                query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels, requestid, remarks,manager_email, created_at) VALUES ($1, $2, $3, $4, $5,$6,$7,$8, now());",
-               postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+               postgreSQLConfig: idValue, // Reference the PostgreSQL config node
                split: false,
                rowsPerMsg: 1,
                outputs: 1,
@@ -385,7 +387,7 @@ import React, { useEffect, createRef, useState } from 'react';
                z: tabId,
                name: `PostgreSQL(Reject)`,
                query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid,remarks, manager_email,created_at) VALUES ($1, $2, $3, $4, $5,$6, $7,$8,now());",
-               postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+               postgreSQLConfig: idValue, // Reference the PostgreSQL config node
                split: false,
                rowsPerMsg: 1,
                outputs: 1,
@@ -547,7 +549,7 @@ import React, { useEffect, createRef, useState } from 'react';
              //query: "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid, created_at) VALUES ($1, $2, $3, $4, $5,$6, now());",
  
              query: "UPDATE approval_request SET status = $1, current_level = $2, created_at = NOW() WHERE requestid = $3;",
-             postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+             postgreSQLConfig: idValue, // Reference the PostgreSQL config node
              split: false,
              rowsPerMsg: 1,
              outputs: 1,
@@ -562,7 +564,7 @@ import React, { useEffect, createRef, useState } from 'react';
              z: tabId,
              name: `Insert into PostgreSQL(Reject) - ${manager.name}`,
              query: "UPDATE approval_request SET status = $1, current_level = $2, updated_at = NOW() WHERE requestid = $3;",
-             postgreSQLConfig: "7b9ec91590d534cc", // Reference the PostgreSQL config node
+             postgreSQLConfig: idValue, // Reference the PostgreSQL config node
              split: false,
              rowsPerMsg: 1,
              outputs: 1,
@@ -594,7 +596,7 @@ import React, { useEffect, createRef, useState } from 'react';
           "func": "node.warn(msg);\nif (msg.payload.formCompleted != true) {\n    // Ensure we're passing the requestid correctly\n    msg.params = [msg.payload.requestid, msg.payload.workflowName, msg.payload.formCompleted, msg.payload.status];\n    node.warn(msg.params);\n    \n    return [msg, null];\n}\nelse {\n    msg.payload[0]=msg.payload\n    return [null,msg];\n}",
           "outputs": 2,
           "timeout": 0,
-          "noerr": 0,
+          //"noerr": 0,
           "initialize": "",
           "finalize": "",
           "libs": [],
@@ -616,7 +618,7 @@ import React, { useEffect, createRef, useState } from 'react';
           z: tabId,
           "name": `postgres_${index}`,
           "query": "WITH email_data AS (\n  SELECT \n    TRIM(BOTH '\"' FROM (\n      SPLIT_PART(\n        REPLACE(REPLACE(manager_email, '{', ''), '}', ''),\n        ',',\n        current_level+1\n      )\n    )) AS extracted_email\n  FROM approval_request\n  WHERE requestid = $1\n)\nSELECT\n  $1::integer AS \"requestid\",\n  $2::text AS \"workflowName\",\n  COALESCE((SELECT extracted_email FROM email_data), null) AS \"approverEmail\",\n  $3::boolean AS \"formCompleted\",\n  $4::text AS \"status\"",
-          "postgreSQLConfig": "7b9ec91590d534cc",
+          "postgreSQLConfig": idValue,
           "split": false,
           "rowsPerMsg": 1,
           "outputs": 1,
