@@ -981,27 +981,27 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           style={{ fontSize: '16px', padding: '12px' }}
         />
       </div>
-      <div className="manager-list">
+      {/* <div className="manager-list">
         {managers.map((manager, index) => (
           <div key={index} className="manager-item">
-            {/* Manager Name as Label */}
+            
             <span className="level-label">{manager.name}</span>
 
-            {/* Input Field 1 (Uncontrolled) */}
+            
             <input
               type="text"
               placeholder="Field 1"
               style={{ marginRight: '8px' }}
             />
 
-            {/* Input Field 2 (Uncontrolled) */}
+            
             <input
               type="text"
               placeholder="Field 2"
               style={{ marginRight: '8px' }}
             />
 
-            {/* Remove Button */}
+            
             <button
               className="remove-level"
               onClick={() => removeLevel(index)}
@@ -1010,11 +1010,11 @@ export default function FlowBuilder(props: FlowBuilderProps) {
             </button>
           </div>
         ))}
-      </div>
+      </div> */}
       <div className="form-group">
-        <button className="add-level" onClick={addManager}>
+        {/* <button className="add-level" onClick={addManager}>
           Add Level
-        </button>
+        </button> */}
       </div>
       <button className="submit" onClick={handleSubmit} style={{ fontSize: '16px', padding: '12px 24px' }}>
         Submit
