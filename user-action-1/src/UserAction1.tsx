@@ -119,6 +119,7 @@ const Styles = styled.div<UserAction1StylesProps>`
 interface Request {
   id: string;
   status: string;
+  workflowName: string;
   rejectReason: string;
   selected?: boolean;
 }
@@ -128,6 +129,8 @@ export default function UserAction1(props: UserAction1Props) {
   const rootElem = useRef<HTMLDivElement>(null);
   const [selectAll, setSelectAll] = useState(false);
   const [requests, setRequests] = useState<Request[]>([]);
+  console.log(data);
+  console.log(apiEndpoint);
 
   // Initialize and update requests when data changes
   useEffect(() => {
@@ -135,7 +138,8 @@ export default function UserAction1(props: UserAction1Props) {
       const mappedRequests = data.map(item => ({
         id: item.requestid.toString(),
         status: item.status,
-        rejectReason: '',
+        workflowName: item.workflowName,
+        rejectReason: 'NA',
         selected: false
       }));
       setRequests(mappedRequests);
@@ -202,10 +206,9 @@ export default function UserAction1(props: UserAction1Props) {
 
     const requestBody = {
       requestid: request.id,
-      workflowName: "Workflow-" + request.id,
-      candidateEmail: "nishanth@example.com",
-      formCompleted: true,
-      status: status
+      workflowName: request.workflowName,
+      status: status,
+      remark: request.rejectReason
     };
 
     try {
@@ -312,7 +315,7 @@ export default function UserAction1(props: UserAction1Props) {
                   <button 
                     className="btn approve" 
                     onClick={() => processRequest(index, 'Approved')}
-                    disabled={request.status !== 'Pending'}
+                    //disabled={request.status !== 'Pending'}
                   >
                     Approve
                   </button>
@@ -323,12 +326,12 @@ export default function UserAction1(props: UserAction1Props) {
                       placeholder="Enter reason"
                       value={request.rejectReason}
                       onChange={(e) => updateRejectReason(index, e.target.value)}
-                      disabled={request.status !== 'Pending'}
+                      //disabled={request.status !== 'Pending'}
                     />
                     <button 
                       className="btn reject" 
                       onClick={() => processRequest(index, 'Rejected')}
-                      disabled={request.status !== 'Pending'}
+                      //disabled={request.status !== 'Pending'}
                     >
                       Reject
                     </button>
