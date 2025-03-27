@@ -99,9 +99,9 @@ export default function FlowBuilder(props: FlowBuilderProps) {
     `Workflow-${Math.floor(Math.random() * 1000)}`, // Auto-generate workflow name
   );
 
-  const [managers, setManagers] = useState<{ name: string; field1: string; field2: string }[]>(
-    [],
-  );
+  // const [managers, setManagers] = useState<{ name: string; field1: string; field2: string }[]>(
+  //   [],
+  // );
   const [workflow_id, setworkflow_id] = useState(Math.floor(Math.random() * 1000)); // Random workflow_id
 
 
@@ -147,35 +147,35 @@ export default function FlowBuilder(props: FlowBuilderProps) {
   // };
 
 
-  // Add a manager to the list
-  const addManager = () => {
-    // Find the maximum level number in the existing managers
-    const maxLevel = managers.reduce((max, manager) => {
-      const levelNumber = parseInt(manager.name.replace("Level", ""), 10);
-      return levelNumber > max ? levelNumber : max;
-    }, 0);
+  // // Add a manager to the list
+  // const addManager = () => {
+  //   // Find the maximum level number in the existing managers
+  //   const maxLevel = managers.reduce((max, manager) => {
+  //     const levelNumber = parseInt(manager.name.replace("Level", ""), 10);
+  //     return levelNumber > max ? levelNumber : max;
+  //   }, 0);
 
-    // Calculate the next level number
-    const nextLevel = maxLevel + 1;
+  //   // Calculate the next level number
+  //   const nextLevel = maxLevel + 1;
 
-    // Add the new manager with the correct level number
-    const newManager = { name: `Level${nextLevel}`, field1: '', field2: '' };
-    setManagers([...managers, newManager]);
-  };
+  //   // Add the new manager with the correct level number
+  //   const newManager = { name: `Level${nextLevel}`, field1: '', field2: '' };
+  //   setManagers([...managers, newManager]);
+  // };
 
-  const removeLevel = (indexToRemove: number) => {
-    // Remove the level at the specified index
-    const updatedManagers = managers.filter((_, index) => index !== indexToRemove);
+  // const removeLevel = (indexToRemove: number) => {
+  //   // Remove the level at the specified index
+  //   const updatedManagers = managers.filter((_, index) => index !== indexToRemove);
 
-    // Renumber the remaining levels
-    const renumberedManagers = updatedManagers.map((manager, index) => ({
-      ...manager,
-      name: `Level${index + 1}`, // Renumber levels starting from 1
-    }));
+  //   // Renumber the remaining levels
+  //   const renumberedManagers = updatedManagers.map((manager, index) => ({
+  //     ...manager,
+  //     name: `Level${index + 1}`, // Renumber levels starting from 1
+  //   }));
 
-    // Update the state with the renumbered managers
-    setManagers(renumberedManagers);
-  };
+  //   // Update the state with the renumbered managers
+  //   setManagers(renumberedManagers);
+  // };
 
 
   const handleSubmit = async () => {
@@ -969,7 +969,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
           style={{ fontSize: '16px', padding: '12px' }}
         />
       </div>
-      <div className="manager-list">
+      {/* <div className="manager-list">
         {managers.map((manager, index) => (
           <div key={index} className="manager-item">
             
@@ -1003,7 +1003,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
         <button className="add-level" onClick={addManager}>
           Add Level
         </button>
-      </div>
+      </div> */}
       <button className="submit" onClick={handleSubmit} style={{ fontSize: '16px', padding: '12px 24px' }}>
         Submit
       </button>

@@ -121,7 +121,7 @@ interface Request {
 }
 
 export default function UserAction1(props: UserAction1Props) {
-  const { data, height, width } = props;
+  const { data, height, width, apiEndpoint } = props;
   const rootElem = useRef<HTMLDivElement>(null);
   const [selectAll, setSelectAll] = useState(false);
   const [requests, setRequests] = useState<Request[]>([]);
@@ -185,7 +185,7 @@ export default function UserAction1(props: UserAction1Props) {
     };
 
     try {
-      const response = await fetch("http://ec2-52-91-38-126.compute-1.amazonaws.com:1880/api/manager1Decision", {
+      const response = await fetch(apiEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

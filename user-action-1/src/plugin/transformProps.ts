@@ -49,7 +49,7 @@ export default function transformProps(chartProps: ChartProps) {
    * be seen until restarting the development server.
    */
   const { width, height, formData, queriesData } = chartProps;
-  const { boldText, headerFontSize, headerText } = formData;
+  const { api_endpoint } = formData;
   const data = queriesData[0].data as TimeseriesDataRecord[];
   const datasource = formData.datasource;
 
@@ -64,5 +64,6 @@ export default function transformProps(chartProps: ChartProps) {
     headerFontSize,
     headerText,
     datasource,
+    api_endpoint,
   };
 }

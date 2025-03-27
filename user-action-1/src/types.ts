@@ -25,13 +25,13 @@ import {
 export interface UserAction1StylesProps {
   height: number;
   width: number;
-  headerFontSize: keyof typeof supersetTheme.typography.sizes;
-  boldText: boolean;
+  headerFontSize?: keyof typeof supersetTheme.typography.sizes;
+  boldText?: boolean;
   datasource: string;
 }
 
 interface UserAction1CustomizeProps {
-  headerText: string;
+  headerText?: string;
 }
 
 export type UserAction1QueryFormData = QueryFormData &
@@ -41,5 +41,6 @@ export type UserAction1QueryFormData = QueryFormData &
 export type UserAction1Props = UserAction1StylesProps &
   UserAction1CustomizeProps & {
     data: TimeseriesDataRecord[];
+    apiEndpoint: string;
     // add typing here for the props you pass in from transformProps.ts!
   };

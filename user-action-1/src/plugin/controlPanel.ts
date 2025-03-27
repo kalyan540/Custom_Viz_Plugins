@@ -114,17 +114,6 @@ const config: ControlPanelConfig = {
             },
           },
         ],
-        [
-          {
-            name: 'metrics',
-            config: {
-              ...sharedControls.metrics,
-              // it's possible to add validators to controls if
-              // certain selections/types need to be enforced
-              validators: [validateNonEmpty],
-            },
-          },
-        ],
         ['adhoc_filters'],
         [
           {
@@ -135,53 +124,19 @@ const config: ControlPanelConfig = {
       ],
     },
     {
-      label: t('Hello Controls!'),
+      label: t('Workflow Engine Controls!'),
       expanded: true,
       controlSetRows: [
         [
           {
-            name: 'header_text',
+            name: 'api_endpoint',
             config: {
               type: 'TextControl',
-              default: 'Hello, World!',
+              default: 'http://localhost:5000',
               renderTrigger: true,
               // ^ this makes it apply instantaneously, without triggering a "run query" button
-              label: t('Header Text'),
-              description: t('The text you want to see in the header'),
-            },
-          },
-        ],
-        [
-          {
-            name: 'bold_text',
-            config: {
-              type: 'CheckboxControl',
-              label: t('Bold Text'),
-              renderTrigger: true,
-              default: true,
-              description: t('A checkbox to make the '),
-            },
-          },
-        ],
-        [
-          {
-            name: 'header_font_size',
-            config: {
-              type: 'SelectControl',
-              label: t('Font Size'),
-              default: 'xl',
-              choices: [
-                // [value, label]
-                ['xxs', 'xx-small'],
-                ['xs', 'x-small'],
-                ['s', 'small'],
-                ['m', 'medium'],
-                ['l', 'large'],
-                ['xl', 'x-large'],
-                ['xxl', 'xx-large'],
-              ],
-              renderTrigger: true,
-              description: t('The size of your header font'),
+              label: t('API Endpoint'),
+              description: t('WF Engine API Endpoint'),
             },
           },
         ],
