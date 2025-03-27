@@ -306,7 +306,7 @@ export default function UserAction1(props: UserAction1Props) {
                     <button 
                       className="btn reject" 
                       onClick={() => processRequest(index, 'Rejected')}
-                      disabled={request.status !== 'Pending'}
+                      //disabled={request.status !== 'Pending'}
                     >
                       Reject
                     </button>
