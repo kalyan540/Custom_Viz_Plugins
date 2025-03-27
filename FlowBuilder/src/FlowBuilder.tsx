@@ -367,7 +367,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       "type": "postgresql",
       "z": tabId,
       "name": "Update DB",
-      "query": "UPDATE approval_request SET status = $1, current_level = $2, created_at = NOW() WHERE requestid = $3;",
+      "query": "UPDATE approval_request SET status = $1, current_level = $2, created_at = NOW(), remarks = $4 WHERE requestid = $3;",
       "postgreSQLConfig": "4521",
       "split": false,
       "rowsPerMsg": 1,
