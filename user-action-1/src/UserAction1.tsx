@@ -290,7 +290,7 @@ export default function UserAction1(props: UserAction1Props) {
                   <button 
                     className="btn approve" 
                     onClick={() => processRequest(index, 'Approved')}
-                    disabled={request.status !== 'Pending'}
+                    //disabled={request.status !== 'Pending'}
                   >
                     Approve
                   </button>
@@ -301,7 +301,7 @@ export default function UserAction1(props: UserAction1Props) {
                       placeholder="Enter reason"
                       value={request.rejectReason}
                       onChange={(e) => updateRejectReason(index, e.target.value)}
-                      disabled={request.status !== 'Pending'}
+                      //disabled={request.status !== 'Pending'}
                     />
                     <button 
                       className="btn reject" 
