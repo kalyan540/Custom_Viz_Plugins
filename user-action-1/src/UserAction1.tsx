@@ -127,6 +127,7 @@ export default function UserAction1(props: UserAction1Props) {
   const [selectAll, setSelectAll] = useState(false);
   const [requests, setRequests] = useState<Request[]>([]);
   console.log(data);
+  console.log(apiEndpoint);
 
   // Initialize and update requests when data changes
   useEffect(() => {
