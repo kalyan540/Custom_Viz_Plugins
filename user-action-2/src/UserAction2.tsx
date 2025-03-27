@@ -91,7 +91,7 @@ export default function UserAction2(props: UserAction2Props) {
     workflowName: '',
     candidate_Email: '',
     approver_email: '',
-    status: '',
+    status: 'Created',
   });
   const [errors, setErrors] = useState({});
 
@@ -178,9 +178,9 @@ export default function UserAction2(props: UserAction2Props) {
       <input type="text" name="approver_email" value={formData.approver_email} onChange={handleChange} className={errors.approver_email ? 'error' : ''} placeholder='["email1@example.com","email2@example.com"]'/>
       <div className="error-message">{errors.approver_email}</div>
 
-      <label>Status:</label>
+      {/* <label>Status:</label>
       <input type="text" name="status" value={formData.status} onChange={handleChange} className={errors.status ? 'error' : ''} />
-      <div className="error-message">{errors.status}</div>
+      <div className="error-message">{errors.status}</div> */}
 
       <button onClick={handleSubmit}>Initiate Workflow</button>
     </Styles>
