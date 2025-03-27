@@ -357,6 +357,8 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       "authtype": "BASIC",
       "saslformat": false,
       "token": "oauth2Response.access_token",
+      "username": "a69fb4ce8de9ed",
+      "password": "8dc8d2e38765cc",
       "secure": false,
       "tls": false,
       "name": "",
