@@ -98,6 +98,7 @@ const Styles = styled.div<UserAction1StylesProps>`
     padding: 5px;
     background-color: #fff;
     justify-content: space-between;
+    transition: all 0.3s ease; /* Add smooth transition */
   }
 
   .rejectReason {
@@ -109,7 +110,9 @@ const Styles = styled.div<UserAction1StylesProps>`
 
   .highlight {
     border: 2px solid red;
-    background-color: #ffcccc;
+    background-color: #ffebee;
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+    
   }
 `;
 
@@ -170,11 +173,32 @@ export default function UserAction1(props: UserAction1Props) {
   };
 
   const processRequest = async (index: number, status: string) => {
+    //let rejectContainer = row.querySelector('.reject-container');
     const request = requests[index];
     
     if (status === "Rejected" && !request.rejectReason.trim()) {
-      return;
+
+      const newRequests = [...requests];
+    newRequests[index] = {
+      ...newRequests[index],
+      status: 'Pending' // E
+      
+  
     }
+
+    setRequests(newRequests);
+
+
+    // Add visual feedback by toggling a highlight class
+    const rejectContainer = document.getElementById(`reject-container-${index}`);
+    if (rejectContainer) {
+      rejectContainer.classList.add("highlight");
+      setTimeout(() => {
+        rejectContainer.classList.remove("highlight");
+      }, 2000); // Remove highlight after 2 seconds
+    }
+    return;
+  }
 
     const requestBody = {
       requestid: request.id,
@@ -292,7 +316,7 @@ export default function UserAction1(props: UserAction1Props) {
                   >
                     Approve
                   </button>
-                  <div className={`reject-container ${request.status === 'Pending' && request.selected && !request.rejectReason.trim() ? 'highlight' : ''}`}>
+                  <div className={`reject-container ${request.status === 'Pending' && request.selected && !request.rejectReason.trim() ? 'highlight' : ''}`} id={`reject-container-${index}`}>
                     <input 
                       type="text" 
                       className="rejectReason" 
