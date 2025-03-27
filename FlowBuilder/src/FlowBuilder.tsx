@@ -265,14 +265,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       "type": "function",
       "z": tabId,
       "name": "prepare_email",
-      "func": `\nnode.warn(msg);\n// Ensure proper JSON structure for request_data\nlet requestData = {\n  workflowName: msg.payload.workflowName || "Unknown Workflow",\n  approver: msg.payload.candidate_Email || "Unknown approver"\n};\n\n// Calculate dynamic total_levels (manager emails count + 1)\nconst total_levels = Array.isArray(msg.payload.manager_email)\n  ? msg.payload.manager_email.length + 1\n  : 1; // Fallback if manager_email isn't an array\n\n// Prepare the parameters for the PostgreSQL query\nmsg.params = [\n  ${workflow_id}, // workflow_id\n  JSON.stringify(requestData), // Ensure request_data is properly stringified\n  msg.payload.status, // status (either "Completed" or "Pending")\n  0, // current_level\n  total_levels, // total_levels\n  msg.payload.requestid, // requestid\n  "NA", // remarks\n  msg.payload.manager_email,\n  msg.payload.candidate_Email\n];\n\n// Prepare email content\nmsg.request_id = msg.payload.requestid; // Use the dynamic requestId\nmsg.topic = "Workflow " + msg.request_id; // Use string concatenation instead of template literals\nmsg.to = msg.payload.candidate_Email; // || "herig68683@cybtric.com";\n\nmsg.html = '<div style="font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">' +\n  '<h2 style="color: #2c3e50;">Workflow Request Update</h2>' +\n  '<p style="font-size: 16px;">Request ' + msg.request_id + ' is ' + msg.payload.status + '. Please click the <a href="http://ec2-52-91-38-126.compute-1.amazonaws.com:9000">Link</a> to approve or reject</p>' +\n  '<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">' +
-      '<tr><td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Request ID:</strong></td>' +
-      '<td style="padding: 10px; border: 1px solid #ddd;">' + msg.request_id + '</td></tr>' +
-      '<tr><td style="padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;"><strong>Status:</strong></td>' +
-      '<td style="padding: 10px; border: 1px solid #ddd; color: ' + (msg.payload.status === 'Completed' ? 'green' : 'red') + ';">' +
-      '<strong>' + msg.payload.status + '</strong></td></tr></table>' +
-      '<p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">This is an automated message. Please do not reply.</p>' +
-      '</div>';\n\nmsg.payload = msg.html;\n\nreturn msg;`,
+      "func": `\nnode.warn(msg);\n// Ensure proper JSON structure for request_data\nlet requestData = {\n  workflowName: msg.payload.workflowName || \"Unknown Workflow\",\n  approver: msg.payload.candidate_Email || \"Unknown approver\"\n};\n\n// Calculate dynamic total_levels (manager emails count + 1)\nconst total_levels = Array.isArray(msg.payload.approver_email)\n  ? msg.payload.approver_email.length + 1\n  : 1; // Fallback if approver_email isn't an array\n\n// Prepare the parameters for the PostgreSQL query\nmsg.params = [\n  ${workflow_id}, // workflow_id\n  JSON.stringify(requestData), // Ensure request_data is properly stringified\n  msg.payload.status, // status (either \"Completed\" or \"Pending\")\n  0, // current_level\n  total_levels, // total_levels\n  msg.payload.requestid, // requestid\n  \"NA\", // remarks\n  msg.payload.approver_email,\n  msg.payload.candidate_Email\n];\n\n// Prepare email content\nmsg.request_id = msg.payload.requestid; // Use the dynamic requestId\nmsg.topic = \"Workflow \" + msg.request_id; // Use string concatenation instead of template literals\nmsg.to = msg.payload.candidate_Email; // || \"herig68683@cybtric.com\";\n\nmsg.html = '<div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\">' +\n  '<h2 style=\"color: #2c3e50;\">Workflow Request Update</h2>' +\n  '<p style=\"font-size: 16px;\">Request ' + msg.request_id + ' is ' + msg.payload.status + '. Please click the <a href=\"http://ec2-52-91-38-126.compute-1.amazonaws.com:9000\">Link</a> to approve or reject</p>' +\n  '<table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\">' +\n      '<tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td>' +\n      '<td style=\"padding: 10px; border: 1px solid #ddd;\">' + msg.request_id + '</td></tr>' +\n      '<tr><td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td>' +\n      '<td style=\"padding: 10px; border: 1px solid #ddd; color: ' + (msg.payload.status === 'Completed' ? 'green' : 'red') + ';\">' +\n      '<strong>' + msg.payload.status + '</strong></td></tr></table>' +\n      '<p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p>' +\n      '</div>';\n\nmsg.payload = msg.html;\n\nreturn msg;`,
       "outputs": 1,
       "timeout": "",
       "noerr": 0,
@@ -294,7 +287,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       "type": "postgresql",
       "z": tabId,
       "name": "New Entry to DB",
-      "query": "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid,remarks, manager_email,candidate_Email,created_at) VALUES ($1, $2, $3, $4, $5,$6, $7,$8,$9,now());",
+      "query": "INSERT INTO approval_request (workflow_id, request_data, status, current_level, total_levels,requestid,remarks, approver_email,candidate_Email,created_at) VALUES ($1, $2, $3, $4, $5,$6, $7,$8,$9,now());",
       "postgreSQLConfig": "4521",
       "split": false,
       "rowsPerMsg": 1,
@@ -313,7 +306,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       "type": "http in",
       "z": tabId,
       "name": "Manager Decision",
-      "url": "/api/level1Decision",
+      "url": "/api/approverDecision",
       "method": "post",
       "upload": false,
       "swaggerDoc": "",
@@ -331,7 +324,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       "type": "function",
       "z": tabId,
       "name": "Check Manager Decision",
-      "func": "node.warn(msg);\n// Extract first payload item if array\nmsg.payload = Array.isArray(msg.payload) ? msg.payload[0] : msg.payload;\n\nconst { total_levels, current_level, status, candidateEmail } = msg.payload;\n\n// Determine new status and level\nif (status === \"Approved\") {\n    msg.payload.status = (total_levels - current_level > 1) ? \"Pending\" : \"Completed\";\n    msg.payload.current_level = current_level + 1;\n} \nelse if (status === \"Rejected\") {\n    msg.payload.status = \"Rejected\";\n    msg.payload.approverEmail = candidateEmail;\n}\n\n// Prepare parameters for PostgreSQL update\nmsg.params = [\n    msg.payload.status,\n    msg.payload.current_level,\n    msg.payload.requestid\n];\n\n\n// Prepare email content\nmsg.request_id = msg.payload.requestid; // Use the dynamic requestId\nmsg.topic = \"Workflow \" + msg.request_id; // Use string concatenation instead of template literals\nmsg.to = msg.payload.approverEmail; // || \"herig68683@cybtric.com\";\n\nmsg.html = `\n  <div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\">\n    <h2 style=\"color: #2c3e50;\">Workflow Request Update</h2>\n    <p style=\"font-size: 16px;\">Workflow ${msg.request_id} is ${msg.payload.status}. Please click the <a href =\"http://ec2-52-91-38-126.compute-1.amazonaws.com:9000\"> Link </a> to approve or reject </p>\n\n    <table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\">\n      <tr>\n        <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td>\n        <td style=\"padding: 10px; border: 1px solid #ddd;\">${msg.request_id}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td>\n        <td style=\"padding: 10px; border: 1px solid #ddd; color: ${msg.payload.status === 'Completed' ? 'green' : 'red'};\">\n          <strong>${msg.payload.status}</strong>\n        </td>\n      </tr>\n    </table>\n\n    <p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p>\n  </div>\n`;\n\nmsg.payload = msg.html;\nnode.warn(msg);\nreturn msg; // Send msg to the first output (for true case)\n\n            ",
+      "func": "node.warn(msg);\n// Extract first payload item if array\nmsg.payload = Array.isArray(msg.payload) ? msg.payload[0] : msg.payload;\n\nconst { total_levels, current_level, status, candidateEmail } = msg.payload;\n\n// Determine new status and level\nif (status === \"Approved\") {\n    msg.payload.status = (total_levels - current_level > 1) ? \"Pending\" : \"Completed\";\n    msg.payload.current_level = current_level + 1;\n} \nelse if (status === \"Rejected\") {\n    msg.payload.status = \"Rejected\";\n    msg.payload.approverEmail = candidateEmail;\n}\n\n// Prepare parameters for PostgreSQL update\nmsg.params = [\n    msg.payload.status,\n    msg.payload.current_level,\n    msg.payload.requestid\n];\n\n\n// Prepare email content\nmsg.request_id = msg.payload.requestid; // Use the dynamic requestId\nmsg.topic = \"Workflow \" + msg.request_id; // Use string concatenation instead of template literals\nmsg.to = msg.payload.approverEmail; // || \"herig68683@cybtric.com\";\n\nmsg.html = `\n  <div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\">\n    <h2 style=\"color: #2c3e50;\">Workflow Request Update</h2>\n    <p style=\"font-size: 16px;\">Request ${msg.request_id} is ${msg.payload.status}. Please click the <a href =\"http://ec2-52-91-38-126.compute-1.amazonaws.com:9000\"> Link </a> to approve or reject </p>\n\n    <table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\">\n      <tr>\n        <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td>\n        <td style=\"padding: 10px; border: 1px solid #ddd;\">${msg.request_id}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td>\n        <td style=\"padding: 10px; border: 1px solid #ddd; color: ${msg.payload.status === 'Completed' ? 'green' : 'red'};\">\n          <strong>${msg.payload.status}</strong>\n        </td>\n      </tr>\n    </table>\n\n    <p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p>\n  </div>\n`;\n\nmsg.payload = msg.html;\nnode.warn(msg);\nreturn msg; // Send msg to the first output (for true case)\n\n            ",
       "outputs": 1,
       "timeout": "",
       "noerr": 0,
@@ -372,7 +365,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       "id": "postgres_insert_approve_0",
       "type": "postgresql",
       "z": tabId,
-      "name": "Update manager",
+      "name": "Update DB",
       "query": "UPDATE approval_request SET status = $1, current_level = $2, created_at = NOW() WHERE requestid = $3;",
       "postgreSQLConfig": "4521",
       "split": false,
@@ -425,7 +418,7 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       "type": "postgresql",
       "z": tabId,
       "name": "postgres_1",
-      "query": "WITH level_check AS (\n  SELECT \n    current_level,\n    total_levels,\n    manager_email,\n    candidate_Email\n  FROM approval_request\n  WHERE requestid = $1\n  LIMIT 1\n),\nemail_data AS (\n  SELECT \n    CASE \n      WHEN (SELECT (total_levels - current_level) > 1 FROM level_check LIMIT 1) THEN\n        TRIM(BOTH '\"' FROM (\n          SPLIT_PART(\n            REPLACE(REPLACE((SELECT manager_email FROM level_check LIMIT 1), '{', ''), '}', ''),\n            ',',\n            (SELECT current_level FROM level_check LIMIT 1) + 1\n          )\n        ))\n      ELSE (SELECT candidate_Email FROM level_check LIMIT 1)\n    END AS extracted_email\n)\nSELECT\n  $1::integer AS \"requestid\",\n  $2::text AS \"workflowName\",\n  (SELECT extracted_email FROM email_data LIMIT 1) AS \"approverEmail\",\n  (SELECT current_level FROM level_check LIMIT 1) AS \"current_level\",\n  (SELECT total_levels FROM level_check LIMIT 1) AS \"total_levels\",\n  (SELECT candidate_email FROM level_check LIMIT 1) AS \"candidateEmail\",\n  $3::text AS \"status\";",
+      "query": "WITH level_check AS (\n  SELECT \n    current_level,\n    total_levels,\n    approver_email,\n    candidate_Email\n  FROM approval_request\n  WHERE requestid = $1\n  LIMIT 1\n),\nemail_data AS (\n  SELECT \n    CASE \n      WHEN (SELECT (total_levels - current_level) > 1 FROM level_check LIMIT 1) THEN\n        TRIM(BOTH '\"' FROM (\n          SPLIT_PART(\n            REPLACE(REPLACE((SELECT approver_email FROM level_check LIMIT 1), '{', ''), '}', ''),\n            ',',\n            (SELECT current_level FROM level_check LIMIT 1) + 1\n          )\n        ))\n      ELSE (SELECT candidate_Email FROM level_check LIMIT 1)\n    END AS extracted_email\n)\nSELECT\n  $1::integer AS \"requestid\",\n  $2::text AS \"workflowName\",\n  (SELECT extracted_email FROM email_data LIMIT 1) AS \"approverEmail\",\n  (SELECT current_level FROM level_check LIMIT 1) AS \"current_level\",\n  (SELECT total_levels FROM level_check LIMIT 1) AS \"total_levels\",\n  (SELECT candidate_email FROM level_check LIMIT 1) AS \"candidateEmail\",\n  $3::text AS \"status\";",
       "postgreSQLConfig": "4521",
       "split": false,
       "rowsPerMsg": 1,
@@ -439,104 +432,6 @@ export default function FlowBuilder(props: FlowBuilderProps) {
       ]
     });
 
-    workflow.push({
-      "id": "candidate_http",
-      "type": "http in",
-      "z": tabId,
-      "name": "Candidate Decision",
-      "url": "/api/candidatedecision",
-      "method": "post",
-      "upload": false,
-      "swaggerDoc": "",
-      "x": 90,
-      "y": 200,
-      "wires": [
-        [
-          "prepare_posgres_1"
-        ]
-      ]
-    });
-
-    workflow.push({
-      "id": "candidate_decision",
-      "type": "function",
-      "z": tabId,
-      "name": "Check Candidate Decision",
-      "func": "node.warn(msg);\n// Extract first payload item if array\nmsg.payload = Array.isArray(msg.payload) ? msg.payload[0] : msg.payload;\n\nconst { total_levels, current_level, status, candidateEmail } = msg.payload;\n\n// Determine new status and level\nif (status === \"Submitted\") {\n  msg.payload.status = (total_levels - current_level > 1) ? \"Pending\" : \"Completed\";\n  msg.payload.current_level = current_level + 1;\n}\n\n// Prepare parameters for PostgreSQL update\nmsg.params = [\n  msg.payload.status,\n  msg.payload.current_level,\n  msg.payload.requestid\n];\n\n\n// Prepare email content\nmsg.request_id = msg.payload.requestid; // Use the dynamic requestId\nmsg.topic = \"Workflow \" + msg.request_id; // Use string concatenation instead of template literals\nmsg.to = msg.payload.approverEmail; // || \"herig68683@cybtric.com\";\n\nmsg.html = `\n  <div style=\"font-family: Arial, sans-serif; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;\">\n    <h2 style=\"color: #2c3e50;\">Workflow Request Update</h2>\n    <p style=\"font-size: 16px;\">Workflow ${msg.request_id} is ${msg.payload.status}. Please click the <a href =\"http://ec2-52-91-38-126.compute-1.amazonaws.com:9000\"> Link </a> to approve or reject </p>\n\n    <table style=\"width: 100%; border-collapse: collapse; margin-top: 10px;\">\n      <tr>\n        <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Request ID:</strong></td>\n        <td style=\"padding: 10px; border: 1px solid #ddd;\">${msg.request_id}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 10px; border: 1px solid #ddd; background-color: #ecf0f1;\"><strong>Status:</strong></td>\n        <td style=\"padding: 10px; border: 1px solid #ddd; color: ${msg.payload.status === 'Completed' ? 'green' : 'red'};\">\n          <strong>${msg.payload.status}</strong>\n        </td>\n      </tr>\n    </table>\n\n    <p style=\"margin-top: 15px; font-size: 14px; color: #7f8c8d;\">This is an automated message. Please do not reply.</p>\n  </div>\n`;\n\nmsg.payload = msg.html;\nnode.warn(msg);\nreturn msg; // Send msg to the first output (for true case)\n\n            ",
-      "outputs": 1,
-      "timeout": "",
-      "noerr": 0,
-      "initialize": "",
-      "finalize": "",
-      "libs": [],
-      "x": 560,
-      "y": 200,
-      "wires": [
-        [
-          "Update candidate",
-          "send_email"
-        ]
-      ]
-    });
-
-    workflow.push({
-      "id": "Update candidate",
-      "type": "postgresql",
-      "z": tabId,
-      "name": "Update candidate",
-      "query": "UPDATE approval_request SET status = $1, current_level = $2, created_at = NOW() WHERE requestid = $3;",
-      "postgreSQLConfig": "4521",
-      "split": false,
-      "rowsPerMsg": 1,
-      "outputs": 1,
-      "x": 810,
-      "y": 200,
-      "wires": [
-        [
-          "http_response"
-        ]
-      ]
-    });
-
-    workflow.push({
-      "id": "prepare_posgres_1",
-      "type": "function",
-      "z": tabId,
-      "name": "prepare_posgres_1",
-      "func": "msg.params = [msg.payload.requestid, msg.payload.workflowName, msg.payload.status];\nnode.warn(msg);\nreturn msg;\n",
-      "outputs": 1,
-      "timeout": 0,
-      "noerr": 0,
-      "initialize": "",
-      "finalize": "",
-      "libs": [],
-      "x": 290,
-      "y": 200,
-      "wires": [
-        [
-          "postgres_1"
-        ]
-      ]
-    });
-
-    workflow.push({
-      "id": "postgres_1",
-      "type": "postgresql",
-      "z": tabId,
-      "name": "postgres_1",
-      "query": "WITH level_check AS (\n  SELECT \n    current_level,\n    total_levels,\n    manager_email,\n    candidate_Email\n  FROM approval_request\n  WHERE requestid = $1\n  LIMIT 1\n),\nemail_data AS (\n  SELECT \n    CASE \n      WHEN (SELECT (total_levels - current_level) > 1 FROM level_check LIMIT 1) THEN\n        TRIM(BOTH '\"' FROM (\n          SPLIT_PART(\n            REPLACE(REPLACE((SELECT manager_email FROM level_check LIMIT 1), '{', ''), '}', ''),\n            ',',\n            (SELECT current_level FROM level_check LIMIT 1) + 1\n          )\n        ))\n      ELSE (SELECT candidate_Email FROM level_check LIMIT 1)\n    END AS extracted_email\n)\nSELECT\n  $1::integer AS \"requestid\",\n  $2::text AS \"workflowName\",\n  (SELECT extracted_email FROM email_data LIMIT 1) AS \"approverEmail\",\n  (SELECT current_level FROM level_check LIMIT 1) AS \"current_level\",\n  (SELECT total_levels FROM level_check LIMIT 1) AS \"total_levels\",\n  (SELECT candidate_email FROM level_check LIMIT 1) AS \"candidateEmail\",\n  $3::text AS \"status\";",
-      "postgreSQLConfig": "4521",
-      "split": false,
-      "rowsPerMsg": 1,
-      "outputs": 1,
-      "x": 370,
-      "y": 260,
-      "wires": [
-        [
-          "candidate_decision"
-        ]
-      ]
-    });
 
     workflow.push({
       "id": "4521",
