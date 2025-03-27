@@ -1,21 +1,3 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 import React, { useEffect, useState, createRef } from 'react';
 import { styled } from '@superset-ui/core';
 import { UserAction2Props, UserAction2StylesProps } from './types';
@@ -66,6 +48,51 @@ const Styles = styled.div<UserAction2StylesProps>`
     width: 100%;
   }
 
+  .email-input-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 4px;
+    min-height: 40px;
+    cursor: text;
+    width: 100%;
+    margin-top: 5px;
+  }
+
+  .email-box {
+    display: flex;
+    align-items: center;
+    background: #e9ecef;
+    padding: 5px;
+    border-radius: 4px;
+    margin: 2px;
+    font-size: 14px;
+  }
+
+  .email-box span {
+    margin-right: 5px;
+    font-weight: bold;
+  }
+
+  .email-box button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: red;
+    font-weight: bold;
+    margin-left: 5px;
+  }
+
+  .email-input {
+    border: none;
+    outline: none;
+    flex: 1;
+    padding: 5px;
+    min-width: 150px;
+  }
+
   button {
     width: 100%;
     padding: 10px;
@@ -90,9 +117,10 @@ export default function UserAction2(props: UserAction2Props) {
     requestid: '',
     workflowName: '',
     candidate_Email: '',
-    approver_email: '',
     status: 'Created',
   });
+  const [approverEmails, setApproverEmails] = useState<string[]>([]);
+  const [currentEmail, setCurrentEmail] = useState('');
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -100,28 +128,40 @@ export default function UserAction2(props: UserAction2Props) {
     console.log('Plugin element', root);
   });
 
-  console.log('Plugin props', props);
-
-  const validateEmails = (emailString: string) => {
-    const emails = emailString.split(',').map(email => email.trim());
+  const validateEmails = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emails.every(email => emailRegex.test(email));
-  };
-
-  const validateManagerEmails = (emailArrayString: string) => {
-    try {
-      const emails = JSON.parse(emailArrayString);
-      if (!Array.isArray(emails)) return false;
-      
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emails.every(email => emailRegex.test(email));
-    } catch (e) {
-      return false;
-    }
+    return emailRegex.test(email);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleEmailKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addApproverEmail();
+    }
+  };
+
+  const addApproverEmail = () => {
+    const email = currentEmail.trim();
+    if (!email) return;
+
+    if (!validateEmails(email)) {
+      setErrors({ ...errors, approver_email: 'Invalid email format' });
+      return;
+    }
+
+    setApproverEmails([...approverEmails, email]);
+    setCurrentEmail('');
+    setErrors({ ...errors, approver_email: '' });
+  };
+
+  const removeApproverEmail = (index: number) => {
+    const newEmails = [...approverEmails];
+    newEmails.splice(index, 1);
+    setApproverEmails(newEmails);
   };
 
   const handleSubmit = () => {
@@ -129,7 +169,7 @@ export default function UserAction2(props: UserAction2Props) {
     if (!formData.requestid) newErrors.requestid = 'Request ID is required.';
     if (!formData.workflowName) newErrors.workflowName = 'Workflow Name is required.';
     if (!validateEmails(formData.candidate_Email)) newErrors.candidate_Email = 'Invalid email format.';
-    if (!validateManagerEmails(formData.approver_email)) newErrors.approver_email = 'Invalid email format.';
+    if (approverEmails.length === 0) newErrors.approver_email = 'At least one approver email is required.';
     if (!formData.status) newErrors.status = 'Status is required.';
 
     if (Object.keys(newErrors).length > 0) {
@@ -145,7 +185,7 @@ export default function UserAction2(props: UserAction2Props) {
         workflowName: formData.workflowName,
         candidate_Email: formData.candidate_Email,
         status: formData.status,
-        approver_email: JSON.parse(formData.approver_email),
+        approver_email: approverEmails,
       }),
     })
       .then(response => response.json())
@@ -174,13 +214,26 @@ export default function UserAction2(props: UserAction2Props) {
       <input type="email" name="candidate_Email" value={formData.candidate_Email} onChange={handleChange} className={errors.candidate_Email ? 'error' : ''} />
       <div className="error-message">{errors.candidate_Email}</div>
 
-      <label>Approver Emails (comma separated):</label>
-      <input type="text" name="approver_email" value={formData.approver_email} onChange={handleChange} className={errors.approver_email ? 'error' : ''} placeholder='["email1@example.com","email2@example.com"]'/>
+      <label>Approver Emails:</label>
+      <div className="email-input-container" onClick={() => document.getElementById('approverEmailInput')?.focus()}>
+        {approverEmails.map((email, index) => (
+          <div key={index} className="email-box">
+            <span>{index + 1}.</span>
+            <span>{email}</span>
+            <button onClick={() => removeApproverEmail(index)}>x</button>
+          </div>
+        ))}
+        <input
+          id="approverEmailInput"
+          type="email"
+          className="email-input"
+          placeholder="Enter email and press Enter"
+          value={currentEmail}
+          onChange={(e) => setCurrentEmail(e.target.value)}
+          onKeyDown={handleEmailKeyDown}
+        />
+      </div>
       <div className="error-message">{errors.approver_email}</div>
-
-      {/* <label>Status:</label>
-      <input type="text" name="status" value={formData.status} onChange={handleChange} className={errors.status ? 'error' : ''} />
-      <div className="error-message">{errors.status}</div> */}
 
       <button onClick={handleSubmit}>Initiate Workflow</button>
     </Styles>
