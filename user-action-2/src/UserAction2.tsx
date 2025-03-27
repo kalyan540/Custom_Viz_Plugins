@@ -177,6 +177,8 @@ export default function UserAction2(props: UserAction2Props) {
       return;
     }
 
+    console.log('Submitting with approver emails:', approverEmails);
+
     fetch(apiEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
