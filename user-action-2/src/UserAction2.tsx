@@ -209,8 +209,8 @@ export default function UserAction2(props: UserAction2Props) {
       <input type="text" name="workflowName" value={formData.workflowName} onChange={handleChange} className={errors.workflowName ? 'error' : ''} />
       <div className="error-message">{errors.workflowName}</div>
 
-      <label>Employee ID:</label>
-      <input type="number" name="requestid" value={formData.requestid} onChange={handleChange} className={errors.requestid ? 'error' : ''} />
+      <label>Request ID:</label>
+      <input type="number" name="requestid" value={formData.requestid} onChange={handleChange} className={errors.requestid ? 'error' : ''} placeholder="e.g.1234" />
       <div className="error-message">{errors.requestid}</div>
 
       <label>Candidate Email:</label>
