@@ -20,7 +20,7 @@ import { t, ChartMetadata, ChartPlugin } from '@superset-ui/core';
 import buildQuery from './buildQuery';
 import controlPanel from './controlPanel';
 import transformProps from './transformProps';
-import thumbnail from '../images/thumbnail.png';
+import thumbnail from '../images/image.png';
 
 export default class UserAction2 extends ChartPlugin {
   /**
