@@ -203,14 +203,15 @@ export default function UserAction2(props: UserAction2Props) {
 
   return (
     <Styles ref={rootElem} boldText={props.boldText} headerFontSize={props.headerFontSize} height={height} width={width}>
-      <h3>Initiate Workflow</h3>
-      <label>Request ID:</label>
-      <input type="number" name="requestid" value={formData.requestid} onChange={handleChange} className={errors.requestid ? 'error' : ''} />
-      <div className="error-message">{errors.requestid}</div>
+      <h3>Create and Initiate Workflow</h3>
 
       <label>Workflow Name:</label>
       <input type="text" name="workflowName" value={formData.workflowName} onChange={handleChange} className={errors.workflowName ? 'error' : ''} />
       <div className="error-message">{errors.workflowName}</div>
+
+      <label>Employee ID:</label>
+      <input type="number" name="requestid" value={formData.requestid} onChange={handleChange} className={errors.requestid ? 'error' : ''} />
+      <div className="error-message">{errors.requestid}</div>
 
       <label>Candidate Email:</label>
       <input type="email" name="candidate_Email" value={formData.candidate_Email} onChange={handleChange} className={errors.candidate_Email ? 'error' : ''} />

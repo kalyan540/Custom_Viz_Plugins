@@ -98,7 +98,7 @@ const Styles = styled.div<UserAction1StylesProps>`
     padding: 5px;
     background-color: #fff;
     justify-content: space-between;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease; /* Add smooth transition */
   }
 
   .rejectReason {
@@ -112,13 +112,7 @@ const Styles = styled.div<UserAction1StylesProps>`
     border: 2px solid red;
     background-color: #ffebee;
     box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
-  }
-
-  .workflow-header {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 15px;
-    color: #333;
+    
   }
 `;
 
@@ -183,26 +177,32 @@ export default function UserAction1(props: UserAction1Props) {
   };
 
   const processRequest = async (index: number, status: string) => {
+    //let rejectContainer = row.querySelector('.reject-container');
     const request = requests[index];
     
     if (status === "Rejected" && !request.rejectReason.trim()) {
-      const newRequests = [...requests];
-      newRequests[index] = {
-        ...newRequests[index],
-        status: 'Pending'
-      };
-      setRequests(newRequests);
 
-      // Add visual feedback by toggling a highlight class
-      const rejectContainer = document.getElementById(`reject-container-${index}`);
-      if (rejectContainer) {
-        rejectContainer.classList.add("highlight");
-        setTimeout(() => {
-          rejectContainer.classList.remove("highlight");
-        }, 2000);
-      }
-      return;
+      const newRequests = [...requests];
+    newRequests[index] = {
+      ...newRequests[index],
+      status: 'Pending' // E
+      
+  
     }
+
+    setRequests(newRequests);
+
+
+    // Add visual feedback by toggling a highlight class
+    const rejectContainer = document.getElementById(`reject-container-${index}`);
+    if (rejectContainer) {
+      rejectContainer.classList.add("highlight");
+      setTimeout(() => {
+        rejectContainer.classList.remove("highlight");
+      }, 2000); // Remove highlight after 2 seconds
+    }
+    return;
+  }
 
     const requestBody = {
       requestid: request.id,
@@ -280,13 +280,7 @@ export default function UserAction1(props: UserAction1Props) {
       width={width}
     >
       <div className="container">
-        <h2>Create and Initiate Workflow</h2>
-        
-        {requests.length > 0 && (
-          <div className="workflow-header">
-            Workflow: {requests[0].workflowName}
-          </div>
-        )}
+        <h2>Workflow's Need Your Attention</h2>
 
         <table>
           <thead>
@@ -298,7 +292,7 @@ export default function UserAction1(props: UserAction1Props) {
                   onChange={(e) => toggleAll(e.target.checked)}
                 />
               </th>
-              <th>Employee ID</th>
+              <th>Request ID</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -321,6 +315,7 @@ export default function UserAction1(props: UserAction1Props) {
                   <button 
                     className="btn approve" 
                     onClick={() => processRequest(index, 'Approved')}
+                    //disabled={request.status !== 'Pending'}
                   >
                     Approve
                   </button>
@@ -331,10 +326,12 @@ export default function UserAction1(props: UserAction1Props) {
                       placeholder="Enter reason"
                       value={request.rejectReason}
                       onChange={(e) => updateRejectReason(index, e.target.value)}
+                      //disabled={request.status !== 'Pending'}
                     />
                     <button 
                       className="btn reject" 
                       onClick={() => processRequest(index, 'Rejected')}
+                      //disabled={request.status !== 'Pending'}
                     >
                       Reject
                     </button>
