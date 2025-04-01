@@ -110,6 +110,14 @@ const Styles = styled.div<UserAction2StylesProps>`
   }
 `;
 
+interface FormErrors {
+  requestid?: string;
+  workflowName?: string;
+  candidate_Email?: string;
+  approver_email?: string;
+  status?: string;
+}
+
 export default function UserAction2(props: UserAction2Props) {
   const { apiEndpoint, height, width } = props;
   const rootElem = createRef<HTMLDivElement>();
@@ -121,8 +129,7 @@ export default function UserAction2(props: UserAction2Props) {
   });
   const [approverEmails, setApproverEmails] = useState<string[]>([]);
   const [currentEmail, setCurrentEmail] = useState('');
-  const [errors, setErrors] = useState({});
-
+  const [errors, setErrors] = useState<FormErrors>({});
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);

@@ -136,9 +136,9 @@ export default function UserAction1(props: UserAction1Props) {
   useEffect(() => {
     if (data && Array.isArray(data)) {
       const mappedRequests = data.map(item => ({
-        id: item.requestid.toString(),
-        status: item.status,
-        workflowName: item.workflowName,
+        id: item.requestid?.toString() || '', // Handle potential null/undefined
+        status: item.status?.toString() || 'Pending', // Ensure status is a string
+        workflowName: item.workflowName?.toString() || '', // Ensure workflowName is a string
         rejectReason: 'NA',
         selected: false
       }));

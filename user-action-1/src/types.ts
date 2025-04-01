@@ -27,7 +27,7 @@ export interface UserAction1StylesProps {
   width: number;
   headerFontSize?: keyof typeof supersetTheme.typography.sizes;
   boldText?: boolean;
-  datasource: string;
+  datasource?: string;
 }
 
 interface UserAction1CustomizeProps {
