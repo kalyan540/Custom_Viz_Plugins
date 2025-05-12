@@ -114,24 +114,6 @@ const config: ControlPanelConfig = {
             },
           },
         ],
-        [
-          {
-            name: 'metrics',
-            config: {
-              ...sharedControls.metrics,
-              // it's possible to add validators to controls if
-              // certain selections/types need to be enforced
-              validators: [validateNonEmpty],
-            },
-          },
-        ],
-        ['adhoc_filters'],
-        [
-          {
-            name: 'row_limit',
-            config: sharedControls.row_limit,
-          },
-        ],
       ],
     },
     {

@@ -40,5 +40,10 @@ export type ChatBotQueryFormData = QueryFormData &
 export type ChatBotProps = ChatBotStylesProps &
   ChatBotCustomizeProps & {
     data: TimeseriesDataRecord[];
+    tableName: string;
+    columns: string;
+    primaryKey: string;
+    foreignKeys: string;
+    querySuggestions: string;
     // add typing here for the props you pass in from transformProps.ts!
   };

@@ -61,7 +61,7 @@ const Styles = styled.div<ChatBotStylesProps>`
 export default function ChatBot(props: ChatBotProps) {
   // height and width are the height and width of the DOM element as it exists in the dashboard.
   // There is also a `data` prop, which is, of course, your DATA 🎉
-  const { data, height, width } = props;
+  const { columns, foreignKeys, primaryKey, querySuggestions,tableName } = props;
 
   const rootElem = createRef<HTMLDivElement>();
 
@@ -70,20 +70,26 @@ export default function ChatBot(props: ChatBotProps) {
   useEffect(() => {
     const root = rootElem.current as HTMLElement;
     console.log('Plugin element', root);
+    console.log('columns', columns);
+    console.log('foreignKeys', foreignKeys);
+    console.log('primaryKeys', primaryKey);
+    console.log('querySuggestions', querySuggestions);
+    console.log('tableName', tableName);
   });
 
   console.log('Plugin props', props);
 
   return (
-    <Styles
-      ref={rootElem}
-      boldText={props.boldText}
-      headerFontSize={props.headerFontSize}
-      height={height}
-      width={width}
-    >
-      <h3>{props.headerText}</h3>
-      <pre>${JSON.stringify(data, null, 2)}</pre>
-    </Styles>
+    // <Styles
+    //   ref={rootElem}
+    //   boldText={props.boldText}
+    //   headerFontSize={props.headerFontSize}
+    //   height={height}
+    //   width={width}
+    // >
+    //   <h3>{props.headerText}</h3>
+    //   <pre>${JSON.stringify(data, null, 2)}</pre>
+    // </Styles>
+    <h1>ChatBot</h1>
   );
 }
