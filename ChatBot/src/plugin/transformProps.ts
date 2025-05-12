@@ -49,7 +49,7 @@ export default function transformProps(chartProps: ChartProps) {
    * be seen until restarting the development server.
    */
   const { width, height, formData, queriesData } = chartProps;
-  const { columns, foreignKeys, primaryKey, querySuggestions,tableName } = formData;
+  const { columns, foreignKeys, primaryKey, querySuggestions,tableName, apiEndpoint } = formData;
   const data = queriesData[0].data as TimeseriesDataRecord[];
 
   console.log('formData via TransformProps.ts', formData);
@@ -63,6 +63,7 @@ export default function transformProps(chartProps: ChartProps) {
     foreignKeys,
     primaryKey,
     querySuggestions,
-    tableName
+    tableName,
+    apiEndpoint
   };
 }

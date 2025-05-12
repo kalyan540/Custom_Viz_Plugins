@@ -43,7 +43,8 @@ export type ChatBotProps = ChatBotStylesProps &
     tableName: string;
     columns: string;
     primaryKey: string;
-    foreignKeys: string;
+    foreignKeys: string[];
     querySuggestions: string;
+    apiEndpoint: string;
     // add typing here for the props you pass in from transformProps.ts!
   };

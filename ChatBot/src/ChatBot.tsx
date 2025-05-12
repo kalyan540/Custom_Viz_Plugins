@@ -19,6 +19,7 @@
 import React, { useEffect, createRef } from 'react';
 import { styled } from '@superset-ui/core';
 import { ChatBotProps, ChatBotStylesProps } from './types';
+import BotVisual from './BotVisual';
 
 // The following Styles component is a <div> element, which has been styled using Emotion
 // For docs, visit https://emotion.sh/docs/styled
@@ -90,6 +91,13 @@ export default function ChatBot(props: ChatBotProps) {
     //   <h3>{props.headerText}</h3>
     //   <pre>${JSON.stringify(data, null, 2)}</pre>
     // </Styles>
-    <h1>ChatBot</h1>
+    <BotVisual
+      apiEndpoint={props.apiEndpoint}
+      columns={JSON.parse(props.columns)}
+      foreignKeys={props.foreignKeys}
+      primaryKey={props.primaryKey}
+      queries={JSON.parse(props.querySuggestions)}
+      tableName={props.tableName}
+      />
   );
 }
