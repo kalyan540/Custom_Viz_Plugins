@@ -79,6 +79,7 @@ export default function ChatBot(props: ChatBotProps) {
   });
 
   console.log('Plugin props', props);
+  const fixedJson = `[${props.columns}]`;
 
   return (
     // <Styles
@@ -93,7 +94,7 @@ export default function ChatBot(props: ChatBotProps) {
     // </Styles>
     <BotVisual
       apiEndpoint={props.apiEndpoint}
-      columns={JSON.parse(props.columns)}
+      columns={JSON.parse(fixedJson)}
       foreignKeys={props.foreignKeys}
       primaryKey={props.primaryKey}
       queries={JSON.parse(props.querySuggestions)}
