@@ -174,21 +174,23 @@ const BotVisual = ({ tableName, columns, primaryKey, foreignKeys, queries, apiEn
     };
 
     return (
-        <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+        <div style={{ height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
             {/* First row */}
             <div
                 style={{
-                    height: "70px",
+                    minHeight: "70px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
                     padding: "0 10px",
                     borderBottom: "1px solid #ccc",
+                    flexShrink: 0, // Prevent shrinking of the header
+                    backgroundColor: "white",
                     position: "relative", // For absolute positioning of dropdown
                 }}
             >
-                <img src="/static/assets/images/Chatbot.png" alt="BotVisual" style={{ height: "50px" }} />
-                <div style={{ flex: 1, margin: "0 10px", position: "relative" }}>
+                <img src="/static/assets/images/Chatbot.png" alt="BotVisual" style={{ height: "40px", width: "40px", flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
                     <input
                         type="text"
                         placeholder="Write your query"
@@ -200,9 +202,10 @@ const BotVisual = ({ tableName, columns, primaryKey, foreignKeys, queries, apiEn
                         ref={inputRef}
                         style={{
                             width: "100%",
-                            padding: "10px",
+                            padding: "8px 12px",
                             borderRadius: "5px",
                             border: "1px solid #ccc",
+                            boxSizing: "border-box"
                         }}
                     />
                     {showSuggestions && (
@@ -211,13 +214,16 @@ const BotVisual = ({ tableName, columns, primaryKey, foreignKeys, queries, apiEn
                             tabIndex={-1}
                             style={{
                                 position: "absolute",
-                                top: "100%",
+                                top: "calc(100% + 5px)",
                                 left: 0,
                                 right: 0,
                                 backgroundColor: "white",
                                 border: "1px solid #ccc",
                                 borderRadius: "5px",
                                 zIndex: 1000,
+                                maxHeight: "200px",
+                                overflowY: "auto",
+                                boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
                             }}
                             onBlur={handleBlur}
                         >
@@ -229,6 +235,9 @@ const BotVisual = ({ tableName, columns, primaryKey, foreignKeys, queries, apiEn
                                         padding: "10px",
                                         cursor: "pointer",
                                         backgroundColor: currentIndex === index ? "#f0f0f0" : "white",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap"
                                     }}
                                     onMouseEnter={() => setCurrentIndex(index)}
                                     onMouseLeave={() => setCurrentIndex(null)}
@@ -252,6 +261,8 @@ const BotVisual = ({ tableName, columns, primaryKey, foreignKeys, queries, apiEn
                         color: "white",
                         border: "none",
                         cursor: "pointer",
+                        flexShrink: 0,
+                        height: "40px"
                     }}
                 >
                     <span>Send</span>
@@ -266,15 +277,19 @@ const BotVisual = ({ tableName, columns, primaryKey, foreignKeys, queries, apiEn
                     backgroundColor: "#f3f4f6",
                     borderRadius: "10px",
                     boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+                    overflow: "auto", // Add scroll if content is too large
+                    minHeight: 0 // Fix for flexbox scrolling
                 }}
             >
                 {tableData.length > 0 ? (
+                    <div style={{ overflow: "auto" }}>
                     <table
                         style={{
                             width: "100%",
                             borderCollapse: "collapse",
                             borderRadius: "10px",
                             overflow: "hidden",
+                            minWidth: "600px"
                         }}
                     >
                         <thead
@@ -329,10 +344,22 @@ const BotVisual = ({ tableName, columns, primaryKey, foreignKeys, queries, apiEn
                             ))}
                         </tbody>
                     </table>
+                    </div>
                 ) : (
-                    <p style={{ textAlign: "center", color: "#6b7280", fontSize: "16px" }}>
-                        No data available.
-                    </p>
+                    <div style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        height: "100%"
+                    }}>
+                        <p style={{ 
+                            textAlign: "center", 
+                            color: "#6b7280", 
+                            fontSize: "16px" 
+                        }}>
+                            No data available.
+                        </p>
+                    </div>
                 )}
             </div>
         </div>
