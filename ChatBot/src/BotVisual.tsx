@@ -187,7 +187,7 @@ const BotVisual = ({ tableName, columns, primaryKey, foreignKeys, queries, apiEn
                     position: "relative", // For absolute positioning of dropdown
                 }}
             >
-                <img src="/static/assets/images/chatbot.png" alt="BotVisual" style={{ height: "50px" }} />
+                <img src="/static/assets/images/Chatbot.png" alt="BotVisual" style={{ height: "50px" }} />
                 <div style={{ flex: 1, margin: "0 10px", position: "relative" }}>
                     <input
                         type="text"
