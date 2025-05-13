@@ -174,7 +174,7 @@ const BotVisual = ({ tableName, columns, primaryKey, foreignKeys, queries, apiEn
     };
 
     return (
-        <div style={{ height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
             {/* First row */}
             <div
                 style={{
