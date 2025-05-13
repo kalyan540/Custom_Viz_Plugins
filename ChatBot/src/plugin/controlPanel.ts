@@ -162,7 +162,7 @@ const config: ControlPanelConfig = {
             config: {
               type: 'TextControl',
               label: t('Foreign Keys (comma-separated)'),
-              default: '',
+              default: [],
               description: t('Enter foreign key column names, separated by commas'),
             },
           },
