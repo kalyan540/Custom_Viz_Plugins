@@ -92,13 +92,15 @@ export default function ChatBot(props: ChatBotProps) {
     //   <h3>{props.headerText}</h3>
     //   <pre>${JSON.stringify(data, null, 2)}</pre>
     // </Styles>
-    <BotVisual
-      apiEndpoint={props.apiEndpoint}
-      columns={JSON.parse(fixedJson)}
-      foreignKeys={props.foreignKeys}
-      primaryKey={props.primaryKey}
-      queries={JSON.parse(props.querySuggestions)}
-      tableName={props.tableName}
+    <div style={{ overflow: 'auto', maxHeight: '100%' }}>
+      <BotVisual
+        apiEndpoint={props.apiEndpoint}
+        columns={JSON.parse(fixedJson)}
+        foreignKeys={props.foreignKeys}
+        primaryKey={props.primaryKey}
+        queries={JSON.parse(props.querySuggestions)}
+        tableName={props.tableName}
       />
+    </div>
   );
 }
